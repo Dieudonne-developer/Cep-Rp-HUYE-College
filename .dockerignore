@@ -1,0 +1,14 @@
+.git
+.github
+node_modules
+**/node_modules
+npm-debug.log
+.DS_Store
+.env
+.env.*
+frontend/dist
+frontend/.vite
+frontend/.cache
+**/*.local
+
+
