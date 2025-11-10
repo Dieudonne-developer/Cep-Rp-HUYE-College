@@ -19,10 +19,12 @@ const allowedOrigins = [
   process.env.BACKEND_URL
 ].filter(Boolean);
 
+const shouldLog = (process.env.DEBUG_CORS === 'true') || (process.env.NODE_ENV !== 'production');
+
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);
-    console.log(`CORS request from origin: ${origin}`);
+    if (shouldLog) console.log(`CORS request from origin: ${origin}`);
     if (allowedOrigins.includes(origin) ||
         origin.match(/^http:\/\/192\.168\.\d+\.\d+:5173$/) ||
         origin.match(/^http:\/\/172\.\d+\.\d+\.\d+:5173$/) ||
@@ -30,10 +32,10 @@ const corsOptions = {
         // Allow Render static sites and web services
         origin.match(/^https:\/\/.*\.onrender\.com$/) ||
         origin.match(/^https:\/\/.*\.render\.com$/)) {
-      console.log(`CORS allowed for origin: ${origin}`);
+      if (shouldLog) console.log(`CORS allowed for origin: ${origin}`);
       return callback(null, true);
     }
-    console.log(`CORS blocked for origin: ${origin}`);
+    if (shouldLog) console.log(`CORS blocked for origin: ${origin}`);
     callback(new Error('Not allowed by CORS'));
   },
   credentials: true
