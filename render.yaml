@@ -4,10 +4,7 @@ services:
     env: node
     rootDir: backend
     plan: free
-    buildCommand: |
-      npm install
-    startCommand: |
-      node server.js
+    dockerfilePath: backend/Dockerfile
     envVars:
       - key: NODE_ENV
         value: production

@@ -1,3 +1,25 @@
+FROM node:20-alpine AS base
+WORKDIR /app
+
+# Install dependencies first (better caching)
+COPY package.json package-lock.json* ./
+RUN npm install --omit=dev
+
+# Copy source
+COPY . .
+
+# Environment
+ENV NODE_ENV=production
+# Render provides PORT at runtime
+ENV PORT=4000
+
+# Create uploads directory at runtime
+RUN mkdir -p /app/uploads
+
+EXPOSE 4000
+
+CMD ["node", "server.js"]
+
 # Use Node.js 18 Alpine image
 FROM node:18-alpine
 
