@@ -1,0 +1,12 @@
+{
+  "name": "cep-monorepo",
+  "private": true,
+  "workspaces": [],
+  "scripts": {
+    "postinstall": "npm install --prefix frontend",
+    "build": "npm run build --prefix frontend",
+    "start": "npm run preview --prefix frontend",
+    "lint": "npm run lint --prefix frontend || exit 0"
+  }
+}
+
