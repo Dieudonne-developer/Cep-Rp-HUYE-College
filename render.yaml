@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: cep-backend
+    env: node
+    rootDir: backend
+    plan: free
+    buildCommand: |
+      npm install
+    startCommand: |
+      node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+      - key: CLIENT_ORIGIN
+        fromService:
+          type: static_site
+          name: cep-frontend
+          property: url
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: cep-backend
+          property: url
+
+  - type: static
+    name: cep-frontend
+    rootDir: frontend
+    plan: free
+    buildCommand: |
+      npm install
+      npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: cep-backend
+          property: url
+

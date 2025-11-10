@@ -1,0 +1,45 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "dev": "nodemon server.js",
+    "start": "node server.js",
+    "seed": "node seed.js",
+    "seed:admin": "node seed-admin.js",
+    "seed:anointed-admin": "node seed-anointed-admin.js",
+    "backfill:groups": "node backfill-groups.js",
+    "seed:abanyamugisha-admin": "node seed-abanyamugisha-admin.js",
+    "seed:psalm23-admin": "node seed-psalm23-admin.js",
+    "seed:psalm46-admin": "node seed-psalm46-admin.js",
+    "seed:protocol-admin": "node seed-protocol-admin.js",
+    "seed:social-admin": "node seed-social-admin.js",
+    "seed:evangelical-admin": "node seed-evangelical-admin.js",
+    "seed:super-admin": "node seed-super-admin.js",
+    "migrate:super-admin": "node migrate-super-admin-to-cepier.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/nodemailer": "^7.0.2",
+    "bcrypt": "^6.0.0",
+    "bcryptjs": "^3.0.2",
+    "cookie-parser": "^1.4.7",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "express": "^5.1.0",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.18.1",
+    "morgan": "^1.10.1",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.10",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
