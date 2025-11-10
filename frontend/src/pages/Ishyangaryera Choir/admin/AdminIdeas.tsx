@@ -18,13 +18,19 @@ type Idea = {
   createdAt: string
 }
 
+type ReviewFormState = {
+  status: Idea['status']
+  notes: string
+  implementationDetails: string
+}
+
 export default function AdminIdeas() {
   const [ideas, setIdeas] = useState<Idea[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
   const [selectedIdea, setSelectedIdea] = useState<Idea | null>(null)
-  const [formData, setFormData] = useState({
-    status: 'pending' as const,
+  const [formData, setFormData] = useState<ReviewFormState>({
+    status: 'pending',
     notes: '',
     implementationDetails: ''
   })
@@ -88,7 +94,7 @@ export default function AdminIdeas() {
       if (response.ok) {
         setShowModal(false)
         setSelectedIdea(null)
-        setFormData({ status: 'pending', notes: '' })
+    setFormData({ status: 'pending', notes: '', implementationDetails: '' })
         fetchIdeas()
       }
     } catch (error) {
