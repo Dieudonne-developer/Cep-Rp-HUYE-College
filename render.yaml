@@ -14,7 +14,7 @@ services:
         sync: false
       - key: CLIENT_ORIGIN
         fromService:
-          type: static_site
+          type: web
           name: cep-frontend
           property: url
       - key: BACKEND_URL
@@ -23,15 +23,17 @@ services:
           name: cep-backend
           property: url
 
-  - type: static
+  - type: web
     name: cep-frontend
+    env: node
     rootDir: frontend
     plan: free
-    buildCommand: |
-      npm install
-      npm run build
-    staticPublishPath: dist
+    dockerfilePath: frontend/Dockerfile
     envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
       - key: VITE_API_BASE_URL
         fromService:
           type: web

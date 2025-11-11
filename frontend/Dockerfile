@@ -1,20 +1,41 @@
-# Multi-stage build: build with Node, serve with Nginx
+# Build stage
 FROM node:20-alpine AS build
 WORKDIR /app
 
+# Copy package files
 COPY package.json package-lock.json* ./
 RUN npm install
 
+# Copy source code
 COPY . .
-# Build uses VITE_API_BASE_URL at build time; set via --build-arg or .env before building
+
+# Build the application
+# VITE_API_BASE_URL should be set as build arg or env var
+# Accept it as build arg and set as env var for Vite build
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
 RUN npm run build
 
-FROM nginx:1.27-alpine AS prod
-COPY --from=build /app/dist /usr/share/nginx/html
-# Minimal nginx config is fine for SPA; default.conf already serves static
-EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+# Production stage
+FROM node:20-alpine AS production
+WORKDIR /app
 
+# Copy package files
+COPY package.json package-lock.json* ./
+# Install only production dependencies (including express for server)
+RUN npm install --omit=dev
 
+# Copy built files from build stage
+COPY --from=build /app/dist ./dist
+# Copy server file
+COPY server.js ./
+
+# Expose port
+EXPOSE 3000
+
+# Set environment
+ENV NODE_ENV=production
+ENV PORT=3000
+
+# Start the server
+CMD ["node", "server.js"]
