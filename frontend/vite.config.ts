@@ -43,6 +43,8 @@ export default defineConfig({
     port: 5173
   },
   build: {
+    // Ensure assets are built correctly
+    assetsDir: 'assets',
     rollupOptions: {
       output: {
         manualChunks: {
@@ -50,7 +52,9 @@ export default defineConfig({
           socket: ['socket.io-client']
         }
       }
-    }
+    },
+    // Ensure sourcemaps are not included in production (can cause issues)
+    sourcemap: false
   },
   publicDir: 'public'
 })

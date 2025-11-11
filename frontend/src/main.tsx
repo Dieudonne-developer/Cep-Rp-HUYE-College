@@ -491,10 +491,26 @@ function AppWrapper() {
 // Initialize Lucide icons
 initializeLucideIcons()
 
-ReactDOM.createRoot(document.getElementById('app') as HTMLElement).render(
-  <React.StrictMode>
-    <AppWrapper />
-  </React.StrictMode>
-)
+// Get the root element
+const rootElement = document.getElementById('app')
+
+if (!rootElement) {
+  console.error('❌ CRITICAL: Root element with id "app" not found!')
+  document.body.innerHTML = '<div style="padding: 20px; color: red;"><h1>Error: Root element not found</h1><p>The app cannot mount because the root element is missing.</p></div>'
+} else {
+  try {
+    // Create root and render app
+    const root = ReactDOM.createRoot(rootElement)
+    root.render(
+      <React.StrictMode>
+        <AppWrapper />
+      </React.StrictMode>
+    )
+    console.log('✅ React app mounted successfully')
+  } catch (error) {
+    console.error('❌ CRITICAL: Failed to mount React app:', error)
+    rootElement.innerHTML = `<div style="padding: 20px; color: red;"><h1>Error: Failed to mount app</h1><p>${error instanceof Error ? error.message : 'Unknown error'}</p></div>`
+  }
+}
 
 

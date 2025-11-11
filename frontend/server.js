@@ -14,23 +14,68 @@ const staticExtensions = ['.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.gif
 
 // Serve static files from the dist directory
 // This MUST come before the catch-all route
+// CRITICAL: This serves all assets (JS, CSS, images, etc.)
 app.use(express.static(join(__dirname, 'dist'), {
   index: false, // Don't serve index.html automatically
   dotfiles: 'ignore',
   etag: false,
-  lastModified: false
+  lastModified: false,
+  maxAge: 0 // Don't cache in production to avoid stale assets
 }))
+
+// Log static file requests for debugging
+app.use((req, res, next) => {
+  const ext = extname(req.path)
+  if (ext && staticExtensions.includes(ext.toLowerCase())) {
+    console.log(`📦 Serving static file: ${req.path}`)
+  }
+  next()
+})
 
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'frontend' })
 })
 
+// Debug endpoint to check if assets exist
+app.get('/debug/assets', (req, res) => {
+  const distPath = join(__dirname, 'dist')
+  const assetsPath = join(distPath, 'assets')
+  const indexPath = join(distPath, 'index.html')
+  
+  const info = {
+    distExists: existsSync(distPath),
+    assetsExists: existsSync(assetsPath),
+    indexExists: existsSync(indexPath),
+    distPath,
+    assetsPath,
+    indexPath
+  }
+  
+  res.json(info)
+})
+
 // Handle SPA routing - serve index.html for all routes that don't match static files
 // This MUST be the last route handler
 app.get('*', (req, res) => {
   try {
-    const path = req.path
+    let path = req.path
+    
+    // CRITICAL: Clean up any /index.html in the path to prevent loops
+    // Remove ALL occurrences of /index.html from the path (case insensitive)
+    const originalPath = path
+    path = path.replace(/\/index\.html/gi, '') || '/'
+    
+    // If path contains /index.html, redirect to clean path ONCE
+    if (originalPath !== path && originalPath.includes('/index.html')) {
+      // Use 307 (temporary redirect) to prevent caching
+      return res.redirect(307, path || '/')
+    }
+    
+    // Don't serve 404.html - we're using Express server, not static site
+    if (path === '/404.html' || path.endsWith('/404.html')) {
+      path = '/'
+    }
     
     // Check if this is a request for a static file by extension
     const ext = extname(path)
@@ -40,14 +85,7 @@ app.get('*', (req, res) => {
       return res.status(404).send('File not found')
     }
     
-    // Check if the path starts with /index.html (prevent loops)
-    if (path.startsWith('/index.html')) {
-      // Redirect to the path without /index.html
-      const cleanPath = path.replace(/^\/index\.html/, '') || '/'
-      return res.redirect(301, cleanPath)
-    }
-    
-    // For all other routes, serve index.html to enable SPA routing
+    // For all routes, serve index.html to enable SPA routing
     const indexPath = join(__dirname, 'dist', 'index.html')
     
     // Verify index.html exists
@@ -61,11 +99,12 @@ app.get('*', (req, res) => {
     // Read and serve index.html
     const indexHtml = readFileSync(indexPath, 'utf8')
     
-    // Set headers
+    // Set headers to prevent caching and redirects
     res.setHeader('Content-Type', 'text/html; charset=utf-8')
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
     res.setHeader('Pragma', 'no-cache')
     res.setHeader('Expires', '0')
+    res.setHeader('X-Content-Type-Options', 'nosniff')
     
     // Send the HTML
     res.send(indexHtml)
