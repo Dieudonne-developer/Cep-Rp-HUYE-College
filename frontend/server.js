@@ -25,7 +25,26 @@ app.use(express.static(join(__dirname, 'dist'), {
 
 // Health check endpoint (before catch-all)
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'ok', service: 'frontend' })
+  res.status(200).json({ 
+    status: 'ok', 
+    service: 'frontend',
+    timestamp: new Date().toISOString(),
+    port: PORT,
+    nodeEnv: process.env.NODE_ENV || 'development'
+  })
+})
+
+// Test endpoint to verify server is running
+app.get('/test-server', (req, res) => {
+  const indexPath = join(__dirname, 'dist', 'index.html')
+  res.json({
+    server: 'running',
+    indexExists: existsSync(indexPath),
+    indexPath,
+    cwd: process.cwd(),
+    __dirname,
+    distExists: existsSync(join(__dirname, 'dist'))
+  })
 })
 
 // Debug endpoint to check if assets exist (before catch-all)
