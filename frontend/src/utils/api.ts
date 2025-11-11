@@ -24,45 +24,12 @@ export function getApiBaseUrl(): string {
     
     // If frontend is on Render, use Render backend URL
     if (hostname.includes('onrender.com')) {
-      // Known production backend URL
+      // Known production backend URL - use this directly for production
       const knownBackendUrl = 'https://cep-backend-hjfu.onrender.com';
       
-      // If frontend URL contains -1, backend is likely without -1
-      if (origin.includes('-1.onrender.com')) {
-        const inferredBackendUrl = origin.replace('-1.onrender.com', '.onrender.com');
-        console.log('Inferred backend URL from frontend:', inferredBackendUrl);
-        // Use known backend URL if it matches the pattern, otherwise use inferred
-        if (inferredBackendUrl === knownBackendUrl) {
-          console.log('Using known backend URL:', knownBackendUrl);
-          return knownBackendUrl;
-        }
-        return inferredBackendUrl;
-      }
-      
-      // If frontend URL contains 'frontend', replace with 'backend'
-      if (hostname.includes('frontend')) {
-        const inferredBackendUrl = origin.replace('frontend', 'backend');
-        console.log('Inferred backend URL from service name:', inferredBackendUrl);
-        // Use known backend URL if it matches the pattern, otherwise use inferred
-        if (inferredBackendUrl === knownBackendUrl) {
-          console.log('Using known backend URL:', knownBackendUrl);
-          return knownBackendUrl;
-        }
-        return inferredBackendUrl;
-      }
-      
-      // Fallback: try common pattern (remove -1 suffix)
-      const inferredBackendUrl = origin.replace(/-1\.onrender\.com$/, '.onrender.com');
-      if (inferredBackendUrl !== origin) {
-        console.log('Inferred backend URL (fallback):', inferredBackendUrl);
-        if (inferredBackendUrl === knownBackendUrl) {
-          console.log('Using known backend URL:', knownBackendUrl);
-          return knownBackendUrl;
-        }
-        return inferredBackendUrl;
-      }
-      
-      // Last fallback: use known backend URL for production
+      // For production, always use the known backend URL
+      // Frontend: cep-frontend-vy68.onrender.com
+      // Backend: cep-backend-hjfu.onrender.com (different service identifier)
       console.log('Using known production backend URL:', knownBackendUrl);
       return knownBackendUrl;
     }

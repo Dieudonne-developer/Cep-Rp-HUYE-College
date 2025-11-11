@@ -19,7 +19,8 @@ const allowedOrigins = [
   process.env.BACKEND_URL
 ].filter(Boolean);
 
-const shouldLog = (process.env.DEBUG_CORS === 'true') || (process.env.NODE_ENV !== 'production');
+// Enable CORS logging in production for debugging (can be disabled later)
+const shouldLog = (process.env.DEBUG_CORS === 'true') || (process.env.NODE_ENV !== 'production') || true;
 
 const corsOptions = {
   origin: function (origin, callback) {
