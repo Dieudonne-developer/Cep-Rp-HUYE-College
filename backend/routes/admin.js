@@ -36,6 +36,15 @@ const EvangelicalEvent = require('../models/EvangelicalEvent');
 const EvangelicalImplementedIdea = require('../models/EvangelicalImplementedIdea');
 const EvangelicalUser = require('../models/EvangelicalUser');
 
+// Load CepierUser model at the top to avoid require issues
+let CepierUser;
+try {
+  CepierUser = require('../models/CepierUser');
+} catch (error) {
+  console.error('Warning: Could not load CepierUser model:', error.message);
+  CepierUser = null;
+}
+
 const ALL_GROUPS = ['cepier', 'choir', 'anointed', 'abanyamugisha', 'psalm23', 'psalm46', 'protocol', 'social', 'evangelical'];
 
 const resolveGroup = async (req) => {
@@ -166,16 +175,17 @@ router.post('/login', async (req, res) => {
       user = await ChoirUser.findOne({ email });
       if (user) foundGroup = 'choir';
     } else if (adminGroup === 'cepier') {
-      const CepierUser = require('../models/CepierUser');
-      user = await CepierUser.findOne({ email });
-      if (user) foundGroup = 'cepier';
+      if (CepierUser) {
+        user = await CepierUser.findOne({ email });
+        if (user) foundGroup = 'cepier';
+      } else {
+        console.error('CepierUser model not available');
+      }
     } else {
       // When adminGroup is not provided, search all models
       try {
-        const CepierUser = require('../models/CepierUser');
-        const searchResults = await Promise.allSettled([
+        const searchPromises = [
           ChoirUser.findOne({ email }).then(u => ({ user: u, group: 'choir' })).catch(e => ({ error: e, group: 'choir' })),
-          CepierUser.findOne({ email }).then(u => ({ user: u, group: 'cepier' })).catch(e => ({ error: e, group: 'cepier' })),
           AnointedUser.findOne({ email }).then(u => ({ user: u, group: 'anointed' })).catch(e => ({ error: e, group: 'anointed' })),
           AbanyamugishaUser.findOne({ email }).then(u => ({ user: u, group: 'abanyamugisha' })).catch(e => ({ error: e, group: 'abanyamugisha' })),
           Psalm23User.findOne({ email }).then(u => ({ user: u, group: 'psalm23' })).catch(e => ({ error: e, group: 'psalm23' })),
@@ -183,7 +193,16 @@ router.post('/login', async (req, res) => {
           ProtocolUser.findOne({ email }).then(u => ({ user: u, group: 'protocol' })).catch(e => ({ error: e, group: 'protocol' })),
           SocialUser.findOne({ email }).then(u => ({ user: u, group: 'social' })).catch(e => ({ error: e, group: 'social' })),
           EvangelicalUser.findOne({ email }).then(u => ({ user: u, group: 'evangelical' })).catch(e => ({ error: e, group: 'evangelical' }))
-        ]);
+        ];
+        
+        // Only add CepierUser if it's available
+        if (CepierUser) {
+          searchPromises.push(
+            CepierUser.findOne({ email }).then(u => ({ user: u, group: 'cepier' })).catch(e => ({ error: e, group: 'cepier' }))
+          );
+        }
+        
+        const searchResults = await Promise.allSettled(searchPromises);
         
         // Find first successful result with a user
         for (const result of searchResults) {
@@ -280,12 +299,30 @@ router.post('/login', async (req, res) => {
   } catch (error) {
     console.error('Admin login error:', error);
     console.error('Error stack:', error.stack);
-    res.status(500).json({
-      success: false,
-      message: 'Login failed',
-      error: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message,
-      ...(process.env.NODE_ENV !== 'production' && { stack: error.stack })
+    console.error('Error details:', {
+      message: error.message,
+      name: error.name,
+      code: error.code
     });
+    
+    // Return detailed error in development, generic in production
+    const errorResponse = {
+      success: false,
+      message: 'Login failed'
+    };
+    
+    if (process.env.NODE_ENV !== 'production') {
+      errorResponse.error = error.message;
+      errorResponse.stack = error.stack;
+      errorResponse.details = {
+        name: error.name,
+        code: error.code
+      };
+    } else {
+      errorResponse.error = 'Internal server error. Please check backend logs.';
+    }
+    
+    res.status(500).json(errorResponse);
   }
 });
 
