@@ -94,17 +94,30 @@ export default function FamiliesPage() {
           {families.map((f) => (
             <div
               key={f.id}
-              onClick={() => navigateTo(f.link)}
+              onClick={(e) => {
+                e.preventDefault()
+                e.stopPropagation()
+                navigateTo(f.link)
+              }}
               role="button"
               tabIndex={0}
-              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') navigateTo(f.link) }}
+              onKeyDown={(e) => { 
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.preventDefault()
+                  navigateTo(f.link)
+                }
+              }}
               className="bg-gray-50 hover:bg-gray-100 cursor-pointer text-gray-800 font-semibold py-4 px-4 rounded-lg shadow-sm border border-gray-200 transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <div className="text-center">
                 <h4 className="text-lg font-bold text-blue-800 mb-2">{f.name}</h4>
                 <p className="text-sm text-gray-600 mb-3">{f.description}</p>
                 <button
-                  onClick={() => navigateTo(f.link)}
+                  onClick={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    navigateTo(f.link)
+                  }}
                   className="bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2 px-4 rounded-lg transition duration-300 ease-in-out"
                 >
                   Learn More
