@@ -25,7 +25,7 @@ services:
 
   - type: web
     name: cep-frontend
-    env: node
+    env: docker
     rootDir: frontend
     plan: free
     dockerfilePath: frontend/Dockerfile
