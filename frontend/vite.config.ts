@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
-import { copyFileSync, existsSync, mkdirSync } from 'fs'
+import { copyFileSync, existsSync, mkdirSync, readFileSync } from 'fs'
 import { join } from 'path'
 
 // https://vitejs.dev/config/
@@ -26,7 +26,7 @@ export default defineConfig({
             
             // Verify the file was copied
             if (existsSync(destFile)) {
-              const content = require('fs').readFileSync(destFile, 'utf8')
+              const content = readFileSync(destFile, 'utf8')
               console.log('✓ _redirects content:', content.trim())
             }
           } else {
