@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getApiBaseUrl } from '../utils/api'
+import { initializeLucideIcons } from '../utils/lucideIcons'
 
 export default function TestLoginPage() {
   const [email, setEmail] = useState('admin@ishyangaryera.com')
@@ -10,6 +11,11 @@ export default function TestLoginPage() {
   const [success, setSuccess] = useState('')
   const navigate = useNavigate()
 
+  // Initialize Lucide icons when component mounts
+  useEffect(() => {
+    initializeLucideIcons()
+  }, [])
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -17,11 +23,16 @@ export default function TestLoginPage() {
     setSuccess('')
 
     try {
-      const response = await fetch(`${getApiBaseUrl()}/api/admin/login`, {
+      const apiUrl = getApiBaseUrl()
+      const response = await fetch(`${apiUrl}/api/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       })
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
 
       const data = await response.json()
 
@@ -35,7 +46,11 @@ export default function TestLoginPage() {
         setError(data.message || 'Login failed')
       }
     } catch (err) {
-      setError('Network error. Please check if the backend server is running.')
+      console.error('Login error:', err)
+      const errorMessage = err instanceof Error 
+        ? `Network error: ${err.message}. Please check if the backend server is running at ${getApiBaseUrl()}`
+        : 'Network error. Please check if the backend server is running.'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
