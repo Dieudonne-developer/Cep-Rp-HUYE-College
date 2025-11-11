@@ -112,10 +112,23 @@ function getUserModelForGroup(group) {
 // Admin login endpoint
 router.post('/login', async (req, res) => {
   try {
+    // Check MongoDB connection
+    const mongoose = require('mongoose');
+    if (mongoose.connection.readyState !== 1) {
+      console.error('MongoDB not connected. ReadyState:', mongoose.connection.readyState);
+      return res.status(500).json({
+        success: false,
+        message: 'Database connection error. Please check MongoDB connection.',
+        error: 'MongoDB not connected'
+      });
+    }
+    
     let { email, password, adminGroup } = req.body;
     
     console.log('=== ADMIN LOGIN REQUEST ===');
     console.log('Email:', email);
+    console.log('AdminGroup:', adminGroup);
+    console.log('MongoDB ReadyState:', mongoose.connection.readyState);
     
     if (!email || !password) {
       return res.status(400).json({
@@ -158,23 +171,35 @@ router.post('/login', async (req, res) => {
       if (user) foundGroup = 'cepier';
     } else {
       // When adminGroup is not provided, search all models
-      const CepierUser = require('../models/CepierUser');
-      const searchResults = await Promise.all([
-        ChoirUser.findOne({ email }).then(u => ({ user: u, group: 'choir' })),
-        CepierUser.findOne({ email }).then(u => ({ user: u, group: 'cepier' })),
-        AnointedUser.findOne({ email }).then(u => ({ user: u, group: 'anointed' })),
-        AbanyamugishaUser.findOne({ email }).then(u => ({ user: u, group: 'abanyamugisha' })),
-        Psalm23User.findOne({ email }).then(u => ({ user: u, group: 'psalm23' })),
-        Psalm46User.findOne({ email }).then(u => ({ user: u, group: 'psalm46' })),
-        ProtocolUser.findOne({ email }).then(u => ({ user: u, group: 'protocol' })),
-        SocialUser.findOne({ email }).then(u => ({ user: u, group: 'social' })),
-        EvangelicalUser.findOne({ email }).then(u => ({ user: u, group: 'evangelical' }))
-      ]);
-      
-      const found = searchResults.find(r => r.user !== null);
-      if (found) {
-        user = found.user;
-        foundGroup = found.group;
+      try {
+        const CepierUser = require('../models/CepierUser');
+        const searchResults = await Promise.allSettled([
+          ChoirUser.findOne({ email }).then(u => ({ user: u, group: 'choir' })).catch(e => ({ error: e, group: 'choir' })),
+          CepierUser.findOne({ email }).then(u => ({ user: u, group: 'cepier' })).catch(e => ({ error: e, group: 'cepier' })),
+          AnointedUser.findOne({ email }).then(u => ({ user: u, group: 'anointed' })).catch(e => ({ error: e, group: 'anointed' })),
+          AbanyamugishaUser.findOne({ email }).then(u => ({ user: u, group: 'abanyamugisha' })).catch(e => ({ error: e, group: 'abanyamugisha' })),
+          Psalm23User.findOne({ email }).then(u => ({ user: u, group: 'psalm23' })).catch(e => ({ error: e, group: 'psalm23' })),
+          Psalm46User.findOne({ email }).then(u => ({ user: u, group: 'psalm46' })).catch(e => ({ error: e, group: 'psalm46' })),
+          ProtocolUser.findOne({ email }).then(u => ({ user: u, group: 'protocol' })).catch(e => ({ error: e, group: 'protocol' })),
+          SocialUser.findOne({ email }).then(u => ({ user: u, group: 'social' })).catch(e => ({ error: e, group: 'social' })),
+          EvangelicalUser.findOne({ email }).then(u => ({ user: u, group: 'evangelical' })).catch(e => ({ error: e, group: 'evangelical' }))
+        ]);
+        
+        // Find first successful result with a user
+        for (const result of searchResults) {
+          if (result.status === 'fulfilled' && result.value && result.value.user) {
+            user = result.value.user;
+            foundGroup = result.value.group;
+            break;
+          } else if (result.status === 'rejected') {
+            console.error(`Error searching model:`, result.reason);
+          } else if (result.value && result.value.error) {
+            console.error(`Error in ${result.value.group} model:`, result.value.error);
+          }
+        }
+      } catch (searchError) {
+        console.error('Error in model search:', searchError);
+        throw searchError;
       }
     }
     
@@ -192,8 +217,27 @@ router.post('/login', async (req, res) => {
       });
     }
     
+    // Check if user has a password
+    if (!user.password) {
+      console.error('User found but has no password:', email);
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid email or password'
+      });
+    }
+    
     // Check password
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    let isPasswordValid = false;
+    try {
+      isPasswordValid = await bcrypt.compare(password, user.password);
+    } catch (bcryptError) {
+      console.error('Bcrypt error:', bcryptError);
+      return res.status(500).json({
+        success: false,
+        message: 'Password verification failed',
+        error: bcryptError.message
+      });
+    }
     
     if (!isPasswordValid) {
       return res.status(401).json({
@@ -218,7 +262,7 @@ router.post('/login', async (req, res) => {
       });
     }
     
-    console.log('Admin login successful for:', email);
+    console.log('Admin login successful for:', email, 'Group:', foundGroup, 'Role:', user.role);
     
     res.json({
       success: true,
@@ -235,10 +279,12 @@ router.post('/login', async (req, res) => {
     
   } catch (error) {
     console.error('Admin login error:', error);
+    console.error('Error stack:', error.stack);
     res.status(500).json({
       success: false,
       message: 'Login failed',
-      error: error.message
+      error: process.env.NODE_ENV === 'production' ? 'Internal server error' : error.message,
+      ...(process.env.NODE_ENV !== 'production' && { stack: error.stack })
     });
   }
 });
