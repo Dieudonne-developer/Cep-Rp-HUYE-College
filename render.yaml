@@ -28,7 +28,7 @@ services:
     env: docker
     rootDir: frontend
     plan: free
-    dockerfilePath: frontend/Dockerfile
+    dockerfilePath: Dockerfile
     # CRITICAL: Do NOT set staticPublishPath - this makes it a static site!
     # staticPublishPath should NOT be here for web service
     envVars:
