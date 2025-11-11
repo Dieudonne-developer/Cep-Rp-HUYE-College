@@ -41,6 +41,3 @@ export function getApiBaseUrl(): string {
   return `http://localhost:${port}`;
 }
 
-// Export a constant for use in components
-export const API_BASE_URL = getApiBaseUrl();
-

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { getApiBaseUrl } from '../../utils/api'
+import { getApiBaseUrl } from '../../../utils/api'
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('')
