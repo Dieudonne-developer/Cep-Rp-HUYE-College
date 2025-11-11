@@ -29,6 +29,8 @@ services:
     rootDir: frontend
     plan: free
     dockerfilePath: frontend/Dockerfile
+    # CRITICAL: Do NOT set staticPublishPath - this makes it a static site!
+    # staticPublishPath should NOT be here for web service
     envVars:
       - key: NODE_ENV
         value: production
