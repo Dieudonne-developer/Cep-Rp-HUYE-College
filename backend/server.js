@@ -59,26 +59,51 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 // Serve static files from uploads directory
 app.use('/uploads', express.static(uploadsDir));
 
-// Initialize Socket.IO
+// Initialize Socket.IO with CORS matching main middleware
+const socketIoAllowedOrigins = [
+  'http://localhost:5173',
+  'http://localhost:4000',
+  'http://127.0.0.1:5173',
+  'http://127.0.0.1:4000',
+  'http://172.16.12.113:5173',
+  'http://10.11.217.11:5173',
+  'http://10.11.217.18:5173',
+  'http://10.11.217.18:4000',
+  'http://10.11.217.46:5173',
+  'http://10.11.217.77:5173',
+  'http://10.11.217.130:5173',
+  'http://10.11.217.158:5173',
+  'http://172.25.192.1:5173',
+  'http://172.25.192.1:4000',
+  process.env.CLIENT_ORIGIN,
+  process.env.FRONTEND_URL,
+  process.env.BACKEND_URL
+].filter(Boolean);
+
 const io = new Server(server, {
   cors: {
-    origin: [
-      'http://localhost:5173',
-      'http://localhost:4000',
-      'http://127.0.0.1:5173',
-      'http://127.0.0.1:4000',
-      'http://172.16.12.113:5173',
-      'http://10.11.217.11:5173',
-      'http://10.11.217.18:5173',
-      'http://10.11.217.18:4000',
-      'http://10.11.217.46:5173',
-      'http://10.11.217.77:5173',
-      'http://10.11.217.130:5173',
-      'http://10.11.217.158:5173',
-      'http://172.25.192.1:5173',
-      'http://172.25.192.1:4000',
-      process.env.CLIENT_ORIGIN
-    ].filter(Boolean),
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+      
+      // Check exact match
+      if (socketIoAllowedOrigins.includes(origin)) {
+        return callback(null, true);
+      }
+      
+      // Allow local network IPs
+      if (origin.match(/^http:\/\/192\.168\.\d+\.\d+:5173$/) ||
+          origin.match(/^http:\/\/172\.\d+\.\d+\.\d+:5173$/) ||
+          origin.match(/^http:\/\/10\.\d+\.\d+\.\d+:5173$/) ||
+          // Allow Render static sites and web services
+          origin.match(/^https:\/\/.*\.onrender\.com$/) ||
+          origin.match(/^https:\/\/.*\.render\.com$/)) {
+        return callback(null, true);
+      }
+      
+      // Reject other origins
+      callback(new Error('Not allowed by Socket.IO CORS'));
+    },
     methods: ["GET", "POST", "OPTIONS"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"]
