@@ -10,10 +10,12 @@ RUN npm install
 COPY . .
 
 # Build the application
-# VITE_API_BASE_URL should be set as build arg or env var
+# VITE_API_BASE_URL should be set as build arg from Render
 # Accept it as build arg and set as env var for Vite build
 ARG VITE_API_BASE_URL
 ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+
+# Build the application
 RUN npm run build
 
 # Production stage

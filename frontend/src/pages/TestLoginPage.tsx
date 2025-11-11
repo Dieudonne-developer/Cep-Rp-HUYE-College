@@ -175,13 +175,13 @@ export default function TestLoginPage() {
             </div>
             
             <div className="text-center">
-              <a 
-                href="/choir" 
-                className="text-sm text-gray-600 hover:text-gray-800 flex items-center justify-center"
+              <button
+                onClick={() => navigate('/choir')}
+                className="text-sm text-gray-600 hover:text-gray-800 flex items-center justify-center mx-auto"
               >
                 <i data-lucide="arrow-left" className="w-4 h-4 mr-1"></i>
                 Back to Public Choir Site
-              </a>
+              </button>
             </div>
           </div>
         </div>
