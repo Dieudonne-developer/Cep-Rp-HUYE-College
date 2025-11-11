@@ -50,9 +50,9 @@ app.get('/debug/assets', (req, res) => {
 app.use((req, res, next) => {
   const ext = extname(req.path)
   if (ext && staticExtensions.includes(ext.toLowerCase())) {
-    console.log(`📦 Serving static file: ${req.path}`)
+    console.log(`📦 Serving static file: ${req.method} ${req.path}`)
   } else if (!req.path.startsWith('/health') && !req.path.startsWith('/debug')) {
-    console.log(`🌐 SPA route requested: ${req.path}`)
+    console.log(`🌐 SPA route requested: ${req.method} ${req.path}`)
   }
   next()
 })
@@ -60,11 +60,12 @@ app.use((req, res, next) => {
 // Handle SPA routing - serve index.html for all routes that don't match static files
 // This MUST be the last route handler - catches ALL routes
 // CRITICAL: This route handles ALL non-static requests including /admin/login
-app.get('*', (req, res) => {
+// Use app.use() to catch ALL HTTP methods (GET, POST, PUT, DELETE, etc.)
+app.use('*', (req, res) => {
   try {
     let path = req.path
     
-    console.log(`🔍 Handling request for path: ${path}`)
+    console.log(`🔍 Handling request: ${req.method} ${path}`)
     
     // CRITICAL: Clean up any /index.html in the path to prevent loops
     // Remove ALL occurrences of /index.html from the path (case insensitive)
