@@ -271,9 +271,9 @@ export default function ChatPage() {
       ? '/admin/login'
       : userGroup === 'cepier'
         ? '/chat'
-        : userGroup === 'choir'
-          ? '/choir'
-          : `/${userGroup}`
+      : userGroup === 'choir'
+        ? '/choir'
+        : `/${userGroup}`
     window.location.href = redirectPath
   }
 
