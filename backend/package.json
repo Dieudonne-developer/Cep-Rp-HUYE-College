@@ -16,6 +16,7 @@
     "seed:social-admin": "node seed-social-admin.js",
     "seed:evangelical-admin": "node seed-evangelical-admin.js",
     "seed:super-admin": "node seed-super-admin.js",
+    "seed:all-admins": "node seed-all-admins.js",
     "migrate:super-admin": "node migrate-super-admin-to-cepier.js"
   },
   "keywords": [],
