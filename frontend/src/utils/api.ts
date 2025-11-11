@@ -8,36 +8,33 @@
  */
 export function getApiBaseUrl(): string {
   // Check if VITE_API_BASE_URL is set (build-time environment variable)
-  if (import.meta.env.VITE_API_BASE_URL) {
-    return import.meta.env.VITE_API_BASE_URL;
+  const viteApiUrl = import.meta.env.VITE_API_BASE_URL;
+  if (viteApiUrl && viteApiUrl.trim() !== '') {
+    console.log('Using VITE_API_BASE_URL:', viteApiUrl);
+    return viteApiUrl;
   }
 
   // Detect if we're running on Render
   if (typeof window !== 'undefined') {
     const hostname = window.location.hostname;
+    const origin = window.location.origin;
+    
+    console.log('Detected hostname:', hostname);
+    console.log('Detected origin:', origin);
     
     // If frontend is on Render, use Render backend URL
     if (hostname.includes('onrender.com')) {
-      // Check if this is the specific Render frontend URL
-      if (hostname === 'cep-rp-huye-college-1.onrender.com' || hostname.includes('cep-rp-huye-college-1')) {
-        return 'https://cep-rp-huye-college.onrender.com';
-      }
-      // Generic Render detection - try to infer backend URL
-      // If frontend is on Render, backend is likely on the same domain pattern
-      const frontendUrl = window.location.origin;
-      // Try common Render backend URL patterns
-      if (frontendUrl.includes('-1.onrender.com')) {
-        // Frontend is typically named with -1 suffix, backend without
-        const backendUrl = frontendUrl.replace('-1.onrender.com', '.onrender.com');
-        return backendUrl;
-      }
-      // Fallback: use the same origin (if backend is on same domain)
-      return frontendUrl;
+      // Known backend URL - use it directly for production
+      const knownBackendUrl = 'https://cep-backend-hjfu.onrender.com';
+      console.log('Using known backend URL:', knownBackendUrl);
+      return knownBackendUrl;
     }
   }
 
   // Local development fallback
   const port = import.meta.env.VITE_API_PORT || '4000';
-  return `http://localhost:${port}`;
+  const localUrl = `http://localhost:${port}`;
+  console.log('Using localhost fallback:', localUrl);
+  return localUrl;
 }
 

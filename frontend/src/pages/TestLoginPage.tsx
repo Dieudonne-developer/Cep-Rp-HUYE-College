@@ -40,7 +40,12 @@ export default function TestLoginPage() {
         localStorage.setItem('admin', JSON.stringify(data.admin))
         setSuccess('Login successful! Redirecting to dashboard...')
         setTimeout(() => {
-          navigate('/admin/dashboard')
+          // Redirect super admin to super admin dashboard
+          if (data.admin?.role === 'super-admin') {
+            navigate('/admin/super-admins')
+          } else {
+            navigate('/admin/dashboard')
+          }
         }, 1500)
       } else {
         setError(data.message || 'Login failed')
@@ -57,7 +62,7 @@ export default function TestLoginPage() {
   }
 
   const testCredentials = [
-    { email: 'admin@ishyangaryera.com', password: 'admin123', role: 'Choir Admin' },
+    { email: 'admin@ishyangaryera.com', password: 'admin123', role: 'Admin (All Groups)' },
   ]
 
   return (
@@ -68,13 +73,16 @@ export default function TestLoginPage() {
           <div className="bg-white bg-opacity-20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
             <i data-lucide="shield-check" className="w-10 h-10"></i>
           </div>
-          <h1 className="text-2xl font-bold mb-2">Ishyanga Ryera</h1>
-          <p className="text-blue-100">Choir Administration Portal</p>
+          <h1 className="text-2xl font-bold mb-2">CEP RP Huye</h1>
+          <p className="text-blue-100">Administration Portal</p>
         </div>
 
         {/* Login Form */}
         <div className="p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Admin Login</h2>
+          <p className="text-sm text-gray-600 text-center mb-6">
+            Login for all CEP administrators (Choir, Anointed, Abanyamugisha, Psalm23, Psalm46, Protocol, Social, Evangelical, CEPier)
+          </p>
 
           {/* Test Credentials Info */}
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
@@ -191,11 +199,11 @@ export default function TestLoginPage() {
             
             <div className="text-center">
               <button
-                onClick={() => navigate('/choir')}
+                onClick={() => navigate('/')}
                 className="text-sm text-gray-600 hover:text-gray-800 flex items-center justify-center mx-auto"
               >
                 <i data-lucide="arrow-left" className="w-4 h-4 mr-1"></i>
-                Back to Public Choir Site
+                Back to Home
               </button>
             </div>
           </div>
@@ -204,10 +212,10 @@ export default function TestLoginPage() {
         {/* Footer */}
         <div className="bg-gray-50 px-8 py-4 text-center">
           <p className="text-xs text-gray-500">
-            Ishyanga Ryera Choir Administration Portal
+            CEP RP Huye Administration Portal
           </p>
           <p className="text-xs text-gray-400 mt-1">
-            Version 1.0.0 • Test Environment
+            For all family administrators • Version 1.0.0
           </p>
         </div>
       </div>

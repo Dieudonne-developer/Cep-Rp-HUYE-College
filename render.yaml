@@ -1,10 +1,10 @@
 services:
   - type: web
     name: cep-backend
-    env: node
+    env: docker
     rootDir: backend
     plan: free
-    dockerfilePath: backend/Dockerfile
+    dockerfilePath: Dockerfile
     envVars:
       - key: NODE_ENV
         value: production
