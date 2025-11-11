@@ -347,12 +347,12 @@ export default function ChoirPage() {
             <h1 className="text-xl md:text-3xl font-extrabold tracking-tight">CEP Huye College</h1>
           </div>
           <nav className="hidden md:flex space-x-6">
-            <a href="/" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">
+            <Link to="/" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">
               <Home className="mr-2 w-5 h-5" /> Home
-            </a>
-            <a href="/families" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">
+            </Link>
+            <Link to="/families" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">
               <Users className="mr-2 w-5 h-5" /> Our Families
-            </a>
+            </Link>
             <div className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out bg-blue-800">
               <Music className="mr-2 w-5 h-5" /> Ishyanga Ryera Choir
             </div>
@@ -362,20 +362,20 @@ export default function ChoirPage() {
         {mobileMenuOpen && (
           <div className="md:hidden bg-blue-800 border-t border-blue-600">
             <nav className="container mx-auto py-4 space-y-2">
-              <a 
-                href="/" 
+              <Link 
+                to="/" 
                 className="block px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Home
-              </a>
-              <a 
-                href="/families" 
+              </Link>
+              <Link 
+                to="/families" 
                 className="block px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                 onClick={() => setMobileMenuOpen(false)}
               >
                 Our Families
-              </a>
+              </Link>
               <div className="block px-4 py-2 rounded-lg bg-blue-900">
                 Ishyanga Ryera Choir
               </div>

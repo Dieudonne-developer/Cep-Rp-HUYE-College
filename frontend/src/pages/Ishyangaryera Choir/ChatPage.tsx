@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { getApiBaseUrl } from '../../utils/api'
 
@@ -158,6 +159,7 @@ export default function ChatPage() {
   const [isPressingMic, setIsPressingMic] = useState(false)
   const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
 
+  const navigate = useNavigate()
   const baseUrl = useMemo(() => getApiBaseUrl(), [])
   const socketRef = useRef<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
@@ -268,7 +270,7 @@ export default function ChatPage() {
       : userGroup === 'choir'
         ? '/choir'
         : `/${userGroup}`
-    window.location.href = redirectPath
+    navigate(redirectPath)
   }
 
   const handleSettings = () => {
@@ -1766,11 +1768,11 @@ export default function ChatPage() {
 
   React.useEffect(() => {
     if (userGroup === 'admins' && !userName) {
-      window.location.href = '/admin/login'
+      navigate('/admin/login')
     } else if (userGroup === 'cepier' && !userName) {
-      window.location.href = '/chat'
+      navigate('/chat')
     }
-  }, [userGroup, userName])
+  }, [userGroup, userName, navigate])
 
   if (!userName) {
     return (
@@ -1780,7 +1782,7 @@ export default function ChatPage() {
             <h3 className="text-xl font-semibold text-gray-800 mb-4">Missing user</h3>
             <p className="text-gray-600 mb-6">Please return to the choir page and login to chat.</p>
             <button 
-              onClick={() => window.location.href = '/choir'} 
+              onClick={() => navigate('/choir')} 
               className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-3 px-6 rounded-lg transition duration-300"
             >
               Go to Choir

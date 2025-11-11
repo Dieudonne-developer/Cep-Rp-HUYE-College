@@ -1,9 +1,12 @@
 import React from 'react'
+import { useNavigate } from 'react-router-dom'
 
 export default function CepMembersPage() {
+  const navigate = useNavigate()
+  
   React.useEffect(() => {
-    window.location.href = '/admin/super-admins?tab=homepage&global=cepier-members'
-  }, [])
+    navigate('/admin/super-admins?tab=homepage&global=cepier-members')
+  }, [navigate])
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 text-gray-700">
