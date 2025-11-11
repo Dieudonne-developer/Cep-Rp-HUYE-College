@@ -23,21 +23,12 @@ app.use(express.static(join(__dirname, 'dist'), {
   maxAge: 0 // Don't cache in production to avoid stale assets
 }))
 
-// Log static file requests for debugging
-app.use((req, res, next) => {
-  const ext = extname(req.path)
-  if (ext && staticExtensions.includes(ext.toLowerCase())) {
-    console.log(`📦 Serving static file: ${req.path}`)
-  }
-  next()
-})
-
-// Health check endpoint
+// Health check endpoint (before catch-all)
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', service: 'frontend' })
 })
 
-// Debug endpoint to check if assets exist
+// Debug endpoint to check if assets exist (before catch-all)
 app.get('/debug/assets', (req, res) => {
   const distPath = join(__dirname, 'dist')
   const assetsPath = join(distPath, 'assets')
@@ -55,11 +46,25 @@ app.get('/debug/assets', (req, res) => {
   res.json(info)
 })
 
+// Log all requests for debugging (before catch-all)
+app.use((req, res, next) => {
+  const ext = extname(req.path)
+  if (ext && staticExtensions.includes(ext.toLowerCase())) {
+    console.log(`📦 Serving static file: ${req.path}`)
+  } else if (!req.path.startsWith('/health') && !req.path.startsWith('/debug')) {
+    console.log(`🌐 SPA route requested: ${req.path}`)
+  }
+  next()
+})
+
 // Handle SPA routing - serve index.html for all routes that don't match static files
-// This MUST be the last route handler
+// This MUST be the last route handler - catches ALL routes
+// CRITICAL: This route handles ALL non-static requests including /admin/login
 app.get('*', (req, res) => {
   try {
     let path = req.path
+    
+    console.log(`🔍 Handling request for path: ${path}`)
     
     // CRITICAL: Clean up any /index.html in the path to prevent loops
     // Remove ALL occurrences of /index.html from the path (case insensitive)
@@ -68,6 +73,7 @@ app.get('*', (req, res) => {
     
     // If path contains /index.html, redirect to clean path ONCE
     if (originalPath !== path && originalPath.includes('/index.html')) {
+      console.log(`🔄 Redirecting from ${originalPath} to ${path}`)
       // Use 307 (temporary redirect) to prevent caching
       return res.redirect(307, path || '/')
     }
@@ -82,19 +88,22 @@ app.get('*', (req, res) => {
     if (ext && staticExtensions.includes(ext.toLowerCase())) {
       // Static file should have been served by express.static
       // If we reach here, the file doesn't exist
+      console.log(`❌ Static file not found: ${path}`)
       return res.status(404).send('File not found')
     }
     
-    // For all routes, serve index.html to enable SPA routing
+    // For ALL other routes (including /admin/login), serve index.html to enable SPA routing
     const indexPath = join(__dirname, 'dist', 'index.html')
     
     // Verify index.html exists
     if (!existsSync(indexPath)) {
-      console.error('ERROR: index.html not found at:', indexPath)
+      console.error('❌ ERROR: index.html not found at:', indexPath)
       console.error('Current working directory:', process.cwd())
       console.error('__dirname:', __dirname)
       return res.status(500).send('index.html not found. Build may have failed.')
     }
+    
+    console.log(`✅ Serving index.html for route: ${path}`)
     
     // Read and serve index.html
     const indexHtml = readFileSync(indexPath, 'utf8')
@@ -109,7 +118,7 @@ app.get('*', (req, res) => {
     // Send the HTML
     res.send(indexHtml)
   } catch (error) {
-    console.error('ERROR serving index.html:', error)
+    console.error('❌ ERROR serving index.html:', error)
     res.status(500).send('Internal Server Error: ' + error.message)
   }
 })
