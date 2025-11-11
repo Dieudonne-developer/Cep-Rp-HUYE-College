@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Users } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { getApiBaseUrl } from '../utils/api'
 
 type Family = {
@@ -10,6 +11,7 @@ type Family = {
 }
 
 export default function FamiliesPage() {
+  const navigate = useNavigate()
   const [families, setFamilies] = useState<Family[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -60,10 +62,12 @@ export default function FamiliesPage() {
       alert('This family page is coming soon!')
       return
     }
-    // If linking to legacy PHP, go there. If choir, route to SPA
-    if (link.toLowerCase().includes('ishyangaryera')) {
-      window.location.href = '/choir'
+    // Use React Router navigation for client-side routing
+    // This prevents full page reloads and 404 errors on static sites
+    if (link.startsWith('/')) {
+      navigate(link)
     } else {
+      // For external links, use window.location
       window.location.href = link
     }
   }
