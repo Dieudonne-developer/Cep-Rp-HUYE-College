@@ -322,7 +322,7 @@ function App() {
   if (location.pathname.startsWith('/admin')) {
     return (
       <Routes>
-        <Route path="/admin/login" element={<AdminLogin />} />
+        <Route path="/admin/login" element={<TestLoginPage />} />
         <Route path="/admin/test" element={<TestLoginPage />} />
         <Route path="/admin/routes" element={<TestRoutes />} />
         <Route path="/admin" element={<AdminLayout />}>

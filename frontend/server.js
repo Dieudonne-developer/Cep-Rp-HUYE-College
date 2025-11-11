@@ -22,7 +22,7 @@ app.use(express.static(join(__dirname, 'dist'), {
 
 // Handle SPA routing - serve index.html for all routes that don't match static files
 // This ensures ALL client-side routes work correctly
-app.get('*', (req, res) => {
+app.get('*', (req, res, next) => {
   try {
     // Check if this is a request for a static file
     const ext = extname(req.path)
@@ -35,7 +35,7 @@ app.get('*', (req, res) => {
     if (req.path.startsWith('/index.html')) {
       // Redirect to the path without /index.html
       const cleanPath = req.path.replace(/^\/index\.html/, '') || '/'
-      return res.redirect(cleanPath)
+      return res.redirect(301, cleanPath)
     }
     
     // For all other routes, serve index.html
@@ -49,6 +49,9 @@ app.get('*', (req, res) => {
     
     const indexHtml = readFileSync(indexPath, 'utf8')
     res.setHeader('Content-Type', 'text/html')
+    res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+    res.setHeader('Pragma', 'no-cache')
+    res.setHeader('Expires', '0')
     res.send(indexHtml)
   } catch (error) {
     console.error('Error serving index.html:', error)
