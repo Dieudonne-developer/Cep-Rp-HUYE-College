@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { getApiBaseUrl } from '../../../utils/api'
 import { useNavigate } from 'react-router-dom'
 import { useLucideIcons } from '../../../utils/lucideIcons'
 
@@ -18,7 +19,7 @@ export default function AdminMembers() {
   const [pendingMembers, setPendingMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'all' | 'pending'>('pending')
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
   const adminGroup = (() => {
     try {
       const raw = localStorage.getItem('admin')

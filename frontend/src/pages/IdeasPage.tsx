@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react'
+import { getApiBaseUrl } from '../utils/api'
 
 export default function IdeasPage() {
-  const baseUrl = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
   const [ideas, setIdeas] = useState<any[]>([])
   const [busy, setBusy] = useState(false)
 

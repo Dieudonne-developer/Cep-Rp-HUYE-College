@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { getApiBaseUrl } from '../../utils/api'
 
 export default function ForgotPasswordPage() {
   const [step, setStep] = useState<'email' | 'verify' | 'reset'>('email')
@@ -13,7 +14,7 @@ export default function ForgotPasswordPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
 
   // Determine group and redirect path based on URL
   const getGroupInfo = () => {

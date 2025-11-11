@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { Calendar, Clock, MapPin, Info, Eye, X } from 'lucide-react'
+import { getApiBaseUrl } from '../utils/api'
 
 type Activity = {
   _id: string
@@ -17,7 +18,7 @@ type Activity = {
 export default function ActivitiesPage() {
   const [events, setEvents] = useState<Activity[]>([])
   const [selectedEvent, setSelectedEvent] = useState<Activity | null>(null)
-  const baseUrl = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
 
   useEffect(() => {
     fetch(`${baseUrl}/api/home/activities`).then(r=>r.json()).then(setEvents).catch(()=>setEvents([]))

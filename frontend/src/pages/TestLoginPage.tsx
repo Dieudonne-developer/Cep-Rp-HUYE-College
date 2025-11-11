@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { getApiBaseUrl } from '../utils/api'
 
 export default function TestLoginPage() {
   const [email, setEmail] = useState('admin@ishyangaryera.com')
@@ -16,7 +17,7 @@ export default function TestLoginPage() {
     setSuccess('')
 
     try {
-      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'}/api/admin/login`, {
+      const response = await fetch(`${getApiBaseUrl()}/api/admin/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),

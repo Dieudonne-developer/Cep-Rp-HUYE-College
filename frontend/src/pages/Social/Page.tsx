@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react'
 import { io } from 'socket.io-client'
 import { Home, Users, Menu, Info, Calendar, Clock, MapPin, History, Lightbulb, HeartHandshake, MessageCircle, Banknote, Smartphone, CreditCard, Send, Eye, X } from 'lucide-react'
+import { getApiBaseUrl } from '../../utils/api'
 
 type Activity = { _id: string; title: string; description?: string; date?: string; time?: string; location?: string; image?: string; schedule?: string }
 
@@ -26,7 +27,7 @@ export default function SocialPage() {
   const [loginError, setLoginError] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
   const socketRef = useRef<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const groupParam = 'social'

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
+import { getApiBaseUrl } from '../utils/api'
 
-const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+const baseUrl = getApiBaseUrl()
 
 export default function SupportPage() {
   const [supportData, setSupportData] = useState<any>(null)

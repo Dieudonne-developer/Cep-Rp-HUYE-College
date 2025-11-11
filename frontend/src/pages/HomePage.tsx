@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Info, Users } from 'lucide-react'
+import { getApiBaseUrl } from '../utils/api'
 
 export default function HomePage() {
   const [loading, setLoading] = useState(true)
@@ -8,7 +9,7 @@ export default function HomePage() {
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+    const baseUrl = getApiBaseUrl()
     fetch(`${baseUrl}/api/home`)
       .then((r) => r.json())
       .then((response) => {
@@ -39,9 +40,9 @@ export default function HomePage() {
       </p>
       <div className="mt-8 flex flex-wrap gap-4 justify-center">
         <Link to="/about">
-          <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out shadow-lg flex items-center">
-            <Info className="mr-2 w-5 h-5" /> About Us
-          </button>
+        <button className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300 ease-in-out shadow-lg flex items-center">
+          <Info className="mr-2 w-5 h-5" /> About Us
+        </button>
         </Link>
         <Link to="/families">
           <button className="bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 transition duration-300 ease-in-out shadow-lg flex items-center">

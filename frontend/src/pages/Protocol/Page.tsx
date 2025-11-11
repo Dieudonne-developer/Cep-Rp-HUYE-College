@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState, useRef, useCallback } from 'react'
 import { io } from 'socket.io-client'
 import { Home, Users, Music, Menu, Info, Calendar, Clock, MapPin, History, Lightbulb, HeartHandshake, MessageCircle, Banknote, Smartphone, CreditCard, Play, Download, Maximize, Video, Send, Eye, X } from 'lucide-react'
+import { getApiBaseUrl } from '../../utils/api'
 
 type Song = { _id: string; title: string; url: string; downloadable?: boolean; mediaType?: 'audio' | 'video'; description?: string; category?: string; thumbnail?: string }
 type Activity = { _id: string; title: string; description?: string; date?: string; time?: string; location?: string; image?: string; schedule?: string }
@@ -32,7 +33,7 @@ export default function ProtocolPage() {
   const [loginError, setLoginError] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
-  const baseUrl = useMemo(() => import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000', [])
+  const baseUrl = useMemo(() => getApiBaseUrl(), [])
   const socketRef = useRef<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const groupParam = 'protocol'

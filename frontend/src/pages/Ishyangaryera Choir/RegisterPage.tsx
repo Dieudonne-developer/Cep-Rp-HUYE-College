@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { Home, Users, Music, Menu, Info, Calendar, Lightbulb, HeartHandshake, MessageCircle } from 'lucide-react'
+import { getApiBaseUrl } from '../../utils/api'
 
 export default function RegisterPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -93,7 +94,7 @@ export default function RegisterPage() {
       }
       formDataToSend.append('userGroup', selectedFamily)
 
-      const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+      const baseUrl = getApiBaseUrl()
       const response = await fetch(`${baseUrl}/api/auth/register`, {
         method: 'POST',
         body: formDataToSend

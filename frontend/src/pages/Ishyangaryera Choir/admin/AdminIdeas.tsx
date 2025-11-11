@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useLucideIcons } from '../../../utils/lucideIcons'
+import { getApiBaseUrl } from '../../../utils/api'
 
 type Idea = {
   _id: string
@@ -35,7 +36,7 @@ export default function AdminIdeas() {
     implementationDetails: ''
   })
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
   const adminGroup = (() => {
     try {
       const raw = localStorage.getItem('admin')

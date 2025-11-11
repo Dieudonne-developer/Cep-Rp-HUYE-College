@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import { io } from 'socket.io-client'
+import { getApiBaseUrl } from '../../utils/api'
 
 // Extend Navigator interface for getUserMedia
 declare global {
@@ -157,14 +158,7 @@ export default function ChatPage() {
   const [isPressingMic, setIsPressingMic] = useState(false)
   const [recordingStartTime, setRecordingStartTime] = useState<number | null>(null)
 
-  const baseUrl = useMemo(() => {
-    if (import.meta.env.VITE_API_BASE_URL) {
-      return import.meta.env.VITE_API_BASE_URL
-    }
-    const { protocol, hostname } = window.location
-    const port = import.meta.env.VITE_API_PORT || '4000'
-    return `${protocol}//${hostname}:${port}`
-  }, [])
+  const baseUrl = useMemo(() => getApiBaseUrl(), [])
   const socketRef = useRef<any>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
 

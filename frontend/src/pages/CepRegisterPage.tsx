@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react'
 import { useLocation } from 'react-router-dom'
+import { getApiBaseUrl } from '../utils/api'
 
 export default function CepRegisterPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
@@ -21,7 +22,7 @@ export default function CepRegisterPage() {
   const [msg, setMsg] = useState<{ type: 'success'|'error'; text: string }|null>(null)
   const [preview, setPreview] = useState<string|null>(null)
 
-  const baseUrl = (import.meta as any).env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
 
   function onFile(e: React.ChangeEvent<HTMLInputElement>) {
     const f = e.target.files?.[0] || null

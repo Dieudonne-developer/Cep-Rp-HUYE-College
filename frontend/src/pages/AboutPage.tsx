@@ -1,7 +1,8 @@
 import React from 'react'
+import { getApiBaseUrl } from '../utils/api'
 
 export default function AboutPage() {
-  const baseUrl = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
   return (
     <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6 md:p-10">
       <div className="w-full flex justify-center mb-6">

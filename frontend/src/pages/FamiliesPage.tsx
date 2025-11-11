@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Users } from 'lucide-react'
+import { getApiBaseUrl } from '../utils/api'
 
 type Family = {
   id: number
@@ -13,7 +14,7 @@ export default function FamiliesPage() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+    const baseUrl = getApiBaseUrl()
     fetch(`${baseUrl}/api/families`)
       .then((r) => r.json())
       .then((response) => {

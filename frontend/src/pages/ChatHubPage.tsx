@@ -1,13 +1,10 @@
 import React, { useState } from 'react'
+import { getApiBaseUrl } from '../utils/api'
 
 const groups = [{ key: 'cepier', name: 'CEPier (General)' }]
 
 export default function ChatHubPage() {
-  const baseUrl = (import.meta as any).env.VITE_API_BASE_URL || (() => {
-    const { protocol, hostname } = window.location
-    const port = (import.meta as any).env.VITE_API_PORT || '4000'
-    return `${protocol}//${hostname}:${port}`
-  })()
+  const baseUrl = getApiBaseUrl()
   const [form, setForm] = useState({ username: '', password: '', group: 'cepier' })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')

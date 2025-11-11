@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import { useLucideIcons } from '../../../utils/lucideIcons'
+import { getApiBaseUrl } from '../../../utils/api'
 
 export default function AdminSupport() {
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
   const adminGroup = (() => {
     try {
       const raw = localStorage.getItem('admin')

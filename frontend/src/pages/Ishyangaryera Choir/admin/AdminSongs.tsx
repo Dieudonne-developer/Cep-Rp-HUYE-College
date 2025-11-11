@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { getApiBaseUrl } from '../../../utils/api'
 import { useNavigate } from 'react-router-dom'
 import { useLucideIcons } from '../../../utils/lucideIcons'
 
@@ -22,7 +23,7 @@ export default function AdminSongs() {
   const [editingSong, setEditingSong] = useState<Song | null>(null)
   const [uploading, setUploading] = useState(false)
 
-  const baseUrl = import.meta.env.VITE_API_BASE_URL || 'http://localhost:4000'
+  const baseUrl = getApiBaseUrl()
   const adminGroup = (() => {
     try {
       const raw = localStorage.getItem('admin')
