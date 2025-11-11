@@ -20,13 +20,20 @@ export default defineConfig({
             if (!existsSync(distDir)) {
               mkdirSync(distDir, { recursive: true })
             }
-            copyFileSync(redirectsFile, join(distDir, '_redirects'))
+            const destFile = join(distDir, '_redirects')
+            copyFileSync(redirectsFile, destFile)
             console.log('✓ _redirects file copied to dist')
+            
+            // Verify the file was copied
+            if (existsSync(destFile)) {
+              const content = require('fs').readFileSync(destFile, 'utf8')
+              console.log('✓ _redirects content:', content.trim())
+            }
           } else {
             console.warn('⚠ _redirects file not found in public directory')
           }
         } catch (err) {
-          console.warn('Could not copy _redirects file:', err)
+          console.error('❌ Could not copy _redirects file:', err)
         }
       }
     }
