@@ -1,7 +1,7 @@
 import express from 'express'
 import { fileURLToPath } from 'url'
 import { dirname, join, extname } from 'path'
-import { readFileSync, existsSync } from 'fs'
+import { readFileSync, existsSync, readdirSync } from 'fs'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = dirname(__filename)
@@ -12,6 +12,25 @@ const PORT = process.env.PORT || 3000
 // List of static file extensions that should be served as-is
 const staticExtensions = ['.js', '.css', '.json', '.png', '.jpg', '.jpeg', '.gif', '.svg', '.ico', '.woff', '.woff2', '.ttf', '.eot', '.map', '.webp', '.avif']
 
+// MIME type mapping for proper content-type headers
+const mimeTypes = {
+  '.css': 'text/css',
+  '.js': 'application/javascript',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.jpeg': 'image/jpeg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.ico': 'image/x-icon',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.eot': 'application/vnd.ms-fontobject',
+  '.webp': 'image/webp',
+  '.avif': 'image/avif'
+}
+
 // Serve static files from the dist directory
 // This MUST come before the catch-all route
 // CRITICAL: This serves all assets (JS, CSS, images, etc.)
@@ -20,7 +39,18 @@ app.use(express.static(join(__dirname, 'dist'), {
   dotfiles: 'ignore',
   etag: false,
   lastModified: false,
-  maxAge: 0 // Don't cache in production to avoid stale assets
+  maxAge: 0, // Don't cache in production to avoid stale assets
+  setHeaders: (res, path) => {
+    // Set proper MIME types for CSS and other assets
+    const ext = extname(path).toLowerCase()
+    if (mimeTypes[ext]) {
+      res.setHeader('Content-Type', mimeTypes[ext])
+    }
+    // Ensure CSS files are not cached incorrectly
+    if (ext === '.css') {
+      res.setHeader('Cache-Control', 'public, max-age=0, must-revalidate')
+    }
+  }
 }))
 
 // Health check endpoint (before catch-all)
@@ -53,10 +83,22 @@ app.get('/debug/assets', (req, res) => {
   const assetsPath = join(distPath, 'assets')
   const indexPath = join(distPath, 'index.html')
   
+  // Check for CSS files in assets
+  let cssFiles = []
+  if (existsSync(assetsPath)) {
+    try {
+      cssFiles = readdirSync(assetsPath).filter(f => f.endsWith('.css'))
+    } catch (e) {
+      console.error('Error reading assets:', e)
+    }
+  }
+  
   const info = {
     distExists: existsSync(distPath),
     assetsExists: existsSync(assetsPath),
     indexExists: existsSync(indexPath),
+    cssFilesFound: cssFiles.length,
+    cssFiles,
     distPath,
     assetsPath,
     indexPath
@@ -69,7 +111,12 @@ app.get('/debug/assets', (req, res) => {
 app.use((req, res, next) => {
   const ext = extname(req.path)
   if (ext && staticExtensions.includes(ext.toLowerCase())) {
-    console.log(`📦 Serving static file: ${req.method} ${req.path}`)
+    const filePath = join(__dirname, 'dist', req.path)
+    const exists = existsSync(filePath)
+    console.log(`📦 Static file request: ${req.method} ${req.path} ${exists ? '✅' : '❌ NOT FOUND'}`)
+    if (!exists && ext === '.css') {
+      console.error(`⚠️  CSS file not found: ${filePath}`)
+    }
   } else if (!req.path.startsWith('/health') && !req.path.startsWith('/debug')) {
     console.log(`🌐 SPA route requested: ${req.method} ${req.path}`)
   }

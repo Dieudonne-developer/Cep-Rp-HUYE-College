@@ -45,16 +45,27 @@ export default defineConfig({
   build: {
     // Ensure assets are built correctly
     assetsDir: 'assets',
+    // Use relative paths for assets to work in Docker
+    base: './',
     rollupOptions: {
       output: {
         manualChunks: {
           vendor: ['react', 'react-dom', 'react-router-dom'],
           socket: ['socket.io-client']
+        },
+        // Ensure CSS files are properly extracted
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name && assetInfo.name.endsWith('.css')) {
+            return 'assets/[name]-[hash][extname]'
+          }
+          return 'assets/[name]-[hash][extname]'
         }
       }
     },
     // Ensure sourcemaps are not included in production (can cause issues)
-    sourcemap: false
+    sourcemap: false,
+    // Ensure CSS is extracted to a separate file
+    cssCodeSplit: true
   },
   publicDir: 'public'
 })

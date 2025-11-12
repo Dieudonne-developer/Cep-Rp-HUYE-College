@@ -12,6 +12,7 @@ services:
         value: 10000
       - key: MONGODB_URI
         sync: false
+        # Set this in Render Dashboard: mongodb://mongo:LTKOiNBFniFluuStCilpHhYBSvRYgPMu@nozomi.proxy.rlwy.net:30110
       - key: CLIENT_ORIGIN
         fromService:
           type: web
