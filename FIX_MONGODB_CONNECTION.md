@@ -1,20 +1,86 @@
-# Fix MongoDB Connection Error on Render
+# MongoDB Connection Configuration
 
-## Error
+This guide covers MongoDB connection setup for:
+- **Docker Desktop** (Local MongoDB)
+- **Render Deployment** (Cloud MongoDB - MongoDB Atlas)
+
+## For Docker Desktop (Local MongoDB)
+
+### ✅ Already Configured!
+
+The project is already set up to use **local MongoDB** in Docker Desktop:
+
+1. **Docker Compose** (`docker-compose.yml`) includes a MongoDB service:
+   ```yaml
+   mongo:
+     image: mongo:6.0
+     ports:
+       - "27017:27017"
+   ```
+
+2. **Backend** is configured to connect to MongoDB service:
+   ```yaml
+   MONGODB_URI: mongodb://mongo:27017/cep_database
+   ```
+
+### Starting MongoDB with Docker
+
+Simply run:
+```bash
+docker-compose up -d
+```
+
+This will start:
+- MongoDB on port `27017`
+- Backend on port `4000`
+- Frontend on port `3000`
+
+### Verifying Local MongoDB Connection
+
+1. Check Docker containers:
+   ```bash
+   docker-compose ps
+   ```
+
+2. Check backend logs:
+   ```bash
+   docker-compose logs backend | grep MongoDB
+   ```
+   Should show: `✅ Connected to MongoDB`
+
+3. Test API:
+   ```bash
+   curl http://localhost:4000/api/home
+   ```
+
+### For Local Development (Without Docker)
+
+If running backend locally (not in Docker), use:
+```env
+MONGODB_URI=mongodb://localhost:27017/cep_database
+```
+
+Make sure MongoDB is running locally on port 27017.
+
+---
+
+## For Render Deployment (Cloud MongoDB)
+
+### Error
 ```
 ❌ MongoDB connection error: MongooseServerSelectionError: connect ECONNREFUSED ::1:27017, connect ECONNREFUSED 127.0.0.1:27017
 ```
 
-## Problem
+### Problem
 The backend is trying to connect to `localhost:27017` (default MongoDB URI), which means `MONGODB_URI` environment variable is **not set** in Render.
 
-## Solution: Set MONGODB_URI in Render
+### Solution: Set MONGODB_URI in Render
 
 ### Step 1: Get Your MongoDB Connection String
 
 You need a MongoDB connection string. Options:
 
-#### Option A: MongoDB Atlas (Cloud - Recommended)
+#### Option A: MongoDB Atlas (Cloud - Recommended for Render)
 1. Go to [MongoDB Atlas](https://www.mongodb.com/cloud/atlas)
 2. Create a free cluster (if you don't have one)
 3. Go to **Database Access** → Create a database user
@@ -27,8 +93,8 @@ You need a MongoDB connection string. Options:
 7. Replace `<password>` with your actual password
 8. Replace `<database>` with your database name (e.g., `cep_database`)
 
-#### Option B: Use Existing MongoDB
-If you already have a MongoDB connection string, use that.
+#### Option B: Use Existing Cloud MongoDB
+If you already have a cloud MongoDB connection string, use that.
 
 ### Step 2: Set MONGODB_URI in Render
 
@@ -37,13 +103,14 @@ If you already have a MongoDB connection string, use that.
 3. Click **Add Environment Variable**
 4. Add:
    - **Key:** `MONGODB_URI`
-   - **Value:** Your MongoDB connection string (from Step 1)
-   - **For Railway MongoDB (provided):** `mongodb://mongo:LTKOiNBFniFluuStCilpHhYBSvRYgPMu@nozomi.proxy.rlwy.net:30110`
-   - **For MongoDB Atlas:** `mongodb+srv://username:password@cluster.mongodb.net/cep_database?retryWrites=true&w=majority`
+   - **Value:** Your MongoDB Atlas connection string (from Step 1)
+   - **Example:** `mongodb+srv://username:password@cluster.mongodb.net/cep_database?retryWrites=true&w=majority`
 5. Click **Save Changes**
 
-**Note:** If using the Railway MongoDB connection string, you may need to append the database name:
-   - `mongodb://mongo:LTKOiNBFniFluuStCilpHhYBSvRYgPMu@nozomi.proxy.rlwy.net:30110/cep_database`
+**Important:** 
+- ❌ **Do NOT use** `mongodb://localhost:27017/cep_database` on Render (localhost doesn't exist on cloud servers)
+- ✅ **Use MongoDB Atlas** or another cloud MongoDB service for Render deployment
+- ✅ **For Docker Desktop**, use `mongodb://mongo:27017/cep_database` (already configured)
 
 ### Step 3: Redeploy Backend
 
@@ -142,12 +209,19 @@ Once MongoDB is connected, you can:
 
 ## Summary
 
+### Docker Desktop (Local)
+✅ **MongoDB is already configured in `docker-compose.yml`**
+✅ **Connection string:** `mongodb://mongo:27017/cep_database`
+✅ **Start with:** `docker-compose up -d`
+✅ **No additional configuration needed!**
+
+### Render Deployment (Cloud)
 ✅ **Set `MONGODB_URI` in Render Environment Variables**
 ✅ **Use MongoDB Atlas connection string (not localhost)**
 ✅ **Redeploy backend after setting environment variable**
 ✅ **Verify connection in logs: `✅ Connected to MongoDB`**
 
-The error `ECONNREFUSED 127.0.0.1:27017` means the backend is trying to connect to localhost, which doesn't exist on Render. You **must** set `MONGODB_URI` to a cloud MongoDB connection string.
+The error `ECONNREFUSED 127.0.0.1:27017` means the backend is trying to connect to localhost, which doesn't exist on Render. You **must** set `MONGODB_URI` to a cloud MongoDB connection string (MongoDB Atlas recommended).
 
 
 

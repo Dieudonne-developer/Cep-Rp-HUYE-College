@@ -4,8 +4,8 @@ import { getApiBaseUrl } from '../utils/api'
 import { initializeLucideIcons } from '../utils/lucideIcons'
 
 export default function TestLoginPage() {
-  const [email, setEmail] = useState('admin@ishyangaryera.com')
-  const [password, setPassword] = useState('admin123')
+  const [email, setEmail] = useState('superadmin@cep.com')
+  const [password, setPassword] = useState('SuperAdmin@2024')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
@@ -44,7 +44,7 @@ export default function TestLoginPage() {
           if (data.admin?.role === 'super-admin') {
             navigate('/admin/super-admins')
           } else {
-            navigate('/admin/dashboard')
+          navigate('/admin/dashboard')
           }
         }, 1500)
       } else {
@@ -62,7 +62,16 @@ export default function TestLoginPage() {
   }
 
   const testCredentials = [
-    { email: 'admin@ishyangaryera.com', password: 'admin123', role: 'Admin (All Groups)' },
+    { email: 'superadmin@cep.com', password: 'SuperAdmin@2024', role: 'Super Admin (All Groups - Full Access)' },
+    { email: 'admin@cep.com', password: 'admin123', role: 'Admin (All Groups)' },
+    { email: 'choir@cep.com', password: 'choir123', role: 'Ishyanga Ryera Choir Admin' },
+    { email: 'anointed@cep.com', password: 'anointed123', role: 'Anointed worship team Admin' },
+    { email: 'abanyamugisha@cep.com', password: 'abanyamugisha123', role: 'Abanyamugisha family Admin' },
+    { email: 'psalm23@cep.com', password: 'psalm23123', role: 'Psalm 23 family Admin' },
+    { email: 'psalm46@cep.com', password: 'psalm46123', role: 'Psalm 46 family Admin' },
+    { email: 'protocol@cep.com', password: 'protocol123', role: 'Protocol family Admin' },
+    { email: 'social@cep.com', password: 'social123', role: 'Social family Admin' },
+    { email: 'evangelical@cep.com', password: 'evangelical123', role: 'Evangelical family Admin' },
   ]
 
   return (
@@ -83,29 +92,6 @@ export default function TestLoginPage() {
           <p className="text-sm text-gray-600 text-center mb-6">
             Login for all CEP administrators (Choir, Anointed, Abanyamugisha, Psalm23, Psalm46, Protocol, Social, Evangelical, CEPier)
           </p>
-
-          {/* Test Credentials Info */}
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h3 className="text-sm font-semibold text-blue-800 mb-2 flex items-center">
-              <i data-lucide="info" className="w-4 h-4 mr-2"></i>
-              Test Credentials
-            </h3>
-            <div className="space-y-2">
-              {testCredentials.map((cred, index) => (
-                <div key={index} className="text-xs text-blue-700">
-                  <div className="font-mono bg-blue-100 px-2 py-1 rounded">
-                    <strong>Email:</strong> {cred.email}
-                  </div>
-                  <div className="font-mono bg-blue-100 px-2 py-1 rounded mt-1">
-                    <strong>Password:</strong> {cred.password}
-                  </div>
-                  <div className="text-blue-600 mt-1">
-                    <strong>Role:</strong> {cred.role}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
 
           {/* Success Message */}
           {success && (
@@ -139,7 +125,7 @@ export default function TestLoginPage() {
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition duration-200"
-                  placeholder="admin@ishyangaryera.com"
+                         placeholder="superadmin@cep.com or admin@cep.com"
                 />
               </div>
             </div>
@@ -186,15 +172,41 @@ export default function TestLoginPage() {
           {/* Quick Actions */}
           <div className="mt-8 space-y-3">
             <div className="text-center">
-              <button
-                onClick={() => {
-                  setEmail('admin@ishyangaryera.com')
-                  setPassword('admin123')
-                }}
-                className="text-sm text-blue-600 hover:text-blue-800 underline"
-              >
-                Fill Test Credentials
-              </button>
+              <div className="relative inline-block">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault()
+                    const select = document.getElementById('credential-select') as HTMLSelectElement
+                    if (select && select.value) {
+                      const selected = testCredentials[parseInt(select.value)]
+                      setEmail(selected.email)
+                      setPassword(selected.password)
+                    }
+                  }}
+                  className="text-sm text-blue-600 hover:text-blue-800 underline mr-2"
+                >
+                  Fill Test Credentials:
+                </button>
+                <select
+                  id="credential-select"
+                  onChange={(e) => {
+                    if (e.target.value) {
+                      const selected = testCredentials[parseInt(e.target.value)]
+                      setEmail(selected.email)
+                      setPassword(selected.password)
+                    }
+                  }}
+                  className="text-sm border border-blue-300 rounded px-2 py-1 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  defaultValue=""
+                >
+                  <option value="">Select account...</option>
+                  {testCredentials.map((cred, index) => (
+                    <option key={index} value={index.toString()}>
+                      {cred.role}
+                    </option>
+                  ))}
+                </select>
+              </div>
             </div>
             
             <div className="text-center">

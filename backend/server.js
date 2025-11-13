@@ -75,9 +75,11 @@ const socketIoAllowedOrigins = [
       'http://10.11.217.158:5173',
       'http://172.25.192.1:5173',
       'http://172.25.192.1:4000',
-  process.env.CLIENT_ORIGIN,
-  process.env.FRONTEND_URL,
-  process.env.BACKEND_URL
+      // Production frontend URLs
+      'https://cep-rp-huye-college.vercel.app',
+      process.env.CLIENT_ORIGIN,
+      process.env.FRONTEND_URL,
+      process.env.BACKEND_URL
 ].filter(Boolean);
 
 const io = new Server(server, {
@@ -91,10 +93,16 @@ const io = new Server(server, {
         return callback(null, true);
       }
       
-      // Allow local network IPs
-      if (origin.match(/^http:\/\/192\.168\.\d+\.\d+:5173$/) ||
+      // Allow local network IPs for frontend (port 3000)
+      if (origin.match(/^http:\/\/192\.168\.\d+\.\d+:3000$/) ||
+          origin.match(/^http:\/\/172\.\d+\.\d+\.\d+:3000$/) ||
+          origin.match(/^http:\/\/10\.\d+\.\d+\.\d+:3000$/) ||
+          // Allow local network IPs for development (port 5173)
+          origin.match(/^http:\/\/192\.168\.\d+\.\d+:5173$/) ||
           origin.match(/^http:\/\/172\.\d+\.\d+\.\d+:5173$/) ||
           origin.match(/^http:\/\/10\.\d+\.\d+\.\d+:5173$/) ||
+          // Allow Vercel deployments
+          origin.match(/^https:\/\/.*\.vercel\.app$/) ||
           // Allow Render static sites and web services
           origin.match(/^https:\/\/.*\.onrender\.com$/) ||
           origin.match(/^https:\/\/.*\.render\.com$/)) {
@@ -110,17 +118,66 @@ const io = new Server(server, {
   }
 });
 
-// MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cep_database')
-  .then(() => {
-    console.log('✅ Connected to MongoDB');
-  })
-  .catch((error) => {
-    console.error('❌ MongoDB connection error:', error);
-    console.error('⚠️  Server will continue without MongoDB connection. Some features may not work.');
-    // Don't exit - allow server to start even if MongoDB fails
-    // process.exit(1);
-  });
+// MongoDB connection with retry logic
+const connectMongoDB = async () => {
+  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/cep_database';
+  
+  const connectionOptions = {
+    serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
+    socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
+    family: 4, // Use IPv4, skip trying IPv6
+    maxPoolSize: 10, // Maintain up to 10 socket connections
+    minPoolSize: 1, // Maintain at least 1 socket connection
+    retryWrites: true,
+    w: 'majority'
+  };
+
+  console.log('🔄 Attempting to connect to MongoDB...');
+  console.log('📍 Connection URI:', mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')); // Hide credentials
+  
+  let retries = 5;
+  let delay = 2000; // Start with 2 second delay
+  
+  while (retries > 0) {
+    try {
+      await mongoose.connect(mongoUri, connectionOptions);
+      console.log('✅ Connected to MongoDB successfully!');
+      console.log('📊 Database:', mongoose.connection.db.databaseName);
+      console.log('🌐 Host:', mongoose.connection.host);
+      return;
+    } catch (error) {
+      retries--;
+      if (retries === 0) {
+        console.error('❌ MongoDB connection failed after all retries');
+        console.error('❌ Error:', error.message);
+        console.error('⚠️  Server will continue without MongoDB connection. Some features may not work.');
+        console.error('💡 Check if MongoDB is running and MONGODB_URI is correct');
+        return;
+      }
+      console.error(`❌ MongoDB connection attempt failed. Retries left: ${retries}`);
+      console.error('⏳ Retrying in', delay / 1000, 'seconds...');
+      await new Promise(resolve => setTimeout(resolve, delay));
+      delay *= 1.5; // Exponential backoff
+    }
+  }
+};
+
+// Connect to MongoDB
+connectMongoDB();
+
+// Handle MongoDB connection events
+mongoose.connection.on('error', (err) => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.warn('⚠️  MongoDB disconnected. Attempting to reconnect...');
+  connectMongoDB();
+});
+
+mongoose.connection.on('reconnected', () => {
+  console.log('✅ MongoDB reconnected successfully!');
+});
 
 // Socket.IO connection handling
 // Track connected users by username and group
@@ -590,9 +647,36 @@ app.use((req, res) => {
 const PORT = process.env.PORT || 4000;
 const HOST = process.env.HOST || '0.0.0.0';
 
+// Get network IP addresses for display
+const os = require('os');
+const getNetworkIPs = () => {
+  const interfaces = os.networkInterfaces();
+  const ips = [];
+  for (const name of Object.keys(interfaces)) {
+    for (const iface of interfaces[name]) {
+      if (iface.family === 'IPv4' && !iface.internal) {
+        ips.push(iface.address);
+      }
+    }
+  }
+  return ips;
+};
+
 server.listen(PORT, HOST, () => {
   console.log(`🚀 Server listening on port ${PORT}`);
-  console.log(`🌐 Accessible from network at: http://${HOST === '0.0.0.0' ? '10.11.217.18' : HOST}:${PORT}`);
+  console.log(`🌐 Listening on: ${HOST === '0.0.0.0' ? 'all network interfaces' : HOST}`);
+  
+  const networkIPs = getNetworkIPs();
+  if (networkIPs.length > 0) {
+    console.log(`\n📡 Accessible from network at:`);
+    networkIPs.forEach(ip => {
+      console.log(`   • http://${ip}:${PORT} (Backend API)`);
+      console.log(`   • http://${ip}:3000 (Frontend)`);
+    });
+  }
+  console.log(`\n💻 Local access:`);
+  console.log(`   • http://localhost:${PORT} (Backend API)`);
+  console.log(`   • http://localhost:3000 (Frontend)`);
 });
 
 // Graceful shutdown

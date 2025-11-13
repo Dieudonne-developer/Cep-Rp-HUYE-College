@@ -12,32 +12,15 @@ services:
         value: 10000
       - key: MONGODB_URI
         sync: false
-        # Set this in Render Dashboard: mongodb://mongo:LTKOiNBFniFluuStCilpHhYBSvRYgPMu@nozomi.proxy.rlwy.net:30110
+        # Set this in Render Dashboard to your Railway MongoDB connection string
+        # Example: mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232
+        # For local development/Docker: mongodb://localhost:27017/cep_database
+        # For Docker Compose: mongodb://mongo:27017/cep_database
       - key: CLIENT_ORIGIN
-        fromService:
-          type: web
-          name: cep-frontend
-          property: url
+        value: https://cep-rp-huye-college.vercel.app
+      - key: FRONTEND_URL
+        value: https://cep-rp-huye-college.vercel.app
       - key: BACKEND_URL
-        fromService:
-          type: web
-          name: cep-backend
-          property: url
-
-  - type: web
-    name: cep-frontend
-    env: docker
-    rootDir: frontend
-    plan: free
-    dockerfilePath: Dockerfile
-    # CRITICAL: Do NOT set staticPublishPath - this makes it a static site!
-    # staticPublishPath should NOT be here for web service
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 3000
-      - key: VITE_API_BASE_URL
         fromService:
           type: web
           name: cep-backend

@@ -14,6 +14,8 @@ const allowedOrigins = [
   'http://10.11.217.77:5173',
   'http://10.11.217.130:5173',
   'http://10.11.217.158:5173',
+  // Production frontend URLs
+  'https://cep-rp-huye-college.vercel.app',
   process.env.CLIENT_ORIGIN,
   process.env.FRONTEND_URL,
   process.env.BACKEND_URL
@@ -27,9 +29,16 @@ const corsOptions = {
     if (!origin) return callback(null, true);
     if (shouldLog) console.log(`CORS request from origin: ${origin}`);
     if (allowedOrigins.includes(origin) ||
+        // Allow all local network IPs for frontend (port 3000)
+        origin.match(/^http:\/\/192\.168\.\d+\.\d+:3000$/) ||
+        origin.match(/^http:\/\/172\.\d+\.\d+\.\d+:3000$/) ||
+        origin.match(/^http:\/\/10\.\d+\.\d+\.\d+:3000$/) ||
+        // Allow all local network IPs for development (port 5173)
         origin.match(/^http:\/\/192\.168\.\d+\.\d+:5173$/) ||
         origin.match(/^http:\/\/172\.\d+\.\d+\.\d+:5173$/) ||
         origin.match(/^http:\/\/10\.\d+\.\d+\.\d+:5173$/) ||
+        // Allow Vercel deployments
+        origin.match(/^https:\/\/.*\.vercel\.app$/) ||
         // Allow Render static sites and web services
         origin.match(/^https:\/\/.*\.onrender\.com$/) ||
         origin.match(/^https:\/\/.*\.render\.com$/)) {

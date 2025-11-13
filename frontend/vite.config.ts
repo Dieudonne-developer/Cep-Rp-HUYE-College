@@ -45,8 +45,10 @@ export default defineConfig({
   build: {
     // Ensure assets are built correctly
     assetsDir: 'assets',
-    // Use relative paths for assets to work in Docker
-    base: './',
+    // Use absolute paths for Vercel (default), relative for Docker
+    // Vercel handles paths automatically, so we use default '/'
+    // Vercel sets VERCEL=true during build, Docker uses './'
+    base: process.env.VERCEL === 'true' ? '/' : './',
     rollupOptions: {
       output: {
         manualChunks: {
