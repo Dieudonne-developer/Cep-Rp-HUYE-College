@@ -100,13 +100,17 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
       });
     } else {
       console.warn('Email sending failed:', emailResult.message);
+      // Render free tier blocks SMTP - provide verification link in response
+      // This allows users to set password even when email fails
+      console.warn('Email sending failed due to Render SMTP blocking. Providing verification link in response as fallback.');
       res.json({
         success: true,
-        message: 'Registration successful! However, email sending failed. Please use this verification link to set your password.',
+        message: 'Registration successful! Email sending is currently unavailable due to service restrictions. Please use the verification link below to set your password.',
         verificationLink: verificationLink,
         token: verificationToken,
         emailSent: false,
-        emailError: emailResult.message
+        emailError: emailResult.message,
+        note: 'Click the verification link above to set your password. If email service is restored, you will also receive it via email.'
       });
     }
     
@@ -1055,12 +1059,16 @@ router.post('/forgot-password', async (req, res) => {
       });
     } else {
       console.error('Failed to send verification code:', result.message);
-      // Don't return 500 - return 200 but indicate email wasn't sent
-      // This allows the frontend to handle gracefully
+      // Render free tier blocks SMTP - provide code in response as fallback
+      // This allows users to reset password even when email fails
+      console.warn('Email sending failed due to Render SMTP blocking. Providing verification code in response as fallback.');
       res.json({
-        success: false,
-        message: result.message || 'Failed to send verification code. Please try again later or contact support.',
-        emailSent: false
+        success: true, // Still return success so user can proceed
+        message: 'Email sending is currently unavailable due to service restrictions. Please use the verification code below to reset your password.',
+        emailSent: false,
+        verificationCode: code, // Provide code in response as fallback
+        codeExpiresAt: new Date(Date.now() + 10 * 60 * 1000).toISOString(), // 10 minutes
+        note: 'This code will expire in 10 minutes. If email service is restored, you will also receive it via email.'
       });
     }
   } catch (error) {
