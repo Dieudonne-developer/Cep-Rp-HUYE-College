@@ -2,8 +2,9 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Psalm46User = require('./models/Psalm46User');
+const { getMongoUri } = require('./utils/mongoUri');
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cep_database';
+const mongoUri = getMongoUri();
 
 async function run() {
   await mongoose.connect(mongoUri);

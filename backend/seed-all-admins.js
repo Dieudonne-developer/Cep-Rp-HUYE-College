@@ -1,6 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
+const { getMongoUri } = require('./utils/mongoUri');
 
 // Import all user models
 const ChoirUser = require('./models/UserRegistration');
@@ -21,7 +22,7 @@ try {
   CepierUser = null;
 }
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cep_database';
+const mongoUri = getMongoUri();
 
 // Generic admin credentials that work for all groups
 const adminCredentials = {

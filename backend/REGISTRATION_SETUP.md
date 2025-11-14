@@ -5,8 +5,11 @@
 Add these variables to your `.env` file in the backend directory:
 
 ```env
-# MongoDB Connection
-MONGODB_URI=mongodb://localhost:27017/cep_database
+# MongoDB Connection (Railway - Production)
+MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
+
+# For Local Development (optional):
+# MONGODB_URI=mongodb://localhost:27017/cep-app-database
 
 # Email Configuration (Gmail)
 EMAIL_USER=your-gmail@gmail.com

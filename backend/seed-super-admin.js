@@ -1,9 +1,10 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const CepierUser = require('./models/CepierUser');
+const { getMongoUri } = require('./utils/mongoUri');
 const ChoirUser = require('./models/UserRegistration');
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cep_database';
+const mongoUri = getMongoUri();
 mongoose.set('strictQuery', true);
 
 async function createSuperAdmin() {

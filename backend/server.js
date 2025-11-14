@@ -10,6 +10,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const fs = require('fs');
 const { Server } = require('socket.io');
+const { getMongoUri } = require('./utils/mongoUri');
 
 // Import organized modules
 const corsOptions = require('./middleware/cors');
@@ -120,7 +121,7 @@ const io = new Server(server, {
 
 // MongoDB connection with retry logic
 const connectMongoDB = async () => {
-  const mongoUri = process.env.MONGODB_URI || 'mongodb://localhost:27017/cep_database';
+  const mongoUri = getMongoUri();
   
   const connectionOptions = {
     serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s

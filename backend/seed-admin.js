@@ -2,9 +2,10 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const UserRegistration = require('./models/UserRegistration');
+const { getMongoUri } = require('./utils/mongoUri');
 
 // Connect to MongoDB (single unified database)
-const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cep_database';
+const mongoUri = getMongoUri();
 mongoose.set('strictQuery', true);
 
 async function createAdminUser() {

@@ -1,14 +1,14 @@
 # CEP Database Configuration Summary
 
 ## Unified Database Setup
-The CEP system now uses a single, unified MongoDB database: **`cep_database`**
+The CEP system now uses a single, unified MongoDB database on Railway: **`cep-app-database`** (`gondola.proxy.rlwy.net:30232`)
 
 ## Database Connection
-- **Database Name**: `cep_database`
-- **Connection String**: `mongodb://localhost:27017/cep_database`
+- **Database Name**: `cep-app-database`
+- **Primary Connection String**: `mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database`
 - **Configuration File**: `backend/.env`
 
-## Collections in cep_database
+## Collections in cep-app-database
 
 ### 1. User Registrations
 - **Collection**: `userregistrations`
@@ -51,7 +51,7 @@ The CEP system now uses a single, unified MongoDB database: **`cep_database`**
 ## Environment Configuration
 ```env
 # Database Configuration
-MONGODB_URI=mongodb://localhost:27017/cep_database
+MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
 
 # Server Configuration
 PORT=4000
@@ -79,7 +79,7 @@ npm start
 ```
 
 ## Database Status
-✅ **UNIFIED**: All collections now use `cep_database`
+✅ **UNIFIED**: All collections now use `cep-app-database`
 ✅ **CONNECTED**: MongoDB connection working
 ✅ **TESTED**: All API endpoints functional
 ✅ **CONFIGURED**: Environment variables set correctly

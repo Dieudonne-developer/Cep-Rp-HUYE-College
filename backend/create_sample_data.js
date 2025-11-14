@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 require('dotenv').config();
+const { getMongoUri } = require('./utils/mongoUri');
 
 // Import models
 const Song = require('./models/Song');
@@ -9,7 +10,7 @@ const UserRegistration = require('./models/UserRegistration');
 async function createSampleData() {
   try {
     // Connect to MongoDB
-    await mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/cep_database');
+    await mongoose.connect(getMongoUri());
     console.log('Connected to MongoDB');
 
     // Clear existing data

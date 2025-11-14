@@ -4,8 +4,9 @@ const Song = require('./models/Song');
 const Event = require('./models/Event');
 const ImplementedIdea = require('./models/ImplementedIdea');
 const UserRegistration = require('./models/UserRegistration');
+const { getMongoUri } = require('./utils/mongoUri');
 
-const mongoUri = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/cep_database';
+const mongoUri = getMongoUri();
 
 async function run() {
   try {
