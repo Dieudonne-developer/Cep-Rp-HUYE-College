@@ -143,11 +143,23 @@ export default function AnointedPage() {
 
   useEffect(() => {
     if (section === 'chat' && isLoggedIn) {
-      socketRef.current = io(baseUrl.replace('http://', 'ws://').replace('https://', 'wss://'))
-      socketRef.current.on('message', (m: any) => { setMessages(p=>[...p,m]); messagesEndRef.current?.scrollIntoView({behavior:'smooth'}) })
+      // Socket.IO handles protocol upgrade automatically
+      socketRef.current = io(baseUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5
+      })
+      socketRef.current.on('connect', () => {
+        if (userName) {
+          socketRef.current.emit('set-username', { username: userName, group: 'anointed' })
+          socketRef.current.emit('join-room', 'anointed-chat')
+        }
+      })
+      socketRef.current.on('receive-message', (m: any) => { setMessages(p=>[...p,m]); messagesEndRef.current?.scrollIntoView({behavior:'smooth'}) })
       return () => socketRef.current?.disconnect()
     }
-  }, [section, baseUrl, isLoggedIn])
+  }, [section, baseUrl, isLoggedIn, userName])
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 flex flex-col">

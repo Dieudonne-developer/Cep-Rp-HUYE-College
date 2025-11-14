@@ -6,7 +6,12 @@ const verificationCodes = new Map();
 
 // Create transporter for sending emails
 function createTransporter() {
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+  // Get email credentials from environment variables
+  const emailUser = process.env.EMAIL_USER?.trim();
+  // Remove spaces from app password (Gmail app passwords are 16 characters without spaces)
+  const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+  
+  if (!emailUser || !emailPassword) {
     console.error('Email configuration missing: EMAIL_USER or EMAIL_APP_PASSWORD not set');
     return null;
   }
@@ -14,8 +19,8 @@ function createTransporter() {
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_APP_PASSWORD
+      user: emailUser,
+      pass: emailPassword
     }
   });
 }

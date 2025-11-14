@@ -20,7 +20,7 @@ Quick reference for deploying the backend to Render.
    ```bash
    NODE_ENV=production
    PORT=10000
-   MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232
+   MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
    CLIENT_ORIGIN=https://cep-rp-huye-college.vercel.app
    FRONTEND_URL=https://cep-rp-huye-college.vercel.app
    ```

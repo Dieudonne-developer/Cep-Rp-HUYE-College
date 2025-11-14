@@ -360,7 +360,13 @@ export default function ChatPage() {
     
     checkVoiceSupport()
 
-    socketRef.current = io(baseUrl)
+    // Socket.IO handles protocol upgrade automatically
+    socketRef.current = io(baseUrl, {
+      transports: ['websocket', 'polling'],
+      reconnection: true,
+      reconnectionDelay: 1000,
+      reconnectionAttempts: 5
+    })
 
     socketRef.current.on('connect', () => {
       console.log('Socket connected:', socketRef.current?.id)
@@ -1510,14 +1516,54 @@ export default function ChatPage() {
           <div className="relative group cursor-pointer" onClick={handlePreview}>
             <video 
               src={fileAttachment.fileUrl}
-              className="w-full h-auto rounded-lg shadow-md hover:shadow-lg transition-shadow"
+              className="w-full h-auto max-h-96 rounded-lg shadow-md hover:shadow-lg transition-shadow"
               controls
+              preload="metadata"
             />
-            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center">
+            <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-200 rounded-lg flex items-center justify-center pointer-events-none">
               <div className="opacity-0 group-hover:opacity-100 transition-opacity">
                 <svg className="w-8 h-8 text-white" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z"/>
                 </svg>
+              </div>
+            </div>
+          </div>
+        ) : fileAttachment.fileType === 'audio' ? (
+          <div className={`p-4 rounded-lg shadow-md ${
+            isOwn 
+              ? 'bg-green-600/20 border border-green-400/30' 
+              : 'bg-white/90 border border-gray-200'
+          }`}>
+            <div className="flex items-center space-x-3">
+              <div className="flex-shrink-0">
+                <div className={`w-12 h-12 rounded-full flex items-center justify-center ${
+                  isOwn ? 'bg-green-500' : 'bg-blue-500'
+                }`}>
+                  <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/>
+                  </svg>
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium truncate ${
+                  isOwn ? 'text-white' : 'text-gray-900'
+                }`}>
+                  {fileAttachment.fileName}
+                </p>
+                <audio 
+                  src={fileAttachment.fileUrl}
+                  controls
+                  className="w-full mt-2"
+                  preload="metadata"
+                >
+                  Your browser does not support the audio element.
+                </audio>
+                <p className={`text-xs mt-1 ${
+                  isOwn ? 'text-green-100' : 'text-gray-500'
+                }`}>
+                  {formatFileSize(fileAttachment.fileSize)}
+                  {fileAttachment.duration && ` • ${formatDuration(fileAttachment.duration)}`}
+                </p>
               </div>
             </div>
           </div>

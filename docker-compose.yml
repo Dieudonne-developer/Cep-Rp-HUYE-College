@@ -1,34 +1,15 @@
 services:
-  mongo:
-    image: mongo:6.0
-    restart: unless-stopped
-    environment:
-      MONGO_INITDB_DATABASE: cep_database
-    ports:
-      - "27017:27017"
-    volumes:
-      - mongo-data:/data/db
-    healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-      start_period: 10s
-
   backend:
     build:
       context: ./backend
     environment:
       NODE_ENV: production
       PORT: 4000
-      MONGODB_URI: mongodb://mongo:27017/cep_database
+      MONGODB_URI: mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
       CLIENT_ORIGIN: http://localhost:3000
       BACKEND_URL: http://localhost:4000
     ports:
       - "4000:4000"
-    depends_on:
-      mongo:
-        condition: service_healthy
     volumes:
       - backend-uploads:/app/uploads
       - backend-logs:/app/logs
@@ -48,7 +29,6 @@ services:
       - backend
 
 volumes:
-  mongo-data:
   backend-uploads:
   backend-logs:
 

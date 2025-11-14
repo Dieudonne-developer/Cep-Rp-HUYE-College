@@ -88,7 +88,7 @@ In Render Dashboard → Environment → Environment Variables, add:
 ```bash
 NODE_ENV=production
 PORT=10000
-MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232
+MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
 CLIENT_ORIGIN=https://cep-rp-huye-college.vercel.app
 FRONTEND_URL=https://cep-rp-huye-college.vercel.app
 ```
@@ -128,7 +128,7 @@ If you prefer using `render.yaml`:
 1. Click on your MongoDB service
 2. Go to the **"Connect"** tab
 3. Copy the **"MongoDB Connection URL"**
-4. It will look like: `mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232`
+4. It will look like: `mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database`
 
 ### Step 3: Use Connection String
 
@@ -152,7 +152,7 @@ Use this connection string in:
 |----------|-------|-------------|
 | `NODE_ENV` | `production` | Environment mode |
 | `PORT` | `10000` | Server port (Render sets this automatically) |
-| `MONGODB_URI` | `mongodb://mongo:...@gondola.proxy.rlwy.net:30232` | Railway MongoDB connection string |
+| `MONGODB_URI` | `mongodb://mongo:...@gondola.proxy.rlwy.net:30232/cep-app-database` | Railway MongoDB connection string |
 | `CLIENT_ORIGIN` | `https://cep-rp-huye-college.vercel.app` | Frontend URL for CORS |
 | `FRONTEND_URL` | `https://cep-rp-huye-college.vercel.app` | Frontend URL for redirects |
 | `BACKEND_URL` | Auto-set by Render | Backend URL (auto-configured) |
@@ -248,7 +248,7 @@ npm run dev
 cd backend
 npm install
 # Create .env file with:
-# MONGODB_URI=mongodb://localhost:27017/cep_database
+# MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
 # CLIENT_ORIGIN=http://localhost:5173
 npm start
 # Runs on http://localhost:4000

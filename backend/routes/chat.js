@@ -124,7 +124,10 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     console.log('Uploaded file:', req.file);
     
     const file = req.file;
-    const fileUrl = `http://localhost:4000/uploads/${file.filename}`;
+    
+    // Use dynamic base URL for file URLs (works in both local and production)
+    const baseUrl = process.env.BACKEND_URL || process.env.FRONTEND_URL || `http://localhost:${process.env.PORT || 4000}`;
+    const fileUrl = `${baseUrl}/uploads/${file.filename}`;
     
     // Determine file type
     let fileType = 'document';

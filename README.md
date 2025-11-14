@@ -44,6 +44,22 @@ npm run dev
 
 Frontend runs on: `http://localhost:5173`
 
+### 3. Mobile App (React Native + Expo)
+
+```bash
+cd "Mobile app of Cep app"
+npm install
+npm run start   # starts Expo dev server
+# or
+npm run android
+npm run ios
+npm run web
+```
+
+- Uses the same production backend at `https://cep-backend-hjfu.onrender.com`
+- Update `EXPO_PUBLIC_API_BASE_URL` if you need to point to a different backend
+- Login with the same admin credentials listed in `ADMIN_CREDENTIALS.md`
+
 ## 🌐 Network Access
 
 The frontend is configured to accept network connections. When you run `npm run dev`, you'll see:

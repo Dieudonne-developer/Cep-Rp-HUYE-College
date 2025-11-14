@@ -2,11 +2,21 @@ const nodemailer = require('nodemailer');
 
 // Create transporter for Gmail
 const createTransporter = () => {
+  // Get email credentials from environment variables
+  const emailUser = process.env.EMAIL_USER?.trim();
+  // Remove spaces from app password (Gmail app passwords are 16 characters without spaces)
+  const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+  
+  if (!emailUser || !emailPassword) {
+    console.warn('Email configuration incomplete - EMAIL_USER or EMAIL_APP_PASSWORD not set');
+    return null;
+  }
+  
   return nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL_USER,
-      pass: process.env.EMAIL_APP_PASSWORD
+      user: emailUser,
+      pass: emailPassword
     }
   });
 };
@@ -15,7 +25,10 @@ const createTransporter = () => {
 const sendVerificationEmail = async (email, username, verificationLink, userGroup = 'choir') => {
   try {
     // Check if email configuration is available
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+    const emailUser = process.env.EMAIL_USER?.trim();
+    const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+    
+    if (!emailUser || !emailPassword) {
       console.warn('Email configuration missing - EMAIL_USER or EMAIL_APP_PASSWORD not set');
       return {
         success: false,
@@ -40,12 +53,19 @@ const sendVerificationEmail = async (email, username, verificationLink, userGrou
 
     const transporter = createTransporter();
     
+    if (!transporter) {
+      return {
+        success: false,
+        message: 'Failed to create email transporter. Please check email configuration.'
+      };
+    }
+    
     // Verify transporter configuration
     await transporter.verify();
     console.log('Email transporter verified successfully');
 
     const mailOptions = {
-      from: `"${familyName}" <${process.env.EMAIL_USER}>`,
+      from: `"${familyName}" <${emailUser}>`,
       to: email,
       subject: `Complete Your Registration - ${familyName}`,
       html: `
@@ -258,7 +278,10 @@ const sendVerificationEmail = async (email, username, verificationLink, userGrou
 // Send password reset email
 const sendPasswordResetEmail = async (email, username, resetLink) => {
   try {
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+    const emailUser = process.env.EMAIL_USER?.trim();
+    const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+    
+    if (!emailUser || !emailPassword) {
       return {
         success: false,
         message: 'Email configuration not available'
@@ -266,10 +289,18 @@ const sendPasswordResetEmail = async (email, username, resetLink) => {
     }
 
     const transporter = createTransporter();
+    
+    if (!transporter) {
+      return {
+        success: false,
+        message: 'Failed to create email transporter. Please check email configuration.'
+      };
+    }
+    
     await transporter.verify();
 
     const mailOptions = {
-      from: `"Ishyanga Ryera Choir" <${process.env.EMAIL_USER}>`,
+      from: `"Ishyanga Ryera Choir" <${emailUser}>`,
       to: email,
       subject: 'Password Reset - Ishyanga Ryera Choir',
       html: `
@@ -306,7 +337,10 @@ const sendPasswordResetEmail = async (email, username, resetLink) => {
 const sendAdminInvitationEmail = async (email, username, passwordSetupLink, adminGroup = 'choir', role = 'admin') => {
   try {
     // Check if email configuration is available
-    if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+    const emailUser = process.env.EMAIL_USER?.trim();
+    const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+    
+    if (!emailUser || !emailPassword) {
       console.warn('Email configuration missing - EMAIL_USER or EMAIL_APP_PASSWORD not set');
       return {
         success: false,
@@ -338,12 +372,19 @@ const sendAdminInvitationEmail = async (email, username, passwordSetupLink, admi
 
     const transporter = createTransporter();
     
+    if (!transporter) {
+      return {
+        success: false,
+        message: 'Failed to create email transporter. Please check email configuration.'
+      };
+    }
+    
     // Verify transporter configuration
     await transporter.verify();
     console.log('Email transporter verified successfully');
 
     const mailOptions = {
-      from: `"${familyName} Admin" <${process.env.EMAIL_USER}>`,
+      from: `"${familyName} Admin" <${emailUser}>`,
       to: email,
       subject: `Admin Account Invitation - ${familyName}`,
       html: `

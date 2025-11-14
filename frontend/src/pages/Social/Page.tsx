@@ -117,18 +117,32 @@ export default function SocialPage() {
   // Chat functionality
   useEffect(() => {
     if (section === 'chat' && isLoggedIn) {
-      socketRef.current = io(baseUrl.replace('http://', 'ws://').replace('https://', 'wss://'))
+      // Socket.IO handles protocol upgrade automatically
+      socketRef.current = io(baseUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5
+      })
       
       socketRef.current.on('connect', () => {
         console.log('Connected to chat server')
+        if (userName) {
+          socketRef.current.emit('set-username', { username: userName, group: 'social' })
+          socketRef.current.emit('join-room', 'social-chat')
+        }
       })
 
-      socketRef.current.on('message', (message: any) => {
+      socketRef.current.on('connect_error', (error: any) => {
+        console.error('Socket.IO connection error:', error)
+      })
+
+      socketRef.current.on('receive-message', (message: any) => {
         setMessages(prev => [...prev, message])
         scrollToBottom()
       })
 
-      socketRef.current.on('typing', (data: { user: string; isTyping: boolean }) => {
+      socketRef.current.on('user-typing', (data: { user: string; isTyping: boolean }) => {
         if (data.user !== userName) {
           setTypingUsers(prev => {
             if (data.isTyping) {
@@ -140,7 +154,7 @@ export default function SocialPage() {
         }
       })
 
-      socketRef.current.on('userJoined', (data: { user: string }) => {
+      socketRef.current.on('user-joined', (data: { user: string }) => {
         setMessages(prev => [...prev, {
           id: Date.now(),
           type: 'system',
@@ -149,7 +163,7 @@ export default function SocialPage() {
         }])
       })
 
-      socketRef.current.on('userLeft', (data: { user: string }) => {
+      socketRef.current.on('user-left', (data: { user: string }) => {
         setMessages(prev => [...prev, {
           id: Date.now(),
           type: 'system',
@@ -180,16 +194,18 @@ export default function SocialPage() {
     e.preventDefault()
     if (newMessage.trim() && userName.trim() && socketRef.current) {
       const message = {
-        id: Date.now(),
         user: userName,
         message: newMessage.trim(),
-        timestamp: new Date()
+        type: 'user',
+        timestamp: new Date(),
+        room: 'social-chat',
+        group: 'social'
       }
       
-      socketRef.current.emit('message', message)
+      socketRef.current.emit('send-message', message)
       setNewMessage('')
       setIsTyping(false)
-      socketRef.current.emit('typing', { user: userName, isTyping: false })
+      socketRef.current.emit('user-typing', { user: userName, isTyping: false, room: 'social-chat', group: 'social' })
     }
   }
 

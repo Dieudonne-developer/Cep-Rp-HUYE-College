@@ -210,19 +210,33 @@ export default function ChoirPage() {
   // Chat functionality
   useEffect(() => {
     if (section === 'chat' && isLoggedIn) {
-      // Initialize socket connection
-      socketRef.current = io(baseUrl.replace('http://', 'ws://').replace('https://', 'wss://'))
+      // Initialize socket connection - Socket.IO handles protocol upgrade automatically
+      socketRef.current = io(baseUrl, {
+        transports: ['websocket', 'polling'],
+        reconnection: true,
+        reconnectionDelay: 1000,
+        reconnectionAttempts: 5
+      })
       
       socketRef.current.on('connect', () => {
         console.log('Connected to chat server')
+        // Set username and join room after connection
+        if (userName) {
+          socketRef.current.emit('set-username', { username: userName, group: 'choir' })
+          socketRef.current.emit('join-room', 'choir-chat')
+        }
       })
 
-      socketRef.current.on('message', (message: any) => {
+      socketRef.current.on('connect_error', (error: any) => {
+        console.error('Socket.IO connection error:', error)
+      })
+
+      socketRef.current.on('receive-message', (message: any) => {
         setMessages(prev => [...prev, message])
         scrollToBottom()
       })
 
-      socketRef.current.on('typing', (data: { user: string; isTyping: boolean }) => {
+      socketRef.current.on('user-typing', (data: { user: string; isTyping: boolean }) => {
         if (data.user !== userName) {
           setTypingUsers(prev => {
             if (data.isTyping) {
@@ -234,7 +248,7 @@ export default function ChoirPage() {
         }
       })
 
-      socketRef.current.on('userJoined', (data: { user: string }) => {
+      socketRef.current.on('user-joined', (data: { user: string }) => {
         setMessages(prev => [...prev, {
           id: Date.now(),
           type: 'system',
@@ -243,7 +257,7 @@ export default function ChoirPage() {
         }])
       })
 
-      socketRef.current.on('userLeft', (data: { user: string }) => {
+      socketRef.current.on('user-left', (data: { user: string }) => {
         setMessages(prev => [...prev, {
           id: Date.now(),
           type: 'system',
@@ -274,16 +288,18 @@ export default function ChoirPage() {
     e.preventDefault()
     if (newMessage.trim() && userName.trim() && socketRef.current) {
       const message = {
-        id: Date.now(),
         user: userName,
         message: newMessage.trim(),
-        timestamp: new Date()
+        type: 'user',
+        timestamp: new Date(),
+        room: 'choir-chat',
+        group: 'choir'
       }
       
-      socketRef.current.emit('message', message)
+      socketRef.current.emit('send-message', message)
       setNewMessage('')
       setIsTyping(false)
-      socketRef.current.emit('typing', { user: userName, isTyping: false })
+      socketRef.current.emit('user-typing', { user: userName, isTyping: false, room: 'choir-chat', group: 'choir' })
     }
   }
 
@@ -292,10 +308,10 @@ export default function ChoirPage() {
     
     if (!isTyping && e.target.value.trim()) {
       setIsTyping(true)
-      socketRef.current?.emit('typing', { user: userName, isTyping: true })
+      socketRef.current?.emit('user-typing', { user: userName, isTyping: true, room: 'choir-chat', group: 'choir' })
     } else if (isTyping && !e.target.value.trim()) {
       setIsTyping(false)
-      socketRef.current?.emit('typing', { user: userName, isTyping: false })
+      socketRef.current?.emit('user-typing', { user: userName, isTyping: false, room: 'choir-chat', group: 'choir' })
     }
   }
 

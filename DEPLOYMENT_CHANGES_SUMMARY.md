@@ -71,13 +71,13 @@ This document summarizes all changes made to configure the project for deploymen
 - **Port**: `10000` (auto-set by Render)
 - **Required Environment Variables**:
   - `NODE_ENV=production`
-  - `MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232`
+  - `MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database`
   - `CLIENT_ORIGIN=https://cep-rp-huye-college.vercel.app`
   - `FRONTEND_URL=https://cep-rp-huye-college.vercel.app`
 
 ### Database (Railway)
 - **Type**: MongoDB plugin
-- **Connection String**: `mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232`
+- **Connection String**: `mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database`
 - Used in Render backend `MONGODB_URI` environment variable
 
 ## CORS Configuration
