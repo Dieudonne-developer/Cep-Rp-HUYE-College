@@ -18,7 +18,8 @@
     "seed:super-admin": "node seed-super-admin.js",
     "seed:all-admins": "node seed-all-admins.js",
     "seed:family-admins": "node seed-family-admins.js",
-    "migrate:super-admin": "node migrate-super-admin-to-cepier.js"
+    "migrate:super-admin": "node migrate-super-admin-to-cepier.js",
+    "sync:db": "node sync-database.js"
   },
   "keywords": [],
   "author": "",
