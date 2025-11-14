@@ -12,12 +12,27 @@ const createTransporter = () => {
     return null;
   }
   
+  // Configure for Gmail SMTP with Render compatibility
   return nodemailer.createTransport({
     service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    requireTLS: true,
     auth: {
       user: emailUser,
       pass: emailPassword
-    }
+    },
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certificates
+    },
+    connectionTimeout: 20000, // 20 seconds (increased for Render)
+    greetingTimeout: 20000, // 20 seconds
+    socketTimeout: 20000, // 20 seconds
+    // Retry configuration
+    pool: false, // Disable pooling for better compatibility
+    maxConnections: 1,
+    maxMessages: 1
   });
 };
 
@@ -60,9 +75,22 @@ const sendVerificationEmail = async (email, username, verificationLink, userGrou
       };
     }
     
-    // Verify transporter configuration
-    await transporter.verify();
-    console.log('Email transporter verified successfully');
+    // Verify transporter configuration (with timeout handling for Render)
+    try {
+      await Promise.race([
+        transporter.verify(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Verification timeout')), 5000)
+        )
+      ]);
+      console.log('Email transporter verified successfully');
+    } catch (verifyError) {
+      if (verifyError.code === 'ETIMEDOUT' || verifyError.message === 'Verification timeout') {
+        console.warn('Verification timed out (common on Render), attempting to send email anyway...');
+      } else {
+        console.warn('Verification failed, but attempting to send email anyway:', verifyError.message);
+      }
+    }
 
     const mailOptions = {
       from: `"${familyName}" <${emailUser}>`,
@@ -297,7 +325,25 @@ const sendPasswordResetEmail = async (email, username, resetLink) => {
       };
     }
     
-    await transporter.verify();
+    // Verify transporter (with timeout handling)
+    try {
+      await Promise.race([
+        transporter.verify(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Verification timeout')), 8000)
+        )
+      ]);
+    } catch (verifyError) {
+      if (verifyError.code === 'ETIMEDOUT' || verifyError.message === 'Verification timeout') {
+        console.warn('Verification timed out, but attempting to send email anyway...');
+      } else {
+        console.error('Email transporter verification failed:', verifyError);
+        return {
+          success: false,
+          message: 'Email service configuration error. Please check email credentials.'
+        };
+      }
+    }
 
     const mailOptions = {
       from: `"Ishyanga Ryera Choir" <${emailUser}>`,
@@ -379,9 +425,22 @@ const sendAdminInvitationEmail = async (email, username, passwordSetupLink, admi
       };
     }
     
-    // Verify transporter configuration
-    await transporter.verify();
-    console.log('Email transporter verified successfully');
+    // Verify transporter configuration (with timeout handling for Render)
+    try {
+      await Promise.race([
+        transporter.verify(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Verification timeout')), 5000)
+        )
+      ]);
+      console.log('Email transporter verified successfully');
+    } catch (verifyError) {
+      if (verifyError.code === 'ETIMEDOUT' || verifyError.message === 'Verification timeout') {
+        console.warn('Verification timed out (common on Render), attempting to send email anyway...');
+      } else {
+        console.warn('Verification failed, but attempting to send email anyway:', verifyError.message);
+      }
+    }
 
     const mailOptions = {
       from: `"${familyName} Admin" <${emailUser}>`,

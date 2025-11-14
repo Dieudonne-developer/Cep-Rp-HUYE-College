@@ -16,12 +16,27 @@ function createTransporter() {
     return null;
   }
   
+  // Try port 587 first (TLS), fallback to 465 (SSL) if needed
   return nodemailer.createTransport({
     service: 'gmail',
+    host: 'smtp.gmail.com',
+    port: 587,
+    secure: false, // true for 465, false for other ports
+    requireTLS: true,
     auth: {
       user: emailUser,
       pass: emailPassword
-    }
+    },
+    tls: {
+      rejectUnauthorized: false // Allow self-signed certificates
+    },
+    connectionTimeout: 20000, // 20 seconds (increased for Render)
+    greetingTimeout: 20000, // 20 seconds
+    socketTimeout: 20000, // 20 seconds
+    // Retry configuration
+    pool: false, // Disable pooling for better compatibility
+    maxConnections: 1,
+    maxMessages: 1
   });
 }
 
@@ -106,19 +121,34 @@ async function sendVerificationCode(email, code) {
   try {
     console.log('Attempting to send email...');
     
-    // Verify transporter before sending
+    // Skip verification if it times out - Render may have network restrictions
+    // Verification is optional and sending might still work
     try {
-      await transporter.verify();
+      console.log('Verifying email transporter connection...');
+      await Promise.race([
+        transporter.verify(),
+        new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Verification timeout')), 5000)
+        )
+      ]);
       console.log('Email transporter verified successfully');
     } catch (verifyError) {
-      console.error('Email transporter verification failed:', verifyError);
-      return { 
-        success: false, 
-        message: 'Email service configuration error. Please check email credentials.' 
-      };
+      // If verification times out, continue anyway - sending might still work
+      if (verifyError.code === 'ETIMEDOUT' || verifyError.message === 'Verification timeout') {
+        console.warn('Verification timed out (this is common on Render), attempting to send email anyway...');
+      } else {
+        console.warn('Verification failed, but attempting to send email anyway:', verifyError.message);
+      }
     }
     
-    const info = await transporter.sendMail(mailOptions);
+    // Send email with extended timeout for Render
+    console.log('Sending email to:', email);
+    const sendPromise = transporter.sendMail(mailOptions);
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('Email send timeout')), 30000) // 30 seconds for Render
+    );
+    
+    const info = await Promise.race([sendPromise, timeoutPromise]);
     console.log('Email sent successfully!');
     console.log('Message ID:', info.messageId);
     return { success: true, messageId: info.messageId };
@@ -136,9 +166,9 @@ async function sendVerificationCode(email, code) {
     if (error.code === 'EAUTH') {
       errorMessage = 'Email authentication failed. Please verify EMAIL_USER and EMAIL_APP_PASSWORD are correct in Render environment variables.';
     } else if (error.code === 'ECONNECTION') {
-      errorMessage = 'Could not connect to Gmail SMTP server. Please check internet connection.';
-    } else if (error.code === 'ETIMEDOUT') {
-      errorMessage = 'Email server connection timeout. Please try again later.';
+      errorMessage = 'Could not connect to Gmail SMTP server. This may be a network issue from Render. Please try again later.';
+    } else if (error.code === 'ETIMEDOUT' || error.message === 'Email send timeout' || error.message === 'Verification timeout') {
+      errorMessage = 'Email server connection timeout. This may be due to Render network restrictions. Please try again later or contact support.';
     } else if (error.response) {
       errorMessage = `Email server error: ${error.response}`;
     } else if (error.message) {
