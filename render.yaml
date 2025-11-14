@@ -29,5 +29,5 @@ services:
         # Set this in Render Dashboard to: cep.rp.huye@gmail.com
       - key: EMAIL_APP_PASSWORD
         sync: false
-        # Set this in Render Dashboard to: nsfualtegcvvxoec (remove spaces from: nsfu alte gcvv xoec)
+        # Set this in Render Dashboard to: eygpnyeszsbbasoo (remove spaces from: eygp nyes zsbb asoo)
 

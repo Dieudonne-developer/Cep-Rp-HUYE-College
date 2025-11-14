@@ -28,10 +28,10 @@ Click **"Add Environment Variable"** and add these two variables:
 
 **Variable 2:**
 - **Key**: `EMAIL_APP_PASSWORD`
-- **Value**: `nsfualtegcvvxoec`
+- **Value**: `eygpnyeszsbbasoo` (remove spaces from: eygp nyes zsbb asoo)
 - Click **"Save Changes"**
 
-> **Important**: The app password should be entered **without spaces** (16 characters: `nsfualtegcvvxoec`)
+> **Important**: The app password should be entered **without spaces** (16 characters: `eygpnyeszsbbasoo`)
 
 ### Step 4: Redeploy (Automatic)
 - Render will **automatically redeploy** your service after saving environment variables
@@ -57,8 +57,9 @@ Verification email sent successfully: <message-id>
 ### Still seeing "Email configuration missing"?
 1. **Double-check variable names**: Must be exactly `EMAIL_USER` and `EMAIL_APP_PASSWORD` (case-sensitive)
 2. **Verify no extra spaces**: Check that values don't have leading/trailing spaces
-3. **Wait for redeploy**: Changes take effect after redeployment completes
-4. **Check logs**: Look for any errors during deployment
+3. **App password format**: Should be `eygpnyeszsbbasoo` (no spaces, 16 characters)
+4. **Wait for redeploy**: Changes take effect after redeployment completes
+5. **Check logs**: Look for any errors during deployment
 
 ### Email still not sending?
 1. **Verify Gmail App Password**: Make sure the app password is still valid
@@ -70,7 +71,7 @@ Verification email sent successfully: <message-id>
 **Environment Variables to Set:**
 ```
 EMAIL_USER=cep.rp.huye@gmail.com
-EMAIL_APP_PASSWORD=nsfualtegcvvxoec
+EMAIL_APP_PASSWORD=eygpnyeszsbbasoo
 ```
 
 **Render Service:** `cep-backend`  

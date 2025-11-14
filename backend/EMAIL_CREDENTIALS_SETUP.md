@@ -7,7 +7,7 @@ The project uses Gmail SMTP for sending verification emails, password reset emai
 ### Current Configuration
 
 - **Email**: `cep.rp.huye@gmail.com`
-- **App Password**: `nsfualtegcvvxoec` (16 characters, no spaces)
+- **App Password**: `eygpnyeszsbbasoo` (16 characters, no spaces - remove spaces from: eygp nyes zsbb asoo)
 
 ## Setup Instructions
 
@@ -17,7 +17,7 @@ Create or update `backend/.env` file with:
 
 ```env
 EMAIL_USER=cep.rp.huye@gmail.com
-EMAIL_APP_PASSWORD=nsfualtegcvvxoec
+EMAIL_APP_PASSWORD=eygpnyeszsbbasoo
 ```
 
 **Important**: The app password should be entered **without spaces**. The code automatically removes any spaces, but it's best to set it correctly.
@@ -31,7 +31,7 @@ EMAIL_APP_PASSWORD=nsfualtegcvvxoec
 
    ```
    EMAIL_USER = cep.rp.huye@gmail.com
-   EMAIL_APP_PASSWORD = nsfualtegcvvxoec
+   EMAIL_APP_PASSWORD = eygpnyeszsbbasoo
    ```
 
 5. Click **Save Changes**
@@ -51,7 +51,7 @@ After setting up, test the email functionality:
 
 1. **Check Environment Variables**:
    - Verify `EMAIL_USER` and `EMAIL_APP_PASSWORD` are set correctly
-   - Ensure app password has no spaces (16 characters: `nsfualtegcvvxoec`)
+   - Ensure app password has no spaces (16 characters: `eygpnyeszsbbasoo`)
 
 2. **Check Gmail Settings**:
    - Ensure 2-Step Verification is enabled on the Gmail account
