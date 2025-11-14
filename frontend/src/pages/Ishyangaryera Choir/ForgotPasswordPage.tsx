@@ -11,6 +11,8 @@ export default function ForgotPasswordPage() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
+  const [fallbackCode, setFallbackCode] = useState<string | null>(null)
+  const [codeExpiresAt, setCodeExpiresAt] = useState<string | null>(null)
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -58,8 +60,20 @@ export default function ForgotPasswordPage() {
       const data = await response.json()
 
       if (data.success) {
-        setSuccess('Verification code sent to your email!')
-        setStep('verify')
+        // Check if email was sent or if we got fallback code
+        if (data.emailSent === false && data.verificationCode) {
+          // Email failed but we have fallback code
+          setFallbackCode(data.verificationCode)
+          setCodeExpiresAt(data.codeExpiresAt || null)
+          setSuccess('Email sending is currently unavailable, but here is your verification code:')
+          setStep('verify')
+          // Auto-fill the verification code
+          setVerificationCode(data.verificationCode)
+        } else {
+          // Email was sent successfully
+          setSuccess('Verification code sent to your email!')
+          setStep('verify')
+        }
       } else {
         setError(data.message || 'Failed to send verification code')
       }
@@ -157,7 +171,7 @@ export default function ForgotPasswordPage() {
             <p className="text-sm text-gray-500 mb-2">{group}</p>
             <p className="text-gray-600 mt-2">
               {step === 'email' && 'Enter your email to receive a verification code'}
-              {step === 'verify' && 'Check your email and enter the verification code'}
+              {step === 'verify' && (fallbackCode ? 'Your verification code is displayed below' : 'Check your email and enter the verification code')}
               {step === 'reset' && 'Enter your new password'}
             </p>
           </div>
@@ -212,6 +226,38 @@ export default function ForgotPasswordPage() {
 
           {step === 'verify' && (
             <form onSubmit={handleVerifyCode} className="space-y-4">
+              {/* Show fallback code prominently if email failed */}
+              {fallbackCode && (
+                <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-semibold text-yellow-800 mb-2">
+                    ⚠️ Email service is currently unavailable
+                  </p>
+                  <p className="text-sm text-yellow-700 mb-3">
+                    Your verification code is:
+                  </p>
+                  <div className="bg-white border-2 border-yellow-500 rounded-lg p-4 text-center">
+                    <div className="text-4xl font-bold text-yellow-700 tracking-widest mb-2">
+                      {fallbackCode}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(fallbackCode)
+                        setSuccess('Code copied to clipboard!')
+                      }}
+                      className="text-sm text-yellow-700 hover:text-yellow-900 underline"
+                    >
+                      Click to copy
+                    </button>
+                  </div>
+                  {codeExpiresAt && (
+                    <p className="text-xs text-yellow-600 mt-2">
+                      Code expires: {new Date(codeExpiresAt).toLocaleString()}
+                    </p>
+                  )}
+                </div>
+              )}
+              
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Verification Code
@@ -226,7 +272,7 @@ export default function ForgotPasswordPage() {
                   placeholder="000000"
                 />
                 <p className="text-sm text-gray-500 mt-2">
-                  Check your email for the 6-digit code
+                  {fallbackCode ? 'Code is pre-filled above' : 'Check your email for the 6-digit code'}
                 </p>
               </div>
 
