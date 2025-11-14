@@ -4,7 +4,7 @@ const nodemailer = require('nodemailer');
 // In-memory storage for verification codes (in production, use Redis or database)
 const verificationCodes = new Map();
 
-// Create transporter for sending emails
+// Create transporter for sending emails with Render compatibility
 function createTransporter() {
   // Get email credentials from environment variables
   const emailUser = process.env.EMAIL_USER?.trim();
@@ -16,27 +16,29 @@ function createTransporter() {
     return null;
   }
   
-  // Try port 587 first (TLS), fallback to 465 (SSL) if needed
+  // Render free tier blocks SMTP - use minimal configuration
+  // Try direct connection without service name (sometimes works better)
   return nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    requireTLS: true,
+    port: 465, // Try SSL port first (sometimes works better on Render)
+    secure: true, // SSL
     auth: {
       user: emailUser,
       pass: emailPassword
     },
     tls: {
-      rejectUnauthorized: false // Allow self-signed certificates
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2'
     },
-    connectionTimeout: 20000, // 20 seconds (increased for Render)
-    greetingTimeout: 20000, // 20 seconds
-    socketTimeout: 20000, // 20 seconds
-    // Retry configuration
-    pool: false, // Disable pooling for better compatibility
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
+    // Minimal configuration for Render
+    pool: false,
     maxConnections: 1,
-    maxMessages: 1
+    maxMessages: 1,
+    // Disable dns lookup which can cause delays
+    dnsTimeout: 5000
   });
 }
 
@@ -141,17 +143,38 @@ async function sendVerificationCode(email, code) {
       }
     }
     
-    // Send email with extended timeout for Render
+    // Send email with retry logic for Render
     console.log('Sending email to:', email);
-    const sendPromise = transporter.sendMail(mailOptions);
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Email send timeout')), 30000) // 30 seconds for Render
-    );
     
-    const info = await Promise.race([sendPromise, timeoutPromise]);
-    console.log('Email sent successfully!');
-    console.log('Message ID:', info.messageId);
-    return { success: true, messageId: info.messageId };
+    let lastError = null;
+    const maxRetries = 2;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Email send attempt ${attempt} of ${maxRetries}...`);
+        const sendPromise = transporter.sendMail(mailOptions);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email send timeout')), 40000) // 40 seconds for Render
+        );
+        
+        const info = await Promise.race([sendPromise, timeoutPromise]);
+        console.log('Email sent successfully!');
+        console.log('Message ID:', info.messageId);
+        return { success: true, messageId: info.messageId };
+      } catch (sendError) {
+        lastError = sendError;
+        console.warn(`Email send attempt ${attempt} failed:`, sendError.message);
+        
+        if (attempt < maxRetries) {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log('Retrying email send...');
+        }
+      }
+    }
+    
+    // All retries failed - throw the last error
+    throw lastError;
   } catch (error) {
     console.error('Error sending verification code email:');
     console.error('Error name:', error.name);

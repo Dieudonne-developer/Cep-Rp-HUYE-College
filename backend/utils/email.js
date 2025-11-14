@@ -13,26 +13,27 @@ const createTransporter = () => {
   }
   
   // Configure for Gmail SMTP with Render compatibility
+  // Render free tier may block SMTP - use SSL port 465
   return nodemailer.createTransport({
-    service: 'gmail',
     host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // true for 465, false for other ports
-    requireTLS: true,
+    port: 465, // SSL port (sometimes works better on Render)
+    secure: true, // SSL
     auth: {
       user: emailUser,
       pass: emailPassword
     },
     tls: {
-      rejectUnauthorized: false // Allow self-signed certificates
+      rejectUnauthorized: false,
+      minVersion: 'TLSv1.2'
     },
-    connectionTimeout: 20000, // 20 seconds (increased for Render)
-    greetingTimeout: 20000, // 20 seconds
-    socketTimeout: 20000, // 20 seconds
-    // Retry configuration
-    pool: false, // Disable pooling for better compatibility
+    connectionTimeout: 30000, // 30 seconds
+    greetingTimeout: 30000,
+    socketTimeout: 30000,
+    // Minimal configuration for Render
+    pool: false,
     maxConnections: 1,
-    maxMessages: 1
+    maxMessages: 1,
+    dnsTimeout: 5000
   });
 };
 
@@ -284,15 +285,59 @@ const sendVerificationEmail = async (email, username, verificationLink, userGrou
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Verification email sent successfully:', info.messageId);
+    // Send email with retry logic for Render
+    console.log('Sending verification email to:', email);
+    
+    let lastError = null;
+    const maxRetries = 2;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Email send attempt ${attempt} of ${maxRetries}...`);
+        const sendPromise = transporter.sendMail(mailOptions);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email send timeout')), 40000) // 40 seconds for Render
+        );
+        
+        const info = await Promise.race([sendPromise, timeoutPromise]);
+        console.log('Verification email sent successfully:', info.messageId);
+        
+        return {
+          success: true,
+          message: 'Verification email sent successfully',
+          messageId: info.messageId
+        };
+      } catch (sendError) {
+        lastError = sendError;
+        console.warn(`Email send attempt ${attempt} failed:`, sendError.message);
+        
+        if (attempt < maxRetries) {
+          // Wait before retry
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log('Retrying email send...');
+        }
+      }
+    }
+    
+    // All retries failed
+    console.error('Error sending verification email after retries:', lastError);
+    let errorMessage = 'Failed to send verification email.';
+    
+    if (lastError.code === 'EAUTH') {
+      errorMessage = 'Email authentication failed. Please verify EMAIL_USER and EMAIL_APP_PASSWORD are correct in Render environment variables.';
+    } else if (lastError.code === 'ECONNECTION') {
+      errorMessage = 'Could not connect to Gmail SMTP server. This may be a network issue from Render.';
+    } else if (lastError.code === 'ETIMEDOUT' || lastError.message === 'Email send timeout') {
+      errorMessage = 'Email server connection timeout. This may be due to Render network restrictions.';
+    } else if (lastError.message) {
+      errorMessage = `Email error: ${lastError.message}`;
+    }
     
     return {
-      success: true,
-      message: 'Verification email sent successfully',
-      messageId: info.messageId
+      success: false,
+      message: errorMessage,
+      error: lastError.message
     };
-
   } catch (error) {
     console.error('Error sending verification email:', error);
     return {
@@ -362,13 +407,58 @@ const sendPasswordResetEmail = async (email, username, resetLink) => {
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
+    // Send email with retry logic for Render
+    console.log('Sending password reset email to:', email);
+    
+    let lastError = null;
+    const maxRetries = 2;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Email send attempt ${attempt} of ${maxRetries}...`);
+        const sendPromise = transporter.sendMail(mailOptions);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email send timeout')), 40000) // 40 seconds for Render
+        );
+        
+        const info = await Promise.race([sendPromise, timeoutPromise]);
+        console.log('Password reset email sent successfully:', info.messageId);
+        
+        return {
+          success: true,
+          message: 'Password reset email sent successfully',
+          messageId: info.messageId
+        };
+      } catch (sendError) {
+        lastError = sendError;
+        console.warn(`Email send attempt ${attempt} failed:`, sendError.message);
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log('Retrying email send...');
+        }
+      }
+    }
+    
+    // All retries failed
+    console.error('Error sending password reset email after retries:', lastError);
+    let errorMessage = 'Failed to send password reset email.';
+    
+    if (lastError.code === 'EAUTH') {
+      errorMessage = 'Email authentication failed. Please verify EMAIL_USER and EMAIL_APP_PASSWORD are correct.';
+    } else if (lastError.code === 'ECONNECTION') {
+      errorMessage = 'Could not connect to Gmail SMTP server. This may be a network issue from Render.';
+    } else if (lastError.code === 'ETIMEDOUT' || lastError.message === 'Email send timeout') {
+      errorMessage = 'Email server connection timeout. This may be due to Render network restrictions.';
+    } else if (lastError.message) {
+      errorMessage = `Email error: ${lastError.message}`;
+    }
+    
     return {
-      success: true,
-      message: 'Password reset email sent successfully',
-      messageId: info.messageId
+      success: false,
+      message: errorMessage,
+      error: lastError.message
     };
-
   } catch (error) {
     console.error('Error sending password reset email:', error);
     return {
@@ -660,15 +750,58 @@ const sendAdminInvitationEmail = async (email, username, passwordSetupLink, admi
       `
     };
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log('Admin invitation email sent successfully:', info.messageId);
+    // Send email with retry logic for Render
+    console.log('Sending admin invitation email to:', email);
+    
+    let lastError = null;
+    const maxRetries = 2;
+    
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        console.log(`Email send attempt ${attempt} of ${maxRetries}...`);
+        const sendPromise = transporter.sendMail(mailOptions);
+        const timeoutPromise = new Promise((_, reject) => 
+          setTimeout(() => reject(new Error('Email send timeout')), 40000) // 40 seconds for Render
+        );
+        
+        const info = await Promise.race([sendPromise, timeoutPromise]);
+        console.log('Admin invitation email sent successfully:', info.messageId);
+        
+        return {
+          success: true,
+          message: 'Admin invitation email sent successfully',
+          messageId: info.messageId
+        };
+      } catch (sendError) {
+        lastError = sendError;
+        console.warn(`Email send attempt ${attempt} failed:`, sendError.message);
+        
+        if (attempt < maxRetries) {
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          console.log('Retrying email send...');
+        }
+      }
+    }
+    
+    // All retries failed
+    console.error('Error sending admin invitation email after retries:', lastError);
+    let errorMessage = 'Failed to send admin invitation email.';
+    
+    if (lastError.code === 'EAUTH') {
+      errorMessage = 'Email authentication failed. Please verify EMAIL_USER and EMAIL_APP_PASSWORD are correct.';
+    } else if (lastError.code === 'ECONNECTION') {
+      errorMessage = 'Could not connect to Gmail SMTP server. This may be a network issue from Render.';
+    } else if (lastError.code === 'ETIMEDOUT' || lastError.message === 'Email send timeout') {
+      errorMessage = 'Email server connection timeout. This may be due to Render network restrictions.';
+    } else if (lastError.message) {
+      errorMessage = `Email error: ${lastError.message}`;
+    }
     
     return {
-      success: true,
-      message: 'Admin invitation email sent successfully',
-      messageId: info.messageId
+      success: false,
+      message: errorMessage,
+      error: lastError.message
     };
-
   } catch (error) {
     console.error('Error sending admin invitation email:', error);
     return {

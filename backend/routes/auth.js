@@ -77,7 +77,9 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
     
     // Send verification email
     console.log('Sending verification email to:', emailLower);
-    const verificationLink = `${req.protocol}://${req.get('host')}/api/auth/verify?token=${verificationToken}`;
+    // Use frontend URL for verification link (not backend URL)
+    const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_ORIGIN || 'http://localhost:5173';
+    const verificationLink = `${frontendUrl}/choir/set-password?token=${verificationToken}`;
     console.log('Email link:', verificationLink);
     console.log('User group for email:', userGroup);
     
