@@ -1053,9 +1053,12 @@ router.post('/forgot-password', async (req, res) => {
       });
     } else {
       console.error('Failed to send verification code:', result.message);
-      res.status(500).json({
+      // Don't return 500 - return 200 but indicate email wasn't sent
+      // This allows the frontend to handle gracefully
+      res.json({
         success: false,
-        message: result.message || 'Failed to send verification code. Please check your email configuration.'
+        message: result.message || 'Failed to send verification code. Please try again later or contact support.',
+        emailSent: false
       });
     }
   } catch (error) {

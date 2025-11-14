@@ -49,11 +49,16 @@ async function sendVerificationCode(email, code) {
   const transporter = createTransporter();
   
   if (!transporter) {
+    console.error('Transporter creation failed - EMAIL_USER or EMAIL_APP_PASSWORD not properly configured');
     return { 
       success: false, 
       message: 'Failed to create email transporter. Please check email configuration.' 
     };
   }
+  
+  console.log('Transporter created successfully');
+  console.log('Email user:', process.env.EMAIL_USER?.trim());
+  console.log('Email password length:', process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '').length);
   
   const mailOptions = {
     from: `"Ishyanga Ryera Choir" <${process.env.EMAIL_USER}>`,
@@ -100,6 +105,19 @@ async function sendVerificationCode(email, code) {
 
   try {
     console.log('Attempting to send email...');
+    
+    // Verify transporter before sending
+    try {
+      await transporter.verify();
+      console.log('Email transporter verified successfully');
+    } catch (verifyError) {
+      console.error('Email transporter verification failed:', verifyError);
+      return { 
+        success: false, 
+        message: 'Email service configuration error. Please check email credentials.' 
+      };
+    }
+    
     const info = await transporter.sendMail(mailOptions);
     console.log('Email sent successfully!');
     console.log('Message ID:', info.messageId);
@@ -110,14 +128,17 @@ async function sendVerificationCode(email, code) {
     console.error('Error message:', error.message);
     console.error('Error code:', error.code);
     console.error('Error response:', error.response);
+    console.error('Error command:', error.command);
     console.error('Full error:', error);
     
     let errorMessage = 'Failed to send verification code email.';
     
     if (error.code === 'EAUTH') {
-      errorMessage = 'Email authentication failed. Please check email credentials.';
+      errorMessage = 'Email authentication failed. Please verify EMAIL_USER and EMAIL_APP_PASSWORD are correct in Render environment variables.';
     } else if (error.code === 'ECONNECTION') {
-      errorMessage = 'Could not connect to email server. Please check internet connection.';
+      errorMessage = 'Could not connect to Gmail SMTP server. Please check internet connection.';
+    } else if (error.code === 'ETIMEDOUT') {
+      errorMessage = 'Email server connection timeout. Please try again later.';
     } else if (error.response) {
       errorMessage = `Email server error: ${error.response}`;
     } else if (error.message) {
