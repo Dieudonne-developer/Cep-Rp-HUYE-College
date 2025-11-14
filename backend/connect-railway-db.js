@@ -6,17 +6,19 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 
-// Railway MongoDB connection string (points to cep-app-database)
-const railwayMongoUri = 'mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database';
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
-// Use Railway URI if MONGODB_URI is not set, otherwise use environment variable
-const mongoUri = process.env.MONGODB_URI || railwayMongoUri;
+// Railway MongoDB connection string (without database name)
+const mongoUri = getMongoUri();
+const dbName = getDbName();
 
 console.log('🔌 Connecting to MongoDB...');
 console.log('📍 Host:', mongoUri.includes('gondola.proxy.rlwy.net') ? 'Railway MongoDB (gondola.proxy.rlwy.net:30232)' : 'Custom URI');
+console.log('📊 Database:', dbName);
 console.log('🔗 URI:', mongoUri.replace(/\/\/[^:]+:[^@]+@/, '//***:***@')); // Hide credentials
 
 const connectionOptions = {
+  dbName: dbName,
   serverSelectionTimeoutMS: 10000,
   socketTimeoutMS: 45000,
   family: 4,

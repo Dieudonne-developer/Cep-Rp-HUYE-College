@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 // Import all user models
 const ChoirUser = require('./models/UserRegistration');
@@ -14,6 +14,7 @@ const SocialUser = require('./models/SocialUser');
 const EvangelicalUser = require('./models/EvangelicalUser');
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 mongoose.set('strictQuery', true);
 
 // Family group admin configurations
@@ -153,8 +154,9 @@ async function createFamilyAdmin(config) {
 
 async function run() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: dbName });
     console.log('✅ Connected to MongoDB');
+    console.log('📊 Database:', dbName);
     console.log('\n📝 Creating admin accounts for all family groups...\n');
     console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
     

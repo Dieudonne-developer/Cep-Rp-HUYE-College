@@ -1,7 +1,7 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 // Import all user models
 const ChoirUser = require('./models/UserRegistration');
@@ -23,6 +23,7 @@ try {
 }
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 
 // Generic admin credentials that work for all groups
 const adminCredentials = {
@@ -82,7 +83,7 @@ async function createAdminInModel(UserModel, groupName) {
 
 async function run() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: dbName });
     console.log('✅ Connected to MongoDB');
     console.log('\n📝 Creating admin accounts for all groups...\n');
     

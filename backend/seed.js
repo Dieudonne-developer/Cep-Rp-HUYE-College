@@ -1,14 +1,15 @@
 require('dotenv').config();
 const mongoose = require('mongoose');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 // Connect to MongoDB (single unified database)
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 mongoose.set('strictQuery', true);
 
 async function seedDatabase() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: dbName });
     console.log('✅ Connected to MongoDB for seeding');
 
     // Import models

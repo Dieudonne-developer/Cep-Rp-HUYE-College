@@ -26,10 +26,11 @@ const ProtocolUser = require('./models/ProtocolUser');
 const SocialUser = require('./models/SocialUser');
 const EvangelicalUser = require('./models/EvangelicalUser');
 
-// Railway MongoDB connection string
-// Format: mongodb://mongo:USERNAME:PASSWORD@gondola.proxy.rlwy.net:30232/cep-app-database
-const defaultMongoUri = 'mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database';
-const mongoUri = process.env.MONGODB_URI || defaultMongoUri;
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
+
+// Railway MongoDB connection string (without database name)
+const mongoUri = getMongoUri();
+const dbName = getDbName();
 
 mongoose.set('strictQuery', true);
 
@@ -298,6 +299,7 @@ async function run() {
     
     // Connect to MongoDB
     await mongoose.connect(mongoUri, {
+      dbName: dbName,
       serverSelectionTimeoutMS: 10000,
       socketTimeoutMS: 45000,
       family: 4,
@@ -306,6 +308,7 @@ async function run() {
       retryWrites: true,
       w: 'majority'
     });
+    console.log(`📊 Database: ${dbName}`);
     
     console.log('✅ Connected to Railway MongoDB successfully!');
     console.log(`📊 Database: ${mongoose.connection.db.databaseName}`);

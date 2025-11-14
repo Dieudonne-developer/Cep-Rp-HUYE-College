@@ -1,12 +1,13 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const ChoirUser = require('./models/UserRegistration');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 
 async function createChoirAdmin() {
-  await mongoose.connect(mongoUri);
+  await mongoose.connect(mongoUri, { dbName: dbName });
   const email = 'choir.admin@cep-huye.org'.toLowerCase();
   const password = await bcrypt.hash('choir123', 10);
   const exists = await ChoirUser.findOne({ email });

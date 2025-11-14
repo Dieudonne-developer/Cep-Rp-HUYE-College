@@ -2,15 +2,16 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const UserRegistration = require('./models/UserRegistration');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 // Connect to MongoDB (single unified database)
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 mongoose.set('strictQuery', true);
 
 async function createAdminUser() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: dbName });
     console.log('✅ Connected to MongoDB');
 
     // Admin credentials

@@ -10,7 +10,7 @@ const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const fs = require('fs');
 const { Server } = require('socket.io');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 // Import organized modules
 const corsOptions = require('./middleware/cors');
@@ -122,8 +122,10 @@ const io = new Server(server, {
 // MongoDB connection with retry logic
 const connectMongoDB = async () => {
   const mongoUri = getMongoUri();
+  const dbName = getDbName();
   
   const connectionOptions = {
+    dbName: dbName, // Specify database name in connection options
     serverSelectionTimeoutMS: 5000, // Timeout after 5s instead of 30s
     socketTimeoutMS: 45000, // Close sockets after 45s of inactivity
     family: 4, // Use IPv4, skip trying IPv6

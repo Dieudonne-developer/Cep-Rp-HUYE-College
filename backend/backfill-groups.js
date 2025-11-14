@@ -4,13 +4,14 @@ const Song = require('./models/Song');
 const Event = require('./models/Event');
 const ImplementedIdea = require('./models/ImplementedIdea');
 const UserRegistration = require('./models/UserRegistration');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 
 async function run() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: dbName });
     console.log('✅ Connected to MongoDB');
 
     const updates = [];

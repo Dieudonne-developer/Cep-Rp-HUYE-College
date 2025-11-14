@@ -2,12 +2,13 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const Psalm23User = require('./models/Psalm23User');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 
 async function run() {
-  await mongoose.connect(mongoUri);
+  await mongoose.connect(mongoUri, { dbName: dbName });
   console.log('Connected to MongoDB:', mongoUri);
 
   const adminCredentials = {

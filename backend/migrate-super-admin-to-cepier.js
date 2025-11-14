@@ -2,14 +2,15 @@ const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const CepierUser = require('./models/CepierUser');
 const ChoirUser = require('./models/UserRegistration');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 mongoose.set('strictQuery', true);
 
 async function migrateSuperAdminToCepier() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: dbName });
     console.log('✅ Connected to MongoDB');
 
     const superAdminEmail = 'superadmin@cep.com';

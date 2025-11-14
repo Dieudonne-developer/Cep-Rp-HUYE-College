@@ -1,15 +1,16 @@
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const CepierUser = require('./models/CepierUser');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 const ChoirUser = require('./models/UserRegistration');
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 mongoose.set('strictQuery', true);
 
 async function createSuperAdmin() {
   try {
-    await mongoose.connect(mongoUri);
+    await mongoose.connect(mongoUri, { dbName: dbName });
     console.log('✅ Connected to MongoDB');
 
     // Super Admin credentials

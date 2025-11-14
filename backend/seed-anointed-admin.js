@@ -2,12 +2,13 @@ require('dotenv').config();
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
 const AnointedUser = require('./models/AnointedUser');
-const { getMongoUri } = require('./utils/mongoUri');
+const { getMongoUri, getDbName } = require('./utils/mongoUri');
 
 const mongoUri = getMongoUri();
+const dbName = getDbName();
 
 async function createAnointedAdmin() {
-  await mongoose.connect(mongoUri);
+  await mongoose.connect(mongoUri, { dbName: dbName });
   const email = 'anointed.admin@cep-huye.org'.toLowerCase();
   const password = await bcrypt.hash('anointed123', 10);
   const exists = await AnointedUser.findOne({ email });
