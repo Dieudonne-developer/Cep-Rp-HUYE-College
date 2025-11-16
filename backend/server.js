@@ -647,7 +647,9 @@ app.use((req, res) => {
 });
 
 // Start server
-const PORT = process.env.PORT || 4000;
+// Railway provides PORT automatically (typically 3000)
+// Fallback to 4000 for local development, 3000 for Railway compatibility
+const PORT = process.env.PORT || (process.env.NODE_ENV === 'production' ? 3000 : 4000);
 const HOST = process.env.HOST || '0.0.0.0';
 
 // Get network IP addresses for display

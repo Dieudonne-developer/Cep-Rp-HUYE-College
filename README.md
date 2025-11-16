@@ -181,6 +181,41 @@ cd backend
 npm start
 ```
 
+## 🚀 Deployment
+
+### Backend Deployment (Railway)
+
+The backend is configured for deployment on Railway. Railway offers better SMTP support and more flexible deployment options.
+
+**Quick Setup:**
+1. See `RAILWAY_DEPLOYMENT.md` for complete guide
+2. Or use `backend/RAILWAY_ENV_VARIABLES.txt` for environment variables
+3. See `backend/RAILWAY_ENV_SETUP.md` for detailed instructions
+
+**Railway Advantages:**
+- ✅ No SMTP blocking (email works out of the box)
+- ✅ Automatic HTTPS
+- ✅ Easy environment variable management
+- ✅ Seamless MongoDB integration (Railway MongoDB plugin)
+
+### Frontend Deployment (Vercel)
+
+The frontend is deployed on Vercel at `https://cep-rp-huye-college.vercel.app`
+
+**Setup:**
+1. Connect GitHub repository to Vercel
+2. Set environment variables in Vercel Dashboard:
+   - `VITE_API_BASE_URL`: Your Railway backend URL
+3. Deploy automatically on push to main branch
+
+### Database (Railway MongoDB)
+
+The database is hosted on Railway MongoDB plugin:
+- Connection: `mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database`
+- Database Name: `cep-app-database`
+
+**Note**: After deploying backend on Railway, update `VITE_API_BASE_URL` in Vercel to point to your Railway backend URL.
+
 ## 🔧 Troubleshooting
 
 ### MongoDB Connection Issues
