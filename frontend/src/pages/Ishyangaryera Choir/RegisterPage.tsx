@@ -32,6 +32,8 @@ export default function RegisterPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [message, setMessage] = useState<{type: 'success' | 'error', text: string} | null>(null)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [fallbackLink, setFallbackLink] = useState<string | null>(null)
+  const [verificationToken, setVerificationToken] = useState<string | null>(null)
 
   // Determine userGroup from URL
   const userGroup = initialFamily;
@@ -103,7 +105,19 @@ export default function RegisterPage() {
       const data = await response.json()
 
       if (response.ok) {
-        setMessage({type: 'success', text: 'Registration successful! Please check your Gmail for password setup instructions.'})
+        // Check if email was sent or if we got fallback link
+        if (data.emailSent === false && data.verificationLink) {
+          // Email failed but we have fallback link
+          setFallbackLink(data.verificationLink)
+          setVerificationToken(data.token || null)
+          setMessage({
+            type: 'success',
+            text: 'Registration successful! Email sending is currently unavailable, but you can use the verification link below to set your password.'
+          })
+        } else {
+          // Email was sent successfully
+          setMessage({type: 'success', text: 'Registration successful! Please check your Gmail for password setup instructions.'})
+        }
         setFormData({email: '', username: '', profileImage: null})
         setPreviewImage(null)
       } else {
@@ -301,6 +315,51 @@ export default function RegisterPage() {
                     : 'bg-red-50 text-red-700 border border-red-200'
                 }`}>
                   {message.text}
+                </div>
+              )}
+
+              {/* Fallback Verification Link Display */}
+              {fallbackLink && (
+                <div className="bg-yellow-50 border-2 border-yellow-400 rounded-lg p-4 mb-4">
+                  <p className="text-sm font-semibold text-yellow-800 mb-2">
+                    ⚠️ Email service is currently unavailable
+                  </p>
+                  <p className="text-sm text-yellow-700 mb-3">
+                    Use this verification link to set your password:
+                  </p>
+                  <div className="bg-white border-2 border-yellow-500 rounded-lg p-4 mb-3">
+                    <a
+                      href={fallbackLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="block text-blue-600 hover:text-blue-800 underline break-all text-sm font-medium mb-2"
+                    >
+                      {fallbackLink}
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        navigator.clipboard.writeText(fallbackLink)
+                        setMessage({type: 'success', text: 'Verification link copied to clipboard! Click the link above or paste it in your browser to set your password.'})
+                      }}
+                      className="text-sm text-yellow-700 hover:text-yellow-900 underline"
+                    >
+                      Click to copy link
+                    </button>
+                  </div>
+                  <div className="flex gap-2">
+                    <a
+                      href={fallbackLink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white text-center py-2 px-4 rounded-lg font-medium transition-colors"
+                    >
+                      Open Link in New Tab
+                    </a>
+                  </div>
+                  <p className="text-xs text-yellow-600 mt-2">
+                    Click the link above or the button below to set your password. If email service is restored, you will also receive it via email.
+                  </p>
                 </div>
               )}
 
