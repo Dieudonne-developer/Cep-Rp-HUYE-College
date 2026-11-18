@@ -8,6 +8,8 @@ dotenv.config({ path: path.join(__dirname, '..', '..', '..', '.env') });
 dotenv.config({ path: path.join(__dirname, '..', '..', '.env') });
 dotenv.config();
 
+require('../env'); // normalise DATABASE_URL (BOM / POSTGRES_URL fallbacks)
+
 let connectionString = process.env.DATABASE_URL;
 if (!connectionString) {
   console.warn('⚠️  DATABASE_URL is not set. Postgres queries will fail until it is configured.');

@@ -4,6 +4,7 @@ require('dotenv').config({ path: path.join(__dirname, '..', '.env.local') });
 require('dotenv').config({ path: path.join(__dirname, '..', '.env') });
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 require('dotenv').config();
+require('./src/env'); // normalise DATABASE_URL before anything reads it
 const http = require('http');
 const express = require('express');
 const cors = require('cors');
@@ -42,6 +43,16 @@ const Song = require('./models/Song');
 const Event = require('./models/Event');
 const ChatMessage = require('./models/ChatMessage');
 const Asset = require('./models/Asset');
+
+// Debug/maintenance endpoints expose user data or change site content without logging in.
+// They are disabled in production unless ENABLE_DEBUG_ENDPOINTS=true is set on purpose.
+const debugEndpointsEnabled =
+  process.env.ENABLE_DEBUG_ENDPOINTS === 'true' ||
+  (process.env.NODE_ENV !== 'production' && !process.env.VERCEL);
+const debugOnly = (_req, res, next) => {
+  if (debugEndpointsEnabled) return next();
+  return res.status(404).json({ success: false, message: 'Route not found' });
+};
 
 // Create Express app and HTTP server
 const app = express();
@@ -510,7 +521,7 @@ app.get('/api/assets/logo', async (req, res) => {
 });
 
 // Optional: upsert logo via base64 (for admins/tools). Expects { data, mimeType }
-app.post('/api/assets/logo', async (req, res) => {
+app.post('/api/assets/logo', debugOnly, async (req, res) => {
   try {
     const { data, mimeType } = req.body || {};
     if (!data) {
@@ -598,7 +609,7 @@ app.get('/api/families', (req, res) => {
 });
 
 // Debug endpoints
-app.get('/api/debug/users', async (req, res) => {
+app.get('/api/debug/users', debugOnly, async (req, res) => {
   try {
     const users = await UserRegistration.find().select('email username isVerified verificationToken createdAt');
     res.json({ 
@@ -616,7 +627,7 @@ app.get('/api/debug/users', async (req, res) => {
 });
 
 // Manual verification endpoint (for when email fails)
-app.get('/api/manual-verify/:email', async (req, res) => {
+app.get('/api/manual-verify/:email', debugOnly, async (req, res) => {
   try {
     const { email } = req.params;
     console.log('Manual verification request for email:', email);
