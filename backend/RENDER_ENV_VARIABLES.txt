@@ -1,0 +1,28 @@
+# ============================================================================
+# CEP BACKEND - ENVIRONMENT VARIABLES FOR RENDER DEPLOYMENT
+# ============================================================================
+# Copy these variables and paste into Render Dashboard > Environment tab
+# Go to: https://dashboard.render.com/ > Select "cep-backend" > Environment
+# ============================================================================
+
+MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
+NODE_ENV=production
+EMAIL_USER=cep.rp.huye@gmail.com
+EMAIL_APP_PASSWORD=eygpnyeszsbbasoo
+CLIENT_ORIGIN=https://cep-rp-huye-college.vercel.app
+FRONTEND_URL=https://cep-rp-huye-college.vercel.app
+JWT_SECRET=cep-jwt-secret-key-change-this-to-random-string
+MAX_FILE_SIZE=104857600
+UPLOAD_PATH=./uploads
+DEBUG_CORS=false
+
+# ============================================================================
+# NOTES:
+# ============================================================================
+# 1. PORT is automatically set by Render (10000 in render.yaml)
+# 2. BACKEND_URL is automatically set by Render (fromService in render.yaml)
+# 3. EMAIL_APP_PASSWORD must have NO SPACES (remove spaces from app password)
+#    Original: "eygp nyes zsbb asoo"
+#    For Render: "eygpnyeszsbbasoo" (no spaces)
+# 4. After adding variables, click "Save Changes" - Render will redeploy
+# ============================================================================

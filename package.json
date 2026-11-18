@@ -1,0 +1,16 @@
+{
+  "name": "cep-monorepo",
+  "private": true,
+  "workspaces": [],
+  "scripts": {
+    "postinstall": "npm install --prefix frontend --include=dev && npm install --prefix backend",
+    "build": "npm run build --prefix frontend && npm run build --prefix backend",
+    "start": "npm run start --prefix backend",
+    "start:frontend": "npm run preview --prefix frontend",
+    "lint": "npm run lint --prefix frontend || exit 0"
+  },
+  "dependencies": {
+    "@neon/config": "^1.14.3",
+    "@neon/env": "^2.1.6"
+  }
+}

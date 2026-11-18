@@ -1,0 +1,33 @@
+services:
+  - type: web
+    name: cep-backend
+    env: docker
+    rootDir: backend
+    plan: free
+    dockerfilePath: Dockerfile
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: MONGODB_URI
+        sync: false
+        # Set this in Render Dashboard to your Railway MongoDB connection string
+        # Example: mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
+        # Optional local override: mongodb://localhost:27017/cep-app-database
+      - key: CLIENT_ORIGIN
+        value: https://cep-rp-huye-college.vercel.app
+      - key: FRONTEND_URL
+        value: https://cep-rp-huye-college.vercel.app
+      - key: BACKEND_URL
+        fromService:
+          type: web
+          name: cep-backend
+          property: url
+      - key: EMAIL_USER
+        sync: false
+        # Set this in Render Dashboard to: cep.rp.huye@gmail.com
+      - key: EMAIL_APP_PASSWORD
+        sync: false
+        # Set this in Render Dashboard to: eygpnyeszsbbasoo (remove spaces from: eygp nyes zsbb asoo)
+

@@ -1,0 +1,30 @@
+# ============================================================================
+# CEP BACKEND - ENVIRONMENT VARIABLES FOR RAILWAY DEPLOYMENT
+# ============================================================================
+# Copy these variables and paste into Railway Dashboard > Variables tab
+# Go to: https://railway.app/dashboard > Select service > Variables
+# ============================================================================
+
+MONGODB_URI=mongodb://mongo:UWxIyLcLqSLzUskMheYBSwdzqXjHYate@gondola.proxy.rlwy.net:30232/cep-app-database
+NODE_ENV=production
+EMAIL_USER=cep.rp.huye@gmail.com
+EMAIL_APP_PASSWORD=eygpnyeszsbbasoo
+CLIENT_ORIGIN=https://cep-rp-huye-college.vercel.app
+FRONTEND_URL=https://cep-rp-huye-college.vercel.app
+JWT_SECRET=cep-jwt-secret-key-change-this-to-random-string
+MAX_FILE_SIZE=104857600
+UPLOAD_PATH=./uploads
+DEBUG_CORS=false
+
+# ============================================================================
+# NOTES:
+# ============================================================================
+# 1. PORT is automatically set by Railway (typically 3000 or dynamic)
+# 2. BACKEND_URL is automatically provided by Railway (your-service.railway.app)
+# 3. EMAIL_APP_PASSWORD must have NO SPACES (remove spaces from app password)
+#    Original: "eygp nyes zsbb asoo"
+#    For Railway: "eygpnyeszsbbasoo" (no spaces)
+# 4. Railway does NOT block SMTP - email should work without fallback
+# 5. After adding variables, Railway will automatically redeploy
+# ============================================================================
+
