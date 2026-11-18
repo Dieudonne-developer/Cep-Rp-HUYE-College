@@ -47,11 +47,26 @@ const Asset = require('./models/Asset');
 const app = express();
 const server = http.createServer(app);
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+// Create uploads directory if it doesn't exist. On Vercel only /tmp is writable.
+const uploadsDir = process.env.VERCEL
+  ? path.join(require('os').tmpdir(), 'cep-uploads')
+  : path.join(__dirname, 'uploads');
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('Could not create uploads directory:', err.message);
 }
+
+// Answer the browser’s automatic favicon request before any other middleware.
+app.get('/favicon.ico', (_req, res) => {
+  res.status(204).end();
+});
+
+app.get('/', (_req, res) => {
+  res.json({ message: 'CEP Backend Server is running!' });
+});
 
 // Middleware
 app.use(cors(corsOptions));

@@ -1,11 +1,19 @@
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 
-// Create uploads directory if it doesn't exist
-const uploadsDir = path.join(__dirname, '../uploads');
-if (!fs.existsSync(uploadsDir)) {
-  fs.mkdirSync(uploadsDir, { recursive: true });
+// Vercel’s filesystem is read-only except /tmp. mkdir here used to crash the
+// function on startup, so every request (including / and /favicon.ico) returned 500.
+const uploadsDir = process.env.VERCEL
+  ? path.join(os.tmpdir(), 'cep-uploads')
+  : path.join(__dirname, '../uploads');
+try {
+  if (!fs.existsSync(uploadsDir)) {
+    fs.mkdirSync(uploadsDir, { recursive: true });
+  }
+} catch (err) {
+  console.warn('Could not create uploads directory:', err.message);
 }
 
 // Multer configuration for file uploads

@@ -3,9 +3,13 @@ const path = require('path');
 
 // Ensure directory exists
 const ensureDirectoryExists = (dirPath) => {
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-    console.log(`Created directory: ${dirPath}`);
+  try {
+    if (!fs.existsSync(dirPath)) {
+      fs.mkdirSync(dirPath, { recursive: true });
+      console.log(`Created directory: ${dirPath}`);
+    }
+  } catch (err) {
+    console.warn(`Could not create directory ${dirPath}:`, err.message);
   }
 };
 
