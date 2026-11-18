@@ -27,12 +27,16 @@ if (connectionString && needsSsl) {
   connectionString = url.toString();
 }
 
+// Serverless (Vercel) opens many short-lived instances, so keep each pool small
+// and fail fast instead of hanging until the function times out.
+const isServerless = Boolean(process.env.VERCEL);
+
 const pool = new Pool({
   connectionString,
   ssl: needsSsl ? { rejectUnauthorized: false } : undefined,
-  max: 10,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 30000,
+  max: isServerless ? 3 : 10,
+  idleTimeoutMillis: isServerless ? 10000 : 30000,
+  connectionTimeoutMillis: isServerless ? 8000 : 30000,
 });
 
 pool.on('error', (err) => {
@@ -44,6 +48,9 @@ async function query(text, params) {
 }
 
 async function connect() {
+  if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is not set. Add it in the Vercel project Environment Variables.');
+  }
   const client = await pool.connect();
   try {
     const result = await client.query('SELECT current_database() AS db, now() AS now');

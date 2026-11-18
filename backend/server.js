@@ -144,8 +144,9 @@ const connectDatabase = async () => {
   console.log('🔄 Connecting to Neon Postgres...');
   console.log('📍 DATABASE_URL host:', databaseUrl.replace(/\/\/[^:]+:[^@]+@/, '//***:***@').split('/')[2] || '(missing)');
 
-  let retries = 5;
-  let delay = 2000;
+  // On Vercel a request must finish within the function time limit, so retry less.
+  let retries = process.env.VERCEL ? 2 : 5;
+  let delay = process.env.VERCEL ? 1000 : 2000;
 
   while (retries > 0) {
     try {
@@ -171,7 +172,8 @@ const connectDatabase = async () => {
   }
 };
 
-connectDatabase();
+// Keep the promise so API requests can wait for the first connection + migration
+const dbReady = connectDatabase();
 
 // Socket.IO connection handling
 // Track connected users by username and group
@@ -457,6 +459,24 @@ app.get('/api/health', async (_req, res) => {
 // Favicon route
 app.get('/favicon.ico', (_req, res) => {
   res.status(204).end();
+});
+
+// Database guard: return a clear message instead of a vague 500 when the DB is not configured,
+// and on serverless wait for the first connection/migration before handling a request.
+app.use('/api', async (req, res, next) => {
+  if (req.path === '/health' || req.path === '/test') return next();
+  if (!process.env.DATABASE_URL) {
+    return res.status(503).json({
+      success: false,
+      message: 'Server is not configured: DATABASE_URL environment variable is missing.'
+    });
+  }
+  try {
+    await dbReady;
+  } catch (_err) {
+    // connectDatabase logs its own errors; routes will report any query failure
+  }
+  next();
 });
 
 // API Routes
