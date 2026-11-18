@@ -464,7 +464,7 @@ app.get('/favicon.ico', (_req, res) => {
 // Database guard: return a clear message instead of a vague 500 when the DB is not configured,
 // and on serverless wait for the first connection/migration before handling a request.
 app.use('/api', async (req, res, next) => {
-  if (req.path === '/health' || req.path === '/test') return next();
+  if (['/health', '/test', '/families'].includes(req.path)) return next();
   if (!process.env.DATABASE_URL) {
     return res.status(503).json({
       success: false,
