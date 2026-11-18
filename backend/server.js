@@ -668,22 +668,28 @@ const getNetworkIPs = () => {
   return ips;
 };
 
-server.listen(PORT, HOST, () => {
-  console.log(`🚀 Server listening on port ${PORT}`);
-  console.log(`🌐 Listening on: ${HOST === '0.0.0.0' ? 'all network interfaces' : HOST}`);
-  
-  const networkIPs = getNetworkIPs();
-  if (networkIPs.length > 0) {
-    console.log(`\n📡 Accessible from network at:`);
-    networkIPs.forEach(ip => {
-      console.log(`   • http://${ip}:${PORT} (Backend API)`);
-      console.log(`   • http://${ip}:3000 (Frontend)`);
-    });
-  }
-  console.log(`\n💻 Local access:`);
-  console.log(`   • http://localhost:${PORT} (Backend API)`);
-  console.log(`   • http://localhost:3000 (Frontend)`);
-});
+// Vercel runs this file as a serverless function and must receive the Express app.
+// Calling listen() there crashes every request, including / and /favicon.ico, with HTTP 500.
+module.exports = app;
+
+if (!process.env.VERCEL) {
+  server.listen(PORT, HOST, () => {
+    console.log(`🚀 Server listening on port ${PORT}`);
+    console.log(`🌐 Listening on: ${HOST === '0.0.0.0' ? 'all network interfaces' : HOST}`);
+
+    const networkIPs = getNetworkIPs();
+    if (networkIPs.length > 0) {
+      console.log(`\n📡 Accessible from network at:`);
+      networkIPs.forEach(ip => {
+        console.log(`   • http://${ip}:${PORT} (Backend API)`);
+        console.log(`   • http://${ip}:3000 (Frontend)`);
+      });
+    }
+    console.log(`\n💻 Local access:`);
+    console.log(`   • http://localhost:${PORT} (Backend API)`);
+    console.log(`   • http://localhost:3000 (Frontend)`);
+  });
+}
 
 // Graceful shutdown
 process.on('SIGTERM', () => {

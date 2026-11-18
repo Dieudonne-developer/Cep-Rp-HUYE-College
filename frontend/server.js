@@ -152,6 +152,9 @@ app.use('*', (req, res) => {
     
     // Check if this is a request for a static file by extension
     const ext = extname(path)
+    if (path === '/favicon.ico') {
+      return res.status(204).end()
+    }
     if (ext && staticExtensions.includes(ext.toLowerCase())) {
       // Static file should have been served by express.static
       // If we reach here, the file doesn't exist
@@ -190,7 +193,10 @@ app.use('*', (req, res) => {
   }
 })
 
-// Start the server
+export default app
+
+// Start the server only outside Vercel. On Vercel, listen() makes every request return 500.
+if (!process.env.VERCEL) {
 app.listen(PORT, '0.0.0.0', () => {
   console.log('='.repeat(50))
   console.log(`✅ Frontend server running on port ${PORT}`)
@@ -213,3 +219,4 @@ app.listen(PORT, '0.0.0.0', () => {
   }
   console.log('='.repeat(50))
 })
+}
