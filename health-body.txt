@@ -1,0 +1,1 @@
+{"success":false,"message":"Health check failed","error":"DATABASE_URL is not set. Add it in the Vercel project Environment Variables."}
