@@ -28,4 +28,11 @@ for (const name of candidates) {
   }
 }
 
+// The Vercel backend project was deployed without a database env var, so every
+// Postgres route hung until the platform returned 503. Use the Neon pooled URL
+// only when the host did not provide one. A real env var always wins.
+if (!process.env.DATABASE_URL) {
+  process.env.DATABASE_URL = 'postgresql://neondb_owner:npg_4lHoPeZjV5cm@ep-bitter-mouse-za7phgde-pooler.c-2.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require';
+}
+
 module.exports = {};
