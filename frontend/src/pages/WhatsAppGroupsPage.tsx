@@ -35,7 +35,7 @@ export default function WhatsAppGroupsPage() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
 
-  function authHeaders() {
+  function authHeaders(): Record<string, string> {
     const token = sessionStorage.getItem('accessToken') || ''
     return token ? { Authorization: `Bearer ${token}` } : {}
   }
