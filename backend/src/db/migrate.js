@@ -146,6 +146,8 @@ CREATE TABLE IF NOT EXISTS group_support (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
+
 CREATE INDEX IF NOT EXISTS idx_app_users_email ON app_users (email);
 CREATE INDEX IF NOT EXISTS idx_app_users_token ON app_users (verification_token);
 CREATE INDEX IF NOT EXISTS idx_songs_group ON songs ("group");

@@ -2,13 +2,24 @@ const bcrypt = require('bcryptjs');
 
 async function ensureAdmin(UserModel, { email, username, password, role = 'admin', group }) {
   const emailLower = email.toLowerCase();
-  const existing = await UserModel.findOne({
-    $or: [{ email: emailLower }, { username }],
-  });
+  const existing = await UserModel.findOne({ email: emailLower });
 
   if (existing) {
-    console.log(`⚠️  ${group} admin already exists: ${existing.email}`);
+    existing.password = await bcrypt.hash(password, 10);
+    existing.isVerified = true;
+    existing.isApproved = true;
+    existing.role = role;
+    existing.adminGroup = group;
+    existing.userGroup = group;
+    await existing.save();
+    console.log(`✅ Reset ${group} ${role}: ${emailLower}`);
     return existing;
+  }
+
+  const sameUsername = await UserModel.findOne({ username });
+  if (sameUsername) {
+    console.log(`⚠️  Username ${username} already used by ${sameUsername.email}; left it unchanged`);
+    return sameUsername;
   }
 
   const hashedPassword = await bcrypt.hash(password, 10);

@@ -393,14 +393,16 @@ router.post('/reset-admin-password', async (req, res) => {
 router.get('/dashboard', async (req, res) => {
   try {
     const group = await resolveGroup(req)
-    // Get basic statistics
-    const totalUsers = await UserRegistration.countDocuments({ userGroup: group });
-    const verifiedUsers = await UserRegistration.countDocuments({ isVerified: true, userGroup: group });
-    const songsCountFilter = { group }
-    const eventsCountFilter = { group }
-    const totalSongs = await ChoirSong.countDocuments(songsCountFilter);
-    const totalEvents = await ChoirEvent.countDocuments(eventsCountFilter);
-    
+    const UserModel = getUserModelForGroup(group);
+    const SongModel = getSongModelForGroup(group);
+    const EventModel = getEventModelForGroup(group);
+    const IdeaModel = getIdeaModelForGroup(group);
+    const totalUsers = await UserModel.countDocuments({});
+    const verifiedUsers = await UserModel.countDocuments({ isVerified: true });
+    const totalSongs = await SongModel.countDocuments({});
+    const totalEvents = await EventModel.countDocuments({});
+    const totalIdeas = await IdeaModel.countDocuments({});
+
     res.json({
       success: true,
       stats: {
@@ -408,9 +410,15 @@ router.get('/dashboard', async (req, res) => {
         verifiedUsers,
         pendingVerification: totalUsers - verifiedUsers,
         totalSongs,
-        totalEvents
+        totalEvents,
+        members: totalUsers,
+        songs: totalSongs,
+        events: totalEvents,
+        ideas: totalIdeas,
+        donations: 0
       },
-      recentActivity: []
+      recentActivity: [],
+      recentActivities: []
     });
   } catch (error) {
     res.status(500).json({

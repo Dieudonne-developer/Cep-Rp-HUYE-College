@@ -30,11 +30,12 @@ export default function TestLoginPage() {
         body: JSON.stringify({ email, password }),
       })
 
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`)
-      }
+      const data = await response.json().catch(() => ({}))
 
-      const data = await response.json()
+      if (!response.ok || !data.success) {
+        setError(data.message || `Login failed (${response.status})`)
+        return
+      }
 
       if (data.success) {
         localStorage.setItem('admin', JSON.stringify(data.admin))
