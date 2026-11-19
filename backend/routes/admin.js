@@ -687,7 +687,7 @@ router.get('/members', async (req, res) => {
     const Model = getUserModelForGroup(group);
     // Include all users for the group (verified or not) so newly registered users show up for approval
     const members = await Model.find({ userGroup: group })
-      .select('email username profileImage createdAt isApproved approvedAt approvedBy userGroup')
+      .select('email username profileImage createdAt isApproved approvedAt approvedBy userGroup contactNumber')
       .sort({ createdAt: -1 });
     res.json(members);
   } catch (error) {
@@ -702,7 +702,7 @@ router.get('/members/pending', async (req, res) => {
     const group = await resolveGroup(req);
     const Model = getUserModelForGroup(group);
     const pendingUsers = await Model.find({ isVerified: true, isApproved: { $ne: true }, userGroup: group })
-      .select('email username profileImage createdAt isApproved userGroup')
+      .select('email username profileImage createdAt isApproved userGroup contactNumber')
       .sort({ createdAt: -1 });
     res.json(pendingUsers);
   } catch (error) {
@@ -776,9 +776,13 @@ router.put('/members/:id', async (req, res) => {
     const { id } = req.params;
     const group = await resolveGroup(req);
     const Model = getUserModelForGroup(group);
-    const { username, email } = req.body || {};
+    const { username, email, contactNumber } = req.body || {};
     if (!username || !String(username).trim() || !email || !String(email).trim()) {
       return res.status(400).json({ success: false, message: 'Username and email are required' });
+    }
+    const contactDigits = String(contactNumber || '').replace(/\D/g, '');
+    if (contactNumber && contactDigits.length < 9) {
+      return res.status(400).json({ success: false, message: 'Contact number must include at least 9 digits.' });
     }
     const user = await Model.findById(id);
     if (!user) {
@@ -786,6 +790,7 @@ router.put('/members/:id', async (req, res) => {
     }
     user.username = String(username).trim();
     user.email = String(email).trim().toLowerCase();
+    user.contactNumber = contactDigits ? contactDigits : null;
     await user.save();
     res.json({ success: true, message: 'Member updated successfully', member: user });
   } catch (error) {

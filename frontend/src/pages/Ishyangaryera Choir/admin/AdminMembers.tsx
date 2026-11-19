@@ -6,6 +6,7 @@ import { useLucideIcons } from '../../../utils/lucideIcons'
 type Member = {
   _id: string
   email: string
+  contactNumber?: string
   username: string
   profileImage?: string
   createdAt: string
@@ -20,7 +21,7 @@ export default function AdminMembers() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'all' | 'pending'>('pending')
   const [editingMember, setEditingMember] = useState<Member | null>(null)
-  const [editForm, setEditForm] = useState({ username: '', email: '' })
+  const [editForm, setEditForm] = useState({ username: '', email: '', contactNumber: '' })
   const baseUrl = getApiBaseUrl()
   const adminGroup = (() => {
     try {
@@ -89,7 +90,7 @@ export default function AdminMembers() {
 
   const handleEdit = (member: Member) => {
     setEditingMember(member)
-    setEditForm({ username: member.username || '', email: member.email || '' })
+    setEditForm({ username: member.username || '', email: member.email || '', contactNumber: member.contactNumber || '' })
   }
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -238,6 +239,7 @@ export default function AdminMembers() {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">{member.email}</div>
+                    <div className="text-xs text-gray-500">{member.contactNumber || 'No contact number'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {member.isApproved ? (
@@ -327,6 +329,16 @@ export default function AdminMembers() {
                   onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2"
                   required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Contact number</label>
+                <input
+                  type="tel"
+                  value={editForm.contactNumber}
+                  onChange={(e) => setEditForm({ ...editForm, contactNumber: e.target.value })}
+                  placeholder="07..."
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
                 />
               </div>
               <div className="flex justify-end space-x-2">

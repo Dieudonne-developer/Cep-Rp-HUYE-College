@@ -56,8 +56,7 @@ function memberFromRequest(req) {
   return payload ? payload.email : null;
 }
 
-function publicGroup(group, request) {
-  const approved = request && request.status === 'approved' && group.isActive !== false;
+function publicGroup(group) {
   return {
     id: group._id,
     slug: group.slug,
@@ -65,9 +64,6 @@ function publicGroup(group, request) {
     description: group.description || '',
     isActive: group.isActive !== false,
     hasInvite: Boolean(group.inviteUrl),
-    requestStatus: request ? request.status : null,
-    rejectionNote: request && request.status === 'rejected' ? (request.note || '') : '',
-    inviteUrl: approved ? group.inviteUrl : null,
   };
 }
 
@@ -86,16 +82,73 @@ async function requireAdmin(req, res) {
   return user;
 }
 
-router.get('/groups', async (req, res) => {
+const FAMILY_SLUGS = new Set(['choir', 'cepier', 'anointed', 'abanyamugisha', 'psalm23', 'psalm46', 'protocol', 'social', 'evangelical']);
+
+function contactKey(raw) {
+  const digits = String(raw || '').replace(/\D/g, '');
+  if (digits.length < 9) return '';
+  return digits.slice(-9);
+}
+
+async function findApprovedMember(contactNumber, slug) {
+  const key = contactKey(contactNumber);
+  if (!key) return { error: 'Enter a valid contact number.' };
+  const params = [key];
+  let sql = `SELECT username, user_group FROM app_users
+    WHERE is_approved = TRUE
+      AND right(regexp_replace(coalesce(contact_number, ''), '\\D', '', 'g'), 9) = $1`;
+  if (FAMILY_SLUGS.has(slug)) {
+    params.push(slug);
+    sql += ` AND user_group = $2`;
+  }
+  sql += ' LIMIT 1';
+  const result = await query(sql, params);
+  return { user: result.rows[0] || null };
+}
+
+router.post('/open', async (req, res) => {
   try {
-    const email = memberFromRequest(req);
-    const groups = await WhatsAppGroup.find({ isActive: true }).sort({ name: 1 });
-    const requests = email ? await WhatsAppRequest.find({ userEmail: email }) : [];
-    const byGroup = new Map(requests.map((item) => [String(item.groupId), item]));
+    const slug = String(req.body.slug || '').trim().toLowerCase();
+    const group = slug
+      ? await WhatsAppGroup.findOne({ slug })
+      : await WhatsAppGroup.findById(req.body.groupId);
+    if (!group || group.isActive === false) {
+      return res.status(404).json({ success: false, message: 'WhatsApp group not found' });
+    }
+    const found = await findApprovedMember(req.body.contactNumber, group.slug);
+    if (found.error) return res.status(400).json({ success: false, message: found.error });
+    if (!found.user) {
+      return res.status(403).json({
+        success: false,
+        message: 'This contact number is not a member of this group.',
+      });
+    }
+    if (!group.inviteUrl) {
+      return res.json({
+        success: true,
+        member: true,
+        inviteUrl: null,
+        message: 'Your contact is a member of this group. Invitation link not yet provided.',
+      });
+    }
     res.json({
       success: true,
-      signedIn: Boolean(email),
-      groups: groups.map((group) => publicGroup(group, byGroup.get(String(group._id)))),
+      member: true,
+      inviteUrl: group.inviteUrl,
+      message: 'Your contact is a member of this group. Open the invitation in WhatsApp. This does not add you to the group by itself.',
+    });
+  } catch (error) {
+    console.error('WhatsApp open error:', error);
+    res.status(500).json({ success: false, message: 'Could not check this contact number' });
+  }
+});
+
+router.get('/groups', async (req, res) => {
+  try {
+    const groups = await WhatsAppGroup.find({ isActive: true }).sort({ name: 1 });
+    res.json({
+      success: true,
+      groups: groups.map((group) => publicGroup(group)),
     });
   } catch (error) {
     console.error('WhatsApp groups error:', error);

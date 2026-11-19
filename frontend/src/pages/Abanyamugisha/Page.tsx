@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { Home, Users, Music, Menu, Info, Calendar, Clock, MapPin, History, Lightbulb, HeartHandshake, MessageCircle, Banknote, Smartphone, CreditCard, Play, Download, Maximize, Video, Send, Eye, X } from 'lucide-react'
 import { getApiBaseUrl } from '../../utils/api'
+import { WhatsAppAccessForm } from '../WhatsAppGroupsPage'
 
 type Song = { _id: string; title: string; url: string; downloadable?: boolean; mediaType?: 'audio' | 'video'; description?: string; category?: string; thumbnail?: string }
 type Activity = { _id: string; title: string; description?: string; date?: string; time?: string; location?: string; image?: string; schedule?: string }
@@ -794,119 +795,13 @@ export default function AbanyamugishaPage() {
           )}
 
           {section === 'chat' && (
-            <div className="p-6 bg-white rounded-lg shadow-md">
-              <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
-                <i data-lucide="message-circle" className="mr-2 text-blue-600" /> 
-                WhatsApp Groups
+            <div className="p-6 bg-white rounded-lg shadow-md max-w-lg mx-auto">
+              <h2 className="text-3xl font-bold text-gray-800 mb-3 flex items-center">
+                <i data-lucide="message-circle" className="mr-2 text-blue-600" />
+                WhatsApp Group
               </h2>
-              
-              {!isLoggedIn ? (
-                <div className="max-w-md mx-auto">
-                  <div className="bg-blue-50 p-6 rounded-lg">
-                    <h3 className="text-xl font-semibold text-blue-800 mb-4">Login to Continue</h3>
-                    <p className="text-gray-700 mb-4">Please login to request WhatsApp group access.</p>
-                    
-                    {loginError && (
-                      <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
-                        {loginError}
-                      </div>
-                    )}
-                    <form
-                      onSubmit={async (e) => {
-                        e.preventDefault()
-                        if (!loginForm.username.trim() || !loginForm.password.trim()) return
-                        
-                        setIsLoggingIn(true)
-                        setLoginError('')
-                        
-                        try {
-                        const response = await fetch(`${baseUrl}/api/auth/login`, {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            username: loginForm.username.trim(),
-                            password: loginForm.password,
-                            userGroup: 'abanyamugisha'
-                          })
-                        })
-                        
-                        const data = await response.json()
-                        
-                        if (data.success) {
-                          sessionStorage.setItem('chatUser', data.user.username)
-                          sessionStorage.setItem('userInfo', JSON.stringify(data.user))
-                          if (data.accessToken) sessionStorage.setItem('accessToken', data.accessToken)
-                          sessionStorage.setItem('userGroup', data.user.userGroup || 'abanyamugisha')
-                          setUserName(data.user.username)
-                          setIsLoggedIn(true)
-                          window.location.href = '/abanyamugisha/chat'
-                        } else {
-                          setLoginError(data.message || 'Login failed')
-                        }
-                        } catch (error) {
-                          setLoginError('Network error. Please try again.')
-                        } finally {
-                          setIsLoggingIn(false)
-                        }
-                      }}
-                      className="space-y-4"
-                    >
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-                        <input
-                          type="text"
-                          value={loginForm.username}
-                          onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))}
-                          placeholder="Enter your username"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                        <input
-                          type="password"
-                          value={loginForm.password}
-                          onChange={(e) => setLoginForm(prev => ({ ...prev, password: e.target.value }))}
-                          placeholder="Enter your password"
-                          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                          required
-                        />
-                      </div>
-                      <div className="flex items-center justify-between text-sm">
-                        <button
-                          type="button"
-                          onClick={() => window.location.href = '/abanyamugisha/forgot-password'}
-                          className="text-blue-700 hover:text-blue-900"
-                        >
-                          Forgot password?
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => window.location.href = '/abanyamugisha/register'}
-                          className="text-blue-700 hover:text-blue-900"
-                        >
-                          Register
-                        </button>
-                      </div>
-                      <button
-                        type="submit"
-                        disabled={isLoggingIn}
-                        className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-bold py-2 px-4 rounded-lg transition duration-300 disabled:cursor-not-allowed"
-                      >
-                        {isLoggingIn ? 'Logging in...' : 'Login'}
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              ) : (
-                <div className="max-w-4xl mx-auto">
-                  <div className="bg-blue-50 p-6 rounded-lg text-center">
-                    <p className="mb-4">You are logged in as <strong>{userName}</strong>. Continue to WhatsApp groups.</p>
-                    <button onClick={() => (window.location.href = '/abanyamugisha/chat')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">WhatsApp groups</button>
-                  </div>
-                </div>
-              )}
+              <p className="text-gray-600 mb-4">Enter the contact number saved on your Abanyamugisha membership. Registration and a password are not required.</p>
+              <WhatsAppAccessForm slug="abanyamugisha" />
             </div>
           )}
         </div>
