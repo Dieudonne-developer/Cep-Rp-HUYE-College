@@ -143,7 +143,7 @@ export default function CepRegisterPage() {
               {busy ? 'Registering...' : 'Register'}
             </button>
           </form>
-          <div className="text-sm text-gray-600 mt-4">Already have an account? <a href="/chat" className="text-blue-700">Go to Chat</a></div>
+          <div className="text-sm text-gray-600 mt-4">Already have an account? <a href="/chat" className="text-blue-700">WhatsApp groups</a></div>
         </div>
       </main>
 

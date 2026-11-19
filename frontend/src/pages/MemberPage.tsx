@@ -18,7 +18,7 @@ export default function MemberPage() {
       <h2 className="text-3xl font-bold text-gray-800 mb-4">Member</h2>
       {!user ? (
         <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 px-4 py-3 rounded-lg mb-4">
-          You are not logged in. Please go to <a href="/chat" className="text-blue-700 underline">Chat</a> to login.
+          You are not logged in. Please go to <a href="/chat" className="text-blue-700 underline">WhatsApp</a> to login.
         </div>
       ) : (
         <div className="space-y-4">

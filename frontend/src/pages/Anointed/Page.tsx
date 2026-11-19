@@ -144,6 +144,7 @@ export default function AnointedPage() {
 
   useEffect(() => {
     if (section === 'chat' && isLoggedIn) {
+      return
       // Socket.IO handles protocol upgrade automatically
       socketRef.current = io(baseUrl, {
         transports: ['websocket', 'polling'],
@@ -212,7 +213,7 @@ export default function AnointedPage() {
           <div className="flex flex-wrap justify-center md:justify-start space-x-1 md:space-x-4">
             {(['about','media','activities','ideas','support','chat'] as Section[]).map((s) => (
               <button key={s} onClick={() => setSection(s)} className={`px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-700 ${section===s?'bg-blue-900':''}`}>
-                {s[0].toUpperCase()+s.slice(1)}
+                {s==='chat'?'WhatsApp':s[0].toUpperCase()+s.slice(1)}
               </button>
             ))}
           </div>
@@ -542,7 +543,7 @@ export default function AnointedPage() {
 
           {section === 'chat' && (
             <div className="p-6 bg-white rounded-lg shadow-md">
-              <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center"><MessageCircle className="mr-2 text-blue-600" /> Team Chat</h2>
+              <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center"><MessageCircle className="mr-2 text-blue-600" /> WhatsApp Groups</h2>
               {!isLoggedIn ? (
                 <div className="max-w-md mx-auto">
                   <div className="bg-blue-50 p-6 rounded-lg">
@@ -555,7 +556,7 @@ export default function AnointedPage() {
                       try {
                         const response = await fetch(`${baseUrl}/api/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username: loginForm.username.trim(), password: loginForm.password, userGroup: 'anointed' }) })
                         const data = await response.json()
-                        if (data.success) { sessionStorage.setItem('chatUser', data.user.username); sessionStorage.setItem('userInfo', JSON.stringify(data.user)); sessionStorage.setItem('userGroup', data.user.userGroup || 'anointed'); setUserName(data.user.username); setIsLoggedIn(true); window.location.href = '/anointed/chat' } else { setLoginError(data.message || 'Login failed') }
+                        if (data.success) { sessionStorage.setItem('chatUser', data.user.username); sessionStorage.setItem('userInfo', JSON.stringify(data.user)); if (data.accessToken) sessionStorage.setItem('accessToken', data.accessToken); sessionStorage.setItem('userGroup', data.user.userGroup || 'anointed'); setUserName(data.user.username); setIsLoggedIn(true); window.location.href = '/anointed/chat' } else { setLoginError(data.message || 'Login failed') }
                       } catch { setLoginError('Network error. Please try again.') } finally { setIsLoggingIn(false) }
                     }} className="space-y-4">
                       <input type="text" value={loginForm.username} onChange={(e) => setLoginForm(prev => ({ ...prev, username: e.target.value }))} placeholder="Username" className="w-full px-4 py-2 border border-gray-300 rounded-lg" required />
@@ -571,8 +572,8 @@ export default function AnointedPage() {
               ) : (
                 <div className="max-w-4xl mx-auto">
                   <div className="bg-blue-50 p-6 rounded-lg text-center">
-                    <p className="mb-4">You are logged in as <strong>{userName}</strong>. Redirecting to chat...</p>
-                    <button onClick={() => (window.location.href = '/anointed/chat')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Go to Chat</button>
+                    <p className="mb-4">You are logged in as <strong>{userName}</strong>. Continue to WhatsApp groups.</p>
+                    <button onClick={() => (window.location.href = '/anointed/chat')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">WhatsApp groups</button>
                   </div>
                 </div>
               )}

@@ -18,7 +18,8 @@ import AdminIdeas from './pages/Ishyangaryera Choir/admin/AdminIdeas'
 import AdminSupport from './pages/Ishyangaryera Choir/admin/AdminSupport'
 import AdminSuperAdmins from './pages/Ishyangaryera Choir/admin/AdminSuperAdmins'
 import SuperAdminDashboard from './pages/Ishyangaryera Choir/admin/SuperAdminDashboard'
-import ChatPage from './pages/Ishyangaryera Choir/ChatPage'
+import ChatPage from './pages/WhatsAppGroupsPage'
+import AdminWhatsApp from './pages/Ishyangaryera Choir/admin/AdminWhatsApp'
 import RegisterPage from './pages/Ishyangaryera Choir/RegisterPage'
 import ForgotPasswordPage from './pages/Ishyangaryera Choir/ForgotPasswordPage'
 import AnointedPage from './pages/Anointed/Page'
@@ -31,7 +32,7 @@ import EvangelicalPage from './pages/Evangelical/Page'
 import ActivitiesPage from './pages/ActivitiesPage'
 import SupportPage from './pages/SupportPage'
 import IdeasPage from './pages/IdeasPage'
-import ChatHubPage from './pages/ChatHubPage'
+import ChatHubPage from './pages/WhatsAppGroupsPage'
 import MemberPage from './pages/MemberPage'
 import CepRegisterPage from './pages/CepRegisterPage'
 import CepMembersPage from './pages/CepMembersPage'
@@ -61,7 +62,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             <Link to="/activities" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">Activities</Link>
             <Link to="/support" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">Support</Link>
             <Link to="/ideas" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">Ideas</Link>
-            <Link to="/chat" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">Chat</Link>
+            <Link to="/chat" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">WhatsApp</Link>
           </nav>
         </div>
         {/* Mobile Menu */}
@@ -108,7 +109,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                 className="block px-4 py-2 rounded-lg hover:bg-blue-700 transition"
                 onClick={() => setMobileMenuOpen(false)}
               >
-                Chat
+                WhatsApp
               </Link>
             </nav>
           </div>
@@ -171,7 +172,8 @@ function App() {
 
   // Dedicated chat page (standalone)
   if (location.pathname === '/admin/chat') {
-    return <ChatPage />
+    window.location.replace('/admin/whatsapp')
+    return null
   }
 
   if (location.pathname === '/choir/chat') {
@@ -332,6 +334,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="super-admin-dashboard" element={<SuperAdminDashboard />} />
           <Route path="super-admins" element={<AdminSuperAdmins />} />
         </Route>
@@ -351,6 +354,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
         </Route>
       </Routes>
     )
@@ -368,6 +372,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
         </Route>
       </Routes>
     )
@@ -385,6 +390,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
         </Route>
       </Routes>
     )
@@ -402,6 +408,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
         </Route>
       </Routes>
     )
@@ -419,6 +426,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
         </Route>
       </Routes>
     )
@@ -436,6 +444,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
         </Route>
       </Routes>
     )
@@ -453,6 +462,7 @@ function App() {
           <Route path="members" element={<AdminMembers />} />
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
+          <Route path="whatsapp" element={<AdminWhatsApp />} />
         </Route>
       </Routes>
     )

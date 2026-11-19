@@ -28,6 +28,7 @@ const adminRoutes = require('./routes/admin');
 const choirRoutes = require('./routes/choir');
 const homeRoutes = require('./routes/init');
 const chatRoutes = require('./routes/chat');
+const whatsappRoutes = require('./routes/whatsapp');
 
 // Import models
 const UserRegistration = require('./models/UserRegistration');
@@ -499,6 +500,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/choir', choirRoutes);
 app.use('/api/chat', chatRoutes);
+app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/home', homeRoutes);
 
 // Assets: logo image from DB with filesystem fallback

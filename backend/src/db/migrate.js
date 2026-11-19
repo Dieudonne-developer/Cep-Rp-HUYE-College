@@ -159,6 +159,46 @@ ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS implementation_details TE
 ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
 ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS reviewed_by TEXT;
 ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
+
+CREATE TABLE IF NOT EXISTS whatsapp_groups (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  slug TEXT NOT NULL UNIQUE,
+  name TEXT NOT NULL,
+  description TEXT,
+  invite_url TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+CREATE TABLE IF NOT EXISTS whatsapp_access_requests (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  group_id UUID NOT NULL REFERENCES whatsapp_groups(id) ON DELETE CASCADE,
+  user_email TEXT NOT NULL,
+  username TEXT,
+  user_group TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  note TEXT,
+  reviewed_by TEXT,
+  reviewed_at TIMESTAMPTZ,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (group_id, user_email)
+);
+
+INSERT INTO whatsapp_groups (slug, name, description, invite_url, is_active)
+VALUES
+  ('cep', 'CEP Group', 'Main CEP community WhatsApp group.', 'https://chat.whatsapp.com/KshHGDS0KdVL7RFhe7wOUi', TRUE),
+  ('anointed', 'The Anointed Group', 'Anointed worship team WhatsApp group.', 'https://chat.whatsapp.com/JfnnXpYnWN51i4thUGshw4', TRUE),
+  ('protocol', 'Protocol Family', 'Protocol family WhatsApp group. The invitation link has not been provided yet.', NULL, TRUE),
+  ('choir', 'Ishyanga Ryera Choir', 'Choir family WhatsApp group.', NULL, TRUE),
+  ('abanyamugisha', 'Abanyamugisha Family', 'Abanyamugisha family WhatsApp group.', NULL, TRUE),
+  ('psalm23', 'Psalm 23 Family', 'Psalm 23 family WhatsApp group.', NULL, TRUE),
+  ('psalm46', 'Psalm 46 Family', 'Psalm 46 family WhatsApp group.', NULL, TRUE),
+  ('social', 'Social Family', 'Social family WhatsApp group.', NULL, TRUE),
+  ('evangelical', 'Evangelical Family', 'Evangelical family WhatsApp group.', NULL, TRUE),
+  ('cepier', 'CEPier', 'CEPier members WhatsApp group.', NULL, TRUE)
+ON CONFLICT (slug) DO NOTHING;
 CREATE INDEX IF NOT EXISTS idx_chat_group ON chat_messages ("group");
 `;
 

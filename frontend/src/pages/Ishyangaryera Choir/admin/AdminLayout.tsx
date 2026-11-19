@@ -99,29 +99,6 @@ export default function AdminLayout() {
     return groups[adminGroup] || 'Admin'
   }
 
-  // All admins share a dedicated admin chat room
-  const getChatUrl = () => '/admin/chat'
-
-  // Handle chat navigation - set up sessionStorage with admin info
-  const handleChatClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault()
-    // Set up chat session with admin info
-    if (admin) {
-      const adminUsername = (admin as any).username || admin.name || admin.email.split('@')[0]
-      sessionStorage.setItem('chatUser', adminUsername)
-      sessionStorage.setItem('userInfo', JSON.stringify({
-        username: adminUsername,
-        email: admin.email,
-        profileImage: (admin as any).profileImage || null,
-        role: admin.role
-      }))
-      sessionStorage.setItem('userGroup', 'admins')
-      sessionStorage.setItem('adminGroup', adminGroup)
-    }
-    // Navigate to chat
-    navigate(getChatUrl())
-  }
-
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col">
       {/* Header */}
@@ -186,17 +163,14 @@ export default function AdminLayout() {
                     <i data-lucide="users" className="mr-3 w-5 h-5"></i>
                     Manage Admins
                   </Link>
-                  <a
-                    href={getChatUrl()}
-                    onClick={handleChatClick}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onTouchStart={(e) => e.preventDefault()}
-                    onClickCapture={handleNavLinkClick}
-                    className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+                  <Link
+                    to={`${baseAdminPath}/whatsapp`}
+                    onClick={handleNavLinkClick}
+                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${location.pathname.endsWith('/whatsapp') ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'}`}
                   >
                     <i data-lucide="message-circle" className="mr-3 w-5 h-5"></i>
-                    Admin Chat
-                  </a>
+                    WhatsApp Groups
+                  </Link>
                   <div className="mt-2">
                     <div className="px-2 text-xs uppercase tracking-wider text-gray-400 mb-1">Homepage</div>
                     <Link 
@@ -286,17 +260,14 @@ export default function AdminLayout() {
                     <i data-lucide="heart-handshake" className="mr-3 w-5 h-5"></i>
                     Support
                   </Link>
-                  <a
-                    href={getChatUrl()}
-                    onClick={handleChatClick}
-                    onMouseDown={(e) => e.preventDefault()}
-                    onTouchStart={(e) => e.preventDefault()}
-                    onClickCapture={handleNavLinkClick}
-                    className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+                  <Link
+                    to={`${baseAdminPath}/whatsapp`}
+                    onClick={handleNavLinkClick}
+                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${location.pathname.endsWith('/whatsapp') ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'}`}
                   >
                     <i data-lucide="message-circle" className="mr-3 w-5 h-5"></i>
-                    Admin Chat
-                  </a>
+                    WhatsApp Groups
+                  </Link>
                 </>
               )}
               <div className="pt-4 border-t border-gray-200 mt-4">

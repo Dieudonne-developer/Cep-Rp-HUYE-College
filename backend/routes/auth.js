@@ -11,6 +11,7 @@ const SocialUser = require('../models/SocialUser');
 const EvangelicalUser = require('../models/EvangelicalUser');
 const upload = require('../middleware/upload');
 const { sendVerificationEmail } = require('../utils/email');
+const { signAccessToken } = require('../src/auth/accessToken');
 
 // User Registration API
 router.post('/register', upload.single('profileImage'), async (req, res) => {
@@ -711,9 +712,10 @@ router.post('/login', async (req, res) => {
     
     if (userGroup) {
       const requestedGroup = userGroup.toLowerCase();
+      const CepierUser = require('../models/CepierUser');
       const groupModelMap = {
         'choir': ChoirUser,
-        'cepier': ChoirUser,
+        'cepier': CepierUser,
         'anointed': AnointedUser,
         'abanyamugisha': AbanyamugishaUser,
         'psalm23': Psalm23User,
@@ -753,8 +755,10 @@ router.post('/login', async (req, res) => {
       }
     } else {
       // If userGroup not provided, search all models (backward compatibility)
+      const CepierUser = require('../models/CepierUser');
       const searchResults = await Promise.all([
         ChoirUser.findOne({ $or: [{ username }, { email: username }] }).then(u => ({ user: u, group: 'choir' })),
+        CepierUser.findOne({ $or: [{ username }, { email: username }] }).then(u => ({ user: u, group: 'cepier' })),
         AnointedUser.findOne({ $or: [{ username }, { email: username }] }).then(u => ({ user: u, group: 'anointed' })),
         AbanyamugishaUser.findOne({ $or: [{ username }, { email: username }] }).then(u => ({ user: u, group: 'abanyamugisha' })),
         Psalm23User.findOne({ $or: [{ username }, { email: username }] }).then(u => ({ user: u, group: 'psalm23' })),
@@ -815,6 +819,7 @@ router.post('/login', async (req, res) => {
     res.json({
       success: true,
       message: 'Login successful',
+      accessToken: signAccessToken(user.email),
       user: {
         id: user._id,
         username: user.username,

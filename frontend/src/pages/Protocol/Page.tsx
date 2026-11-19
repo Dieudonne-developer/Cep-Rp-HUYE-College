@@ -186,6 +186,7 @@ export default function ProtocolPage() {
   // Chat functionality
   useEffect(() => {
     if (section === 'chat' && isLoggedIn) {
+      return
       // Socket.IO handles protocol upgrade automatically
       socketRef.current = io(baseUrl, {
         transports: ['websocket', 'polling'],
@@ -379,7 +380,7 @@ export default function ProtocolPage() {
           <div className="flex flex-wrap justify-center md:justify-start space-x-1 md:space-x-4">
             {(['about','media','activities','ideas','support','chat'] as Section[]).map((s) => (
               <button key={s} onClick={() => setSection(s)} className={`px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-700 flex items-center ${section===s?'bg-blue-900':''}`}>
-                <i data-lucide={s==='about'?'info': s==='media'?'music': s==='activities'?'calendar': s==='ideas'?'lightbulb': s==='support'?'heart-handshake':'message-circle'} className="mr-2 w-4 h-4" /> {s[0].toUpperCase()+s.slice(1)}
+                <i data-lucide={s==='about'?'info': s==='media'?'music': s==='activities'?'calendar': s==='ideas'?'lightbulb': s==='support'?'heart-handshake':'message-circle'} className="mr-2 w-4 h-4" /> {s==='chat'?'WhatsApp':s[0].toUpperCase()+s.slice(1)}
               </button>
             ))}
           </div>
@@ -780,14 +781,14 @@ export default function ProtocolPage() {
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center">
                 <i data-lucide="message-circle" className="mr-2 text-blue-600" /> 
-                Family Chat
+                WhatsApp Groups
               </h2>
               
               {!isLoggedIn ? (
                 <div className="max-w-md mx-auto">
                   <div className="bg-blue-50 p-6 rounded-lg">
                     <h3 className="text-xl font-semibold text-blue-800 mb-4">Login to Continue</h3>
-                    <p className="text-gray-700 mb-4">Please login to access the family chat.</p>
+                    <p className="text-gray-700 mb-4">Please login to request WhatsApp group access.</p>
                     
                     {loginError && (
                       <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg mb-4">
@@ -818,6 +819,7 @@ export default function ProtocolPage() {
                           if (data.success) {
                             sessionStorage.setItem('chatUser', data.user.username)
                             sessionStorage.setItem('userInfo', JSON.stringify(data.user))
+                            if (data.accessToken) sessionStorage.setItem('accessToken', data.accessToken)
                             sessionStorage.setItem('userGroup', data.user.userGroup || 'protocol')
                             setUserName(data.user.username)
                             setIsLoggedIn(true)
@@ -884,8 +886,8 @@ export default function ProtocolPage() {
               ) : (
                 <div className="max-w-4xl mx-auto">
                   <div className="bg-blue-50 p-6 rounded-lg text-center">
-                    <p className="mb-4">You are logged in as <strong>{userName}</strong>. Redirecting to chat...</p>
-                    <button onClick={() => (window.location.href = '/protocol/chat')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">Go to Chat</button>
+                    <p className="mb-4">You are logged in as <strong>{userName}</strong>. Continue to WhatsApp groups.</p>
+                    <button onClick={() => (window.location.href = '/protocol/chat')} className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg">WhatsApp groups</button>
                   </div>
                 </div>
               )}
