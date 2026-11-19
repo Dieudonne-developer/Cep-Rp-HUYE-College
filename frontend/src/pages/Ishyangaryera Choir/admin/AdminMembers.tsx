@@ -19,6 +19,8 @@ export default function AdminMembers() {
   const [pendingMembers, setPendingMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState<'all' | 'pending'>('pending')
+  const [editingMember, setEditingMember] = useState<Member | null>(null)
+  const [editForm, setEditForm] = useState({ username: '', email: '' })
   const baseUrl = getApiBaseUrl()
   const adminGroup = (() => {
     try {
@@ -82,6 +84,58 @@ export default function AdminMembers() {
     } catch (error) {
       console.error('Failed to approve user:', error)
       alert('Failed to approve user')
+    }
+  }
+
+  const handleEdit = (member: Member) => {
+    setEditingMember(member)
+    setEditForm({ username: member.username || '', email: member.email || '' })
+  }
+
+  const handleUpdate = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!editingMember) return
+    try {
+      const adminRaw = localStorage.getItem('admin')
+      const admin = adminRaw ? JSON.parse(adminRaw) : {}
+      const response = await fetch(`${baseUrl}/api/admin/members/${editingMember._id}?${groupQuery}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' },
+        body: JSON.stringify(editForm)
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        alert(data.message || 'Failed to update member')
+        return
+      }
+      setEditingMember(null)
+      fetchMembers()
+      fetchPendingMembers()
+    } catch (error) {
+      console.error('Failed to update member:', error)
+      alert('Failed to update member')
+    }
+  }
+
+  const handleDelete = async (member: Member) => {
+    if (!confirm(`Delete ${member.username || member.email}? This cannot be undone.`)) return
+    try {
+      const adminRaw = localStorage.getItem('admin')
+      const admin = adminRaw ? JSON.parse(adminRaw) : {}
+      const response = await fetch(`${baseUrl}/api/admin/members/${member._id}?${groupQuery}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' }
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        alert(data.message || 'Failed to delete member')
+        return
+      }
+      fetchMembers()
+      fetchPendingMembers()
+    } catch (error) {
+      console.error('Failed to delete member:', error)
+      alert('Failed to delete member')
     }
   }
 
@@ -230,6 +284,20 @@ export default function AdminMembers() {
                           Revoke
                         </button>
                       )}
+                      <button
+                        onClick={() => handleEdit(member)}
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                        title="Update member"
+                      >
+                        Update
+                      </button>
+                      <button
+                        onClick={() => handleDelete(member)}
+                        className="inline-flex items-center px-3 py-1.5 text-sm font-medium text-white bg-gray-700 rounded-lg hover:bg-gray-800 transition-colors"
+                        title="Delete member"
+                      >
+                        Delete
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -237,6 +305,37 @@ export default function AdminMembers() {
             </tbody>
           </table>
         </div>
+
+        {editingMember && (
+          <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
+            <form onSubmit={handleUpdate} className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md space-y-4">
+              <h2 className="text-xl font-bold text-gray-800">Update member</h2>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input
+                  value={editForm.username}
+                  onChange={(e) => setEditForm({ ...editForm, username: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <input
+                  type="email"
+                  value={editForm.email}
+                  onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  required
+                />
+              </div>
+              <div className="flex justify-end space-x-2">
+                <button type="button" onClick={() => setEditingMember(null)} className="px-4 py-2 rounded-lg border">Cancel</button>
+                <button type="submit" className="px-4 py-2 rounded-lg bg-blue-600 text-white">Save</button>
+              </div>
+            </form>
+          </div>
+        )}
 
         {displayMembers.length === 0 && (
           <div className="text-center py-8 text-gray-500">

@@ -153,6 +153,12 @@ CREATE INDEX IF NOT EXISTS idx_app_users_token ON app_users (verification_token)
 CREATE INDEX IF NOT EXISTS idx_songs_group ON songs ("group");
 CREATE INDEX IF NOT EXISTS idx_events_group ON events ("group");
 CREATE INDEX IF NOT EXISTS idx_ideas_group ON implemented_ideas ("group");
+
+ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS implementation_details TEXT;
+ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'pending';
+ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS reviewed_by TEXT;
+ALTER TABLE implemented_ideas ADD COLUMN IF NOT EXISTS reviewed_at TIMESTAMPTZ;
 CREATE INDEX IF NOT EXISTS idx_chat_group ON chat_messages ("group");
 `;
 

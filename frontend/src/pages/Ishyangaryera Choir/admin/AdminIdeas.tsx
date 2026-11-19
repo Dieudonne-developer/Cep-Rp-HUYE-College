@@ -124,7 +124,7 @@ export default function AdminIdeas() {
   }
 
   const getCategoryColor = (category: string) => {
-    switch (category.toLowerCase()) {
+    switch ((category || '').toLowerCase()) {
       case 'song': return 'bg-blue-100 text-blue-800'
       case 'performance': return 'bg-purple-100 text-purple-800'
       case 'event': return 'bg-green-100 text-green-800'

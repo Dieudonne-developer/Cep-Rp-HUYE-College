@@ -773,16 +773,48 @@ router.post('/members', async (req, res) => {
 
 router.put('/members/:id', async (req, res) => {
   try {
-    res.json({ success: true, message: 'Member updated successfully' });
+    const { id } = req.params;
+    const group = await resolveGroup(req);
+    const Model = getUserModelForGroup(group);
+    const { username, email } = req.body || {};
+    if (!username || !String(username).trim() || !email || !String(email).trim()) {
+      return res.status(400).json({ success: false, message: 'Username and email are required' });
+    }
+    const user = await Model.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+    user.username = String(username).trim();
+    user.email = String(email).trim().toLowerCase();
+    await user.save();
+    res.json({ success: true, message: 'Member updated successfully', member: user });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to update member' });
+    console.error('Error updating member:', error);
+    const duplicate = /duplicate key|unique/i.test(error.message || '');
+    res.status(duplicate ? 400 : 500).json({
+      success: false,
+      message: duplicate ? 'That email or username is already used in this group' : 'Failed to update member'
+    });
   }
 });
 
 router.delete('/members/:id', async (req, res) => {
   try {
+    const { id } = req.params;
+    const group = await resolveGroup(req);
+    const Model = getUserModelForGroup(group);
+    const user = await Model.findById(id);
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'Member not found' });
+    }
+    const role = (user.role || '').toLowerCase();
+    if (role === 'admin' || role === 'super-admin') {
+      return res.status(400).json({ success: false, message: 'Admin accounts cannot be deleted from Manage Members' });
+    }
+    await Model.findByIdAndDelete(id);
     res.json({ success: true, message: 'Member deleted successfully' });
   } catch (error) {
+    console.error('Error deleting member:', error);
     res.status(500).json({ success: false, message: 'Failed to delete member' });
   }
 });
@@ -797,14 +829,16 @@ router.get('/ideas', async (req, res) => {
     const formattedIdeas = ideas.map(idea => ({
       _id: idea._id,
       idea: idea.idea,
-      category: idea.category,
+      category: idea.category || '',
       submittedBy: idea.name,
       email: idea.email,
       anonymous: idea.anonymous,
-      status: idea.implementedDate ? 'implemented' : 'pending',
-      notes: '',
-      implementationDetails: '',
+      status: idea.status || (idea.implementedDate ? 'implemented' : 'pending'),
+      notes: idea.notes || '',
+      implementationDetails: idea.implementationDetails || '',
       implementedDate: idea.implementedDate,
+      reviewedBy: idea.reviewedBy,
+      reviewedAt: idea.reviewedAt,
       createdAt: idea.createdAt
     }));
     res.json(formattedIdeas);
@@ -820,14 +854,22 @@ router.put('/ideas/:id', async (req, res) => {
     const IdeaModel = getIdeaModelForGroup(group);
     const { id } = req.params;
     const { status, notes, implementationDetails } = req.body;
-    
-    const updateData = {};
+    const reviewer = req.header('x-admin-email') || undefined;
+
+    const updateData = {
+      status: status || 'pending',
+      notes: notes || '',
+      implementationDetails: implementationDetails || '',
+      reviewedBy: reviewer,
+      reviewedAt: new Date(),
+      updatedAt: new Date()
+    };
     if (status === 'implemented') {
       updateData.implementedDate = new Date();
+    } else {
+      updateData.implementedDate = null;
     }
-    if (notes) updateData.notes = notes;
-    if (implementationDetails) updateData.implementationDetails = implementationDetails;
-    
+
     const idea = await IdeaModel.findByIdAndUpdate(id, updateData, { new: true });
     
     if (!idea) {
