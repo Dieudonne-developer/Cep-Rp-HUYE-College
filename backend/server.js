@@ -477,9 +477,13 @@ app.get('/favicon.ico', (_req, res) => {
 app.use('/api', async (req, res, next) => {
   if (['/health', '/test', '/families'].includes(req.path)) return next();
   if (!process.env.DATABASE_URL) {
+    // Names only (never values) so you can spot a typo or a variable saved under another name
+    const similarNames = Object.keys(process.env).filter((k) => /DATABASE|POSTGRES|NEON|PG(HOST|URL)|MONGO/i.test(k));
     return res.status(503).json({
       success: false,
-      message: 'Server is not configured: DATABASE_URL environment variable is missing.'
+      message: 'Server is not configured: DATABASE_URL environment variable is missing.',
+      fix: 'In the Vercel BACKEND project: Settings > Environment Variables > add DATABASE_URL (Production ticked), then Redeploy.',
+      similarVariableNamesFound: similarNames
     });
   }
   try {
