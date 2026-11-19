@@ -129,10 +129,16 @@ export default function AdminSongs() {
     try {
       const adminRaw = localStorage.getItem('admin')
       const admin = adminRaw ? JSON.parse(adminRaw) : {}
-      await fetch(`${baseUrl}/api/admin/songs/${id}?${groupQuery}`, { method: 'DELETE', headers: { 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' } })
+      const response = await fetch(`${baseUrl}/api/admin/songs/${id}?${groupQuery}`, { method: 'DELETE', headers: { 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' } })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) {
+        alert(data.message || 'Failed to delete song')
+        return
+      }
       fetchSongs()
     } catch (error) {
       console.error('Failed to delete song:', error)
+      alert('Failed to delete song')
     }
   }
 

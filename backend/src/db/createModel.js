@@ -257,7 +257,7 @@ function createModel(tableName, options = {}) {
     const params = [];
     let i = 1;
     for (const [key, value] of Object.entries(payload)) {
-      if (key === '_id' || key === 'isNew' || typeof value === 'function') continue;
+      if (key === '_id' || key === 'isNew' || typeof value === 'function' || value === undefined) continue;
       const col = toSnake(key);
       let stored = value;
       if (jsonFields.includes(key) && value != null && typeof value === 'object') {
@@ -364,6 +364,21 @@ function createModel(tableName, options = {}) {
     if (clauses.length) sql += ` WHERE ${clauses.join(' AND ')}`;
     const result = await query(sql, params);
     return { deletedCount: result.rowCount || 0 };
+  };
+
+  Model.findOneAndDelete = async function findOneAndDelete(filter = {}) {
+    const existing = await Model.findOne(filter);
+    if (!existing) return null;
+    await query(`DELETE FROM ${quoteIdent(tableName)} WHERE ${quoteIdent('id')} = $1`, [existing._id]);
+    return existing;
+  };
+
+  Model.insertMany = async function insertMany(docs = []) {
+    const saved = [];
+    for (const data of docs) {
+      saved.push(await Model.create(data));
+    }
+    return saved;
   };
 
   Model.findOneAndUpdate = async function findOneAndUpdate(filter, update, opts = {}) {
