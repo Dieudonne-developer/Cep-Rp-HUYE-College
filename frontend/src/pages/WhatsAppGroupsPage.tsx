@@ -94,7 +94,7 @@ export default function WhatsAppGroupsPage() {
   return (
     <div className="p-4 sm:p-6 bg-white rounded-lg shadow-md">
       <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">WhatsApp Groups</h2>
-      <p className="text-gray-600 mt-1">Enter the contact number saved for you as a member of the group. No registration or password is required.</p>
+      <p className="text-gray-600 mt-1">Enter the contact number you registered with. No password is required.</p>
       <p className="text-sm text-amber-800 bg-amber-50 border border-amber-200 px-4 py-2 rounded my-4">
         A matching contact number opens the WhatsApp invitation. It does not add you to the group by itself. Join from the button in WhatsApp.
       </p>

@@ -5,7 +5,7 @@ import { getApiBaseUrl } from '../utils/api'
 export default function CepRegisterPage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const location = useLocation()
-  const [form, setForm] = useState<{ email: string; username: string; profileImage: File | null }>({ email: '', username: '', profileImage: null })
+  const [form, setForm] = useState<{ email: string; username: string; contactNumber: string; profileImage: File | null }>({ email: '', username: '', contactNumber: '', profileImage: null })
   const initialFamily = useMemo(() => {
     try {
       const p = location.pathname.toLowerCase()
@@ -44,6 +44,7 @@ export default function CepRegisterPage() {
       const fd = new FormData()
       fd.append('email', form.email)
       fd.append('username', form.username)
+      if (form.contactNumber.trim()) fd.append('contactNumber', form.contactNumber.trim())
       if (form.profileImage) fd.append('profileImage', form.profileImage)
       fd.append('userGroup', family)
       // brand email as CEPier when choosing CEPier (general = choir group)
@@ -52,7 +53,7 @@ export default function CepRegisterPage() {
       const data = await res.json()
       if (!res.ok || !data.success) throw new Error(data.message || 'Registration failed')
       setMsg({ type: 'success', text: data.emailSent ? 'Registration successful! Check your email.' : `Registration successful! Use this link to set your password: ${data.verificationLink}` })
-      setForm({ email: '', username: '', profileImage: null })
+      setForm({ email: '', username: '', contactNumber: '', profileImage: null })
       setPreview(null)
     } catch (err: any) {
       setMsg({ type: 'error', text: err?.message || 'Registration failed' })
@@ -115,6 +116,11 @@ export default function CepRegisterPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Username (optional)</label>
               <input type="text" value={form.username} onChange={(e)=>setForm((p)=>({...p, username: e.target.value}))} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="your username" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Contact / WhatsApp number (optional)</label>
+              <input type="tel" inputMode="tel" value={form.contactNumber} onChange={(e)=>setForm((p)=>({...p, contactNumber: e.target.value}))} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="07..." />
+              <p className="text-xs text-gray-500 mt-1">Used to verify access to WhatsApp groups</p>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Profile Image (optional)</label>

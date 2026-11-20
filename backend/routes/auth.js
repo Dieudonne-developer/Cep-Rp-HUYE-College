@@ -55,6 +55,14 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
       usernameToUse = emailLower;
     }
 
+    const contactDigits = String(req.body.contactNumber || '').replace(/\D/g, '');
+    if (req.body.contactNumber && contactDigits.length < 9) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact number must include at least 9 digits.'
+      });
+    }
+
     // Create user registration (password will be set during verification)
     const userRegistration = new UserModel({
       email: emailLower,
@@ -64,6 +72,7 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
       userGroup,
       adminGroup: userGroup,
       role: 'viewer',
+      contactNumber: contactDigits || null,
       // password will be set during verification process
     });
     

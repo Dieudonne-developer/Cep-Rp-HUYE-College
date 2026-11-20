@@ -199,7 +199,8 @@ VALUES
   ('social', 'Social Family', 'Social family WhatsApp group.', NULL, TRUE),
   ('evangelical', 'Evangelical Family', 'Evangelical family WhatsApp group.', NULL, TRUE),
   ('cepier', 'CEPier', 'CEPier members WhatsApp group.', NULL, TRUE)
-ON CONFLICT (slug) DO NOTHING;
+ON CONFLICT (slug) DO UPDATE SET
+  invite_url = COALESCE(whatsapp_groups.invite_url, EXCLUDED.invite_url);
 CREATE INDEX IF NOT EXISTS idx_chat_group ON chat_messages ("group");
 `;
 

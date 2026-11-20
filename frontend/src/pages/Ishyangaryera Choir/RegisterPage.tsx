@@ -9,6 +9,7 @@ export default function RegisterPage() {
   const [formData, setFormData] = useState({
     email: '',
     username: '',
+    contactNumber: '',
     profileImage: null as File | null
   })
   const initialFamily = (() => {
@@ -91,6 +92,9 @@ export default function RegisterPage() {
       const formDataToSend = new FormData()
       formDataToSend.append('email', formData.email)
       formDataToSend.append('username', formData.username)
+      if (formData.contactNumber.trim()) {
+        formDataToSend.append('contactNumber', formData.contactNumber.trim())
+      }
       if (formData.profileImage) {
         formDataToSend.append('profileImage', formData.profileImage)
       }
@@ -118,7 +122,7 @@ export default function RegisterPage() {
           // Email was sent successfully
           setMessage({type: 'success', text: 'Registration successful! Please check your Gmail for password setup instructions.'})
         }
-        setFormData({email: '', username: '', profileImage: null})
+        setFormData({email: '', username: '', contactNumber: '', profileImage: null})
         setPreviewImage(null)
       } else {
         setMessage({type: 'error', text: data.message || 'Registration failed. Please try again.'})
@@ -258,6 +262,23 @@ export default function RegisterPage() {
                   minLength={3}
                 />
                 <p className="text-xs text-gray-500 mt-1">Leave blank to use your email as username</p>
+              </div>
+
+              {/* Contact Number Field */}
+              <div>
+                <label htmlFor="contactNumber" className="block text-sm font-medium text-gray-700 mb-2">
+                  Contact / WhatsApp Number (Optional)
+                </label>
+                <input
+                  type="tel"
+                  id="contactNumber"
+                  name="contactNumber"
+                  value={formData.contactNumber}
+                  onChange={handleInputChange}
+                  placeholder="07..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
+                />
+                <p className="text-xs text-gray-500 mt-1">Used to verify access to WhatsApp groups</p>
               </div>
 
               {/* Profile Image Field */}
