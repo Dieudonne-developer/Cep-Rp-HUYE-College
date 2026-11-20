@@ -1,14 +1,27 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getApiBaseUrl } from '../utils/api'
+import { WhatsAppAccessForm } from './WhatsAppGroupsPage'
 
 const groups = [{ key: 'cepier', name: 'CEPier (General)' }]
+
+type WaGroup = { id: string; slug: string; name: string; description?: string; inviteUrl?: string | null; isActive?: boolean }
 
 export default function ChatHubPage() {
   const baseUrl = getApiBaseUrl()
   const [form, setForm] = useState({ username: '', password: '', group: 'cepier' })
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState('')
+  const [waGroups, setWaGroups] = useState<WaGroup[]>([])
+
+  useEffect(() => {
+    fetch(`${baseUrl}/api/whatsapp/groups`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) setWaGroups((data.groups || []).filter((g: WaGroup) => g.isActive !== false))
+      })
+      .catch(() => {})
+  }, [baseUrl])
 
   async function handleLogin(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -101,6 +114,22 @@ export default function ChatHubPage() {
           </form>
         </div>
       </div>
+
+      {waGroups.length > 0 && (
+        <div className="mt-8">
+          <h3 className="text-2xl font-semibold text-gray-800 mb-2">Join WhatsApp Groups</h3>
+          <p className="text-gray-600 mb-4 text-sm">Invitation links are managed by each group's administrator.</p>
+          <div className="grid md:grid-cols-2 gap-4">
+            {waGroups.map((g) => (
+              <div key={g.id || g.slug} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
+                <h4 className="font-semibold text-gray-800 mb-1">{g.name}</h4>
+                {g.description && <p className="text-sm text-gray-600 mb-3">{g.description}</p>}
+                <WhatsAppAccessForm slug={g.slug} inviteUrl={g.inviteUrl} />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
