@@ -5,9 +5,10 @@ import { Home, Users, Music, Menu, Info, Calendar, Clock, MapPin, History, Light
 import { getApiBaseUrl } from '../../utils/api'
 import { WhatsAppAccessForm } from '../WhatsAppGroupsPage'
 import SupportItems from '../../components/SupportItems'
+import EventStatusBadge from '../../components/EventStatusBadge'
 
 type Song = { _id: string; title: string; url: string; downloadable?: boolean; mediaType?: 'audio' | 'video'; description?: string; category?: string; thumbnail?: string }
-type Activity = { _id: string; title: string; description?: string; date?: string; time?: string; location?: string; image?: string; schedule?: string }
+type Activity = { _id: string; title: string; description?: string; date?: string; time?: string; location?: string; image?: string; schedule?: string; status?: string }
 
 type Section = 'about'|'media'|'activities'|'ideas'|'support'|'chat'
 type MediaFilter = 'all'|'video'|'audio'
@@ -167,7 +168,8 @@ export default function EvangelicalPage() {
             date: event.eventDate || event.date,
             time: event.eventTime || event.time,
             location: event.location,
-            image: event.imageUrl
+            image: event.imageUrl,
+            status: event.status,
           }
           
           const status = String(event.status || '').toLowerCase()
@@ -612,7 +614,7 @@ export default function EvangelicalPage() {
                     <div className="flex flex-col md:flex-row md:items-start md:justify-between">
                       <div className="flex-1">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xl font-bold text-blue-800">{ev.title}</h4>
+                          <h4 className="text-xl font-bold text-blue-800">{ev.title} <EventStatusBadge status={ev.status} /></h4>
                           <button
                             onClick={() => setSelectedEvent(ev)}
                             className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
@@ -659,7 +661,7 @@ export default function EvangelicalPage() {
                       <div className="flex flex-col md:flex-row md:items-center md:justify-between">
                         <div className="flex-1">
                           <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-lg font-semibold text-gray-800">{ev.title}</h4>
+                            <h4 className="text-lg font-semibold text-gray-800">{ev.title} <EventStatusBadge status={ev.status} /></h4>
                             <button
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -705,7 +707,7 @@ export default function EvangelicalPage() {
                       )}
                       <div className="p-4">
                         <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-bold text-gray-800">{ev.title}</h4>
+                          <h4 className="font-bold text-gray-800">{ev.title} <EventStatusBadge status={ev.status} /></h4>
                           <Eye className="w-4 h-4 text-gray-400" />
                         </div>
                         {ev.date && <p className="text-sm text-gray-600 mb-2 flex items-center"><Calendar className="inline mr-1 w-4 h-4" />{new Date(ev.date).toLocaleDateString()}</p>}
