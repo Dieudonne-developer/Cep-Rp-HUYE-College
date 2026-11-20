@@ -5,7 +5,7 @@ import { Home, Users, Music, Menu, Info, Calendar, Clock, MapPin, History, Light
 import { getApiBaseUrl } from '../../utils/api'
 import { WhatsAppAccessForm } from '../WhatsAppGroupsPage'
 import SupportItems from '../../components/SupportItems'
-import EventStatusBadge from '../../components/EventStatusBadge'
+import ActivitiesGrid from '../../components/ActivitiesGrid'
 
 type Song = { _id: string; title: string; url: string; downloadable?: boolean; mediaType?: 'audio' | 'video'; description?: string; category?: string; thumbnail?: string }
 type Activity = { _id: string; title: string; description?: string; date?: string; time?: string; location?: string; image?: string; schedule?: string; status?: string }
@@ -557,123 +557,7 @@ export default function Psalm23Page() {
           {section === 'activities' && (
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center"><i data-lucide="calendar" className="mr-2 text-blue-600" /> Family Activities</h2>
-              <div className="mb-8">
-                <h3 className="text-2xl font-semibold text-gray-700 mb-4">Upcoming Events</h3>
-                {acts.upcoming.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <i data-lucide="calendar" className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No upcoming events scheduled yet.</p>
-                  </div>
-                ) : (
-                  acts.upcoming.map(ev => (
-                  <div key={ev._id} className="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-600 hover:shadow-lg transition-shadow">
-                    <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="text-xl font-bold text-blue-800">{ev.title} <EventStatusBadge status={ev.status} /></h4>
-                          <button
-                            onClick={() => setSelectedEvent(ev)}
-                            className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
-                          >
-                            <Eye className="w-4 h-4" />
-                            View Details
-                          </button>
-                        </div>
-                        <p className="text-gray-700 mt-2 line-clamp-2">{ev.description}</p>
-                        <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-600">
-                          {ev.date && <div className="flex items-center"><Calendar className="inline mr-1 w-4 h-4" />{new Date(ev.date).toLocaleDateString()}</div>}
-                          {ev.time && <div className="flex items-center"><Clock className="inline mr-1 w-4 h-4" />{ev.time}</div>}
-                          {ev.location && <div className="flex items-center"><MapPin className="inline mr-1 w-4 h-4" />{ev.location}</div>}
-                        </div>
-                      </div>
-                      {ev.image && (
-                        <div className="mt-4 md:mt-0 md:ml-4 cursor-pointer" onClick={() => setSelectedEvent(ev)}>
-                          <img 
-                            src={ev.image} 
-                            alt={ev.title} 
-                            className="w-32 h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                            onError={(e) => {
-                              console.error('Failed to load event image:', ev.image)
-                              e.currentTarget.style.display = 'none'
-                            }}
-                          />
-                      </div>
-                      )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-              <div className="mb-8">
-                <h3 className="text-2xl font-semibold text-gray-700 mb-4">Regular Activities</h3>
-                {acts.regular.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <i data-lucide="calendar" className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No regular activities scheduled yet.</p>
-                  </div>
-                ) : (
-                  acts.regular.map(ev => (
-                    <div key={ev._id} className="bg-gray-50 p-4 rounded-lg mb-4 border-l-4 border-gray-400 hover:shadow-lg transition-shadow cursor-pointer" onClick={() => setSelectedEvent(ev)}>
-                      <div className="flex flex-col md:flex-row md:items-center md:justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center justify-between mb-2">
-                            <h4 className="text-lg font-semibold text-gray-800">{ev.title} <EventStatusBadge status={ev.status} /></h4>
-                            <button
-                              onClick={(e) => {
-                                e.stopPropagation()
-                                setSelectedEvent(ev)
-                              }}
-                              className="flex items-center gap-1 px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded-lg transition-colors"
-                            >
-                              <Eye className="w-4 h-4" />
-                              View Details
-                            </button>
-                          </div>
-                          <div className="mt-2 md:mt-0 text-sm text-gray-600">
-                            {ev.schedule && <div className="flex items-center mb-1"><Clock className="inline mr-1 w-4 h-4" />{ev.schedule}</div>}
-                            {ev.location && <div className="flex items-center"><MapPin className="inline mr-1 w-4 h-4" />{ev.location}</div>}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-              <div>
-                <h3 className="text-2xl font-semibold text-gray-700 mb-4">Past Activities</h3>
-                {acts.past.length === 0 ? (
-                  <div className="text-center py-8 text-gray-500">
-                    <i data-lucide="history" className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-                    <p>No past activities to display yet.</p>
-                  </div>
-                ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {acts.past.map(ev => (
-                    <div key={ev._id} className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer" onClick={() => setSelectedEvent(ev)}>
-                      {ev.image && (
-                        <img 
-                          src={ev.image} 
-                          alt={ev.title} 
-                          className="w-full h-48 object-cover"
-                          onError={(e) => {
-                            console.error('Failed to load event image:', ev.image)
-                            e.currentTarget.style.display = 'none'
-                          }}
-                        />
-                      )}
-                      <div className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h4 className="font-bold text-gray-800">{ev.title} <EventStatusBadge status={ev.status} /></h4>
-                          <Eye className="w-4 h-4 text-gray-400" />
-                        </div>
-                        {ev.date && <p className="text-sm text-gray-600 mb-2 flex items-center"><Calendar className="inline mr-1 w-4 h-4" />{new Date(ev.date).toLocaleDateString()}</p>}
-                        <p className="text-gray-700 text-sm line-clamp-2">{ev.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                )}
-              </div>
+            <ActivitiesGrid items={[...acts.upcoming, ...acts.regular, ...acts.past]} onView={setSelectedEvent} />
             </div>
           )}
 

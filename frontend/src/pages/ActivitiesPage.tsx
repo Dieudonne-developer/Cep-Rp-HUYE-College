@@ -1,6 +1,7 @@
-import React, { useEffect, useMemo, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Calendar, Clock, MapPin, Info, Eye, X } from 'lucide-react'
 import { getApiBaseUrl } from '../utils/api'
+import ActivitiesGrid from '../components/ActivitiesGrid'
 
 type Activity = {
   _id: string
@@ -37,20 +38,6 @@ export default function ActivitiesPage() {
     }
   }, [selectedEvent])
 
-  const { upcoming, regular, past } = useMemo(() => {
-    const now = new Date()
-    const up: Activity[] = []
-    const re: Activity[] = []
-    const pa: Activity[] = []
-    events.forEach((e) => {
-      const status = String(e.status || '').toLowerCase()
-      const d = e.eventDate ? new Date(e.eventDate) : (e.date ? new Date(e.date) : null)
-      if (status === 'regular') re.push(e)
-      else if (status === 'completed' || status === 'cancelled' || !d || d < now) pa.push(e)
-      else up.push(e)
-    })
-    return { upcoming: up, regular: re, past: pa }
-  }, [events])
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
@@ -59,159 +46,9 @@ export default function ActivitiesPage() {
         Activities
       </h2>
 
-      <section className="mb-8">
-        <h3 className="text-2xl font-semibold text-gray-700 mb-4">Upcoming Events</h3>
-        {upcoming.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>No upcoming events scheduled yet.</p>
-          </div>
-        ) : (
-          upcoming.map((ev) => (
-            <div key={ev._id} className="bg-blue-50 p-4 rounded-lg mb-4 border-l-4 border-blue-600 hover:shadow-lg transition-shadow">
-              <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-                <div className="flex-1">
-                  <div className="flex items-center justify-between mb-2">
-                  <h4 className="text-xl font-bold text-blue-800">{ev.title}</h4>
-                    <button
-                      onClick={() => setSelectedEvent(ev)}
-                      className="flex items-center gap-1 px-3 py-1 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-lg transition-colors"
-                    >
-                      <Eye className="w-4 h-4" />
-                      View Details
-                    </button>
-                  </div>
-                  {ev.description && <p className="text-gray-700 mt-2 line-clamp-2">{ev.description}</p>}
-                  <div className="mt-3 flex flex-wrap gap-4 text-sm text-gray-600">
-                    {(ev.eventDate || ev.date) && (
-                      <div className="flex items-center">
-                        <Calendar className="inline mr-1 w-4 h-4" />
-                        {new Date(ev.eventDate || ev.date || '').toLocaleDateString()}
-                      </div>
-                    )}
-                    {(ev.eventTime || ev.time) && (
-                      <div className="flex items-center">
-                        <Clock className="inline mr-1 w-4 h-4" />
-                        {ev.eventTime || ev.time}
-                      </div>
-                    )}
-                    {ev.location && (
-                      <div className="flex items-center">
-                        <MapPin className="inline mr-1 w-4 h-4" />
-                        {ev.location}
-                      </div>
-                    )}
-                  </div>
-                </div>
-                {(ev.imageUrl || ev.image) && (
-                  <div className="mt-4 md:mt-0 md:ml-4 cursor-pointer" onClick={() => setSelectedEvent(ev)}>
-                    <img 
-                      src={ev.imageUrl || ev.image} 
-                      alt={ev.title} 
-                      className="w-32 h-24 object-cover rounded-lg shadow-sm hover:shadow-md transition-shadow"
-                      onError={(e) => {
-                        console.error('Failed to load event image:', ev.imageUrl || ev.image)
-                        e.currentTarget.style.display = 'none'
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          ))
-        )}
-      </section>
+            <ActivitiesGrid items={events} onView={setSelectedEvent} />
 
-      <section className="mb-8">
-        <h3 className="text-2xl font-semibold text-gray-700 mb-4">Regular Activities</h3>
-        {regular.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>No regular activities.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {regular.map((ev) => (
-              <div
-                key={ev._id}
-                className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => setSelectedEvent(ev)}
-              >
-                {(ev.imageUrl || ev.image) && (
-                  <img
-                    src={ev.imageUrl || ev.image}
-                    alt={ev.title}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                )}
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-gray-800">{ev.title}</h4>
-                    <Eye className="w-4 h-4 text-gray-400" />
-                  </div>
-                  {(ev.eventDate || ev.date) && (
-                    <p className="text-sm text-gray-600 mb-2 flex items-center">
-                      <Calendar className="inline mr-1 w-4 h-4" />
-                      {new Date(ev.eventDate || ev.date || '').toLocaleDateString()}
-                    </p>
-                  )}
-                  {ev.description && <p className="text-gray-700 text-sm line-clamp-2">{ev.description}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      <section>
-        <h3 className="text-2xl font-semibold text-gray-700 mb-4">Past Activities</h3>
-        {past.length === 0 ? (
-          <div className="text-center py-8 text-gray-500">
-            <Clock className="w-12 h-12 mx-auto mb-4 text-gray-300" />
-            <p>No past activities to display yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {past.map((ev) => (
-              <div 
-                key={ev._id} 
-                className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
-                onClick={() => setSelectedEvent(ev)}
-              >
-                {(ev.imageUrl || ev.image) && (
-                  <img 
-                    src={ev.imageUrl || ev.image} 
-                    alt={ev.title} 
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      console.error('Failed to load event image:', ev.imageUrl || ev.image)
-                      e.currentTarget.style.display = 'none'
-                    }}
-                  />
-                )}
-                <div className="p-4">
-                  <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-bold text-gray-800">{ev.title}</h4>
-                    <Eye className="w-4 h-4 text-gray-400" />
-                  </div>
-                  {(ev.eventDate || ev.date) && (
-                    <p className="text-sm text-gray-600 mb-2 flex items-center">
-                      <Calendar className="inline mr-1 w-4 h-4" />
-                      {new Date(ev.eventDate || ev.date || '').toLocaleDateString()}
-                    </p>
-                  )}
-                  {ev.description && <p className="text-gray-700 text-sm line-clamp-2">{ev.description}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Event Details Modal */}
+{/* Event Details Modal */}
       {selectedEvent && (
         <div 
           className="fixed inset-0 bg-gray-900 bg-opacity-75 z-50 flex items-center justify-center p-4"
