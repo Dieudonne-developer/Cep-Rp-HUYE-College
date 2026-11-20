@@ -272,7 +272,7 @@ export default function AdminLayout() {
               )}
               <div className="pt-4 border-t border-gray-200 mt-4">
                 <Link
-                  to="/choir"
+                  to="/"
                   onClick={handleNavLinkClick}
                   className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700"
                 >

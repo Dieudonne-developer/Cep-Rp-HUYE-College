@@ -50,6 +50,8 @@ CREATE TABLE IF NOT EXISTS events (
   title TEXT NOT NULL,
   description TEXT,
   date TIMESTAMPTZ,
+  event_time TEXT,
+  status TEXT DEFAULT 'upcoming',
   location TEXT,
   image_url TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -148,6 +150,10 @@ CREATE TABLE IF NOT EXISTS group_support (
 
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS contact_number TEXT;
+
+ALTER TABLE events ADD COLUMN IF NOT EXISTS event_time TEXT;
+ALTER TABLE events ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'upcoming';
+ALTER TABLE events ADD COLUMN IF NOT EXISTS date TIMESTAMPTZ;
 
 CREATE INDEX IF NOT EXISTS idx_app_users_email ON app_users (email);
 CREATE INDEX IF NOT EXISTS idx_app_users_token ON app_users (verification_token);

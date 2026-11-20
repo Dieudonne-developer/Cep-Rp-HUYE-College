@@ -644,11 +644,12 @@ router.put('/events/:id', async (req, res) => {
     const group = await resolveGroup(req);
     const EventModel = getEventModelForGroup(group);
     const { id } = req.params;
-    const updateData = req.body;
+    const updateData = { ...req.body };
     // Handle eventDate -> date mapping
     if (updateData.eventDate && !updateData.date) {
       updateData.date = new Date(updateData.eventDate);
     }
+    delete updateData.eventDate;
     updateData.updatedAt = new Date();
     const event = await EventModel.findByIdAndUpdate(id, updateData, { new: true });
     if (!event) {
@@ -1462,11 +1463,13 @@ router.get('/super-admin/home/activities', checkSuperAdmin, async (_req, res) =>
 
 router.post('/super-admin/home/activities', checkSuperAdmin, async (req, res) => {
   try {
-    const { title, description, date, eventDate, eventTime, location, imageUrl } = req.body;
+    const { title, description, date, eventDate, eventTime, location, imageUrl, status } = req.body;
     const newEvent = new GlobalEvent({
       title,
       description,
       date: eventDate ? new Date(eventDate) : (date ? new Date(date) : undefined),
+      eventTime: eventTime || undefined,
+      status: status || 'upcoming',
       location,
       imageUrl,
       ownerAdminId: req.superAdmin.id,
@@ -1484,6 +1487,7 @@ router.put('/super-admin/home/activities/:id', checkSuperAdmin, async (req, res)
     const { id } = req.params;
     const update = { ...req.body };
     if (update.eventDate && !update.date) update.date = new Date(update.eventDate);
+    delete update.eventDate;
     update.updatedAt = new Date();
     const ev = await GlobalEvent.findByIdAndUpdate(id, update, { new: true });
     if (!ev) return res.status(404).json({ success: false, message: 'Activity not found' });
