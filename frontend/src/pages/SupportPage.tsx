@@ -60,7 +60,7 @@ export default function SupportPage() {
 
   const bank = supportData?.bank || {}
   const mobileMoney = supportData?.mobileMoney || {}
-  const onlineDonationNote = supportData?.onlineDonationNote || 'Paystack verification pending server integration.'
+  const onlineDonationNote = ''
 
   // Check if we have any bank information
   const hasBankInfo = bank.bankName || bank.accountName || bank.accountNumber || bank.swiftCode
@@ -130,17 +130,6 @@ export default function SupportPage() {
           </div>
         </div>
         
-        <div>
-          <h3 className="text-2xl font-semibold text-gray-700 mb-4">Online Donation</h3>
-          {onlineDonationNote && (
-            <div className="bg-gray-50 p-4 rounded-lg border border-gray-200 mb-4">
-              <p className="text-gray-700 text-sm">{onlineDonationNote}</p>
-            </div>
-          )}
-          <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-lg">
-            Donate via Paystack
-          </button>
-        </div>
       </div>
 
       <div className="mt-8">

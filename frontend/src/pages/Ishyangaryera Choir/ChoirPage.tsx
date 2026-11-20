@@ -770,13 +770,6 @@ export default function ChoirPage() {
                       )}
                   </div>
                 </div>
-                <div>
-                  <h3 className="text-2xl font-semibold text-gray-700 mb-4">Online Donation</h3>
-                    <p className="text-gray-700 mb-4">
-                      {supportData?.onlineDonationNote || 'Paystack verification pending server integration.'}
-                    </p>
-                  <button className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition duration-300 ease-in-out shadow-lg flex items-center justify-center"><i data-lucide="credit-card" className="mr-2 w-5 h-5" /> Donate via Paystack</button>
-                </div>
               </div>
               )}
             </div>
