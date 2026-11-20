@@ -216,12 +216,18 @@ router.post('/requests', async (req, res) => {
   }
 });
 
+function canManageGroup(admin, slug) {
+  return (admin.role || '').toLowerCase() === 'super-admin' || slug === admin.userGroup;
+}
+
 router.get('/admin/groups', async (req, res) => {
   try {
-    if (!(await requireAdmin(req, res))) return;
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
     const groups = await WhatsAppGroup.find().sort({ name: 1 });
     res.json({
       success: true,
+      isSuperAdmin: (admin.role || '').toLowerCase() === 'super-admin',
       groups: groups.map((group) => ({
         id: group._id,
         slug: group.slug,
@@ -230,6 +236,7 @@ router.get('/admin/groups', async (req, res) => {
         inviteUrl: group.inviteUrl || '',
         isActive: group.isActive !== false,
         hasInvite: Boolean(group.inviteUrl),
+        canManage: canManageGroup(admin, group.slug),
       })),
     });
   } catch (error) {
@@ -239,7 +246,11 @@ router.get('/admin/groups', async (req, res) => {
 
 router.post('/admin/groups', async (req, res) => {
   try {
-    if (!(await requireAdmin(req, res))) return;
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
+    if ((admin.role || '').toLowerCase() !== 'super-admin') {
+      return res.status(403).json({ success: false, message: 'Only the Super Admin can create WhatsApp groups' });
+    }
     const name = String(req.body.name || '').trim();
     const slug = String(req.body.slug || name).trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
     if (!name || !slug) return res.status(400).json({ success: false, message: 'Group name is required' });
@@ -266,9 +277,13 @@ router.post('/admin/groups', async (req, res) => {
 
 router.put('/admin/groups/:id', async (req, res) => {
   try {
-    if (!(await requireAdmin(req, res))) return;
+    const admin = await requireAdmin(req, res);
+    if (!admin) return;
     const group = await WhatsAppGroup.findById(req.params.id);
     if (!group) return res.status(404).json({ success: false, message: 'Group not found' });
+    if (!canManageGroup(admin, group.slug)) {
+      return res.status(403).json({ success: false, message: 'You can only manage the WhatsApp group for your own family' });
+    }
     if (req.body.name != null) group.name = String(req.body.name).trim();
     if (req.body.description != null) group.description = String(req.body.description).trim();
     if (req.body.isActive != null) group.isActive = Boolean(req.body.isActive);

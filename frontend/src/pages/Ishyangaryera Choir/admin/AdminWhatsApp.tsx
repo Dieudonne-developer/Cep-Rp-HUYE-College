@@ -9,6 +9,7 @@ type Group = {
   inviteUrl: string
   isActive: boolean
   hasInvite: boolean
+  canManage: boolean
 }
 
 type AccessRequest = {
@@ -32,6 +33,7 @@ export default function AdminWhatsApp() {
   const [error, setError] = useState('')
   const [notice, setNotice] = useState('')
   const [loading, setLoading] = useState(true)
+  const [isSuperAdmin, setIsSuperAdmin] = useState(false)
 
   function headers(json = false) {
     const admin = JSON.parse(localStorage.getItem('admin') || '{}')
@@ -52,6 +54,7 @@ export default function AdminWhatsApp() {
     if (!groupData.success) throw new Error(groupData.message || 'Could not load groups')
     if (!requestData.success) throw new Error(requestData.message || 'Could not load requests')
     setGroups(groupData.groups || [])
+    setIsSuperAdmin(Boolean(groupData.isSuperAdmin))
     setRequests(requestData.requests || [])
   }
 
@@ -127,6 +130,7 @@ export default function AdminWhatsApp() {
       {error && <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">{error}</div>}
       {notice && <div className="bg-green-50 border border-green-200 text-green-800 px-4 py-3 rounded-lg">{notice}</div>}
 
+      {isSuperAdmin && (
       <form onSubmit={saveGroup} className="bg-white border border-gray-200 rounded-lg p-4 grid md:grid-cols-2 gap-3">
         <h3 className="md:col-span-2 font-semibold text-gray-800">{editing ? `Edit ${editing.slug}` : 'Add a group'}</h3>
         <input value={editing ? editing.name : form.name} onChange={(e) => editing ? setEditing({ ...editing, name: e.target.value }) : setForm({ ...form, name: e.target.value })} placeholder="Group name" className="px-3 py-2 border border-gray-300 rounded-lg" required />
@@ -141,6 +145,25 @@ export default function AdminWhatsApp() {
           <button className="px-4 py-2 rounded-lg bg-blue-700 text-white">{editing ? 'Save changes' : 'Add group'}</button>
         </div>
       </form>
+      )}
+      {!isSuperAdmin && editing && (
+        <div className="bg-white border border-gray-200 rounded-lg p-4">
+          <h3 className="font-semibold text-gray-800 mb-3">Edit {editing.name}</h3>
+          <div className="grid md:grid-cols-2 gap-3">
+            <input value={editing.name} onChange={(e) => setEditing({ ...editing, name: e.target.value })} placeholder="Group name" className="px-3 py-2 border border-gray-300 rounded-lg" />
+            <input value={editing.inviteUrl} onChange={(e) => setEditing({ ...editing, inviteUrl: e.target.value })} placeholder="https://chat.whatsapp.com/..." className="px-3 py-2 border border-gray-300 rounded-lg" />
+            <textarea value={editing.description} onChange={(e) => setEditing({ ...editing, description: e.target.value })} placeholder="Description" className="md:col-span-2 px-3 py-2 border border-gray-300 rounded-lg" rows={2} />
+            <label className="flex items-center gap-2 text-sm text-gray-700">
+              <input type="checkbox" checked={editing.isActive} onChange={(e) => setEditing({ ...editing, isActive: e.target.checked })} />
+              Active
+            </label>
+            <div className="flex gap-2 justify-end">
+              <button type="button" onClick={() => setEditing(null)} className="px-4 py-2 rounded-lg border border-gray-300">Cancel</button>
+              <button onClick={saveGroup} className="px-4 py-2 rounded-lg bg-blue-700 text-white">Save changes</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className="overflow-x-auto bg-white border border-gray-200 rounded-lg">
         <table className="min-w-full text-sm">
@@ -162,8 +185,14 @@ export default function AdminWhatsApp() {
                 <td className="px-3 py-3 max-w-xs break-all">{group.hasInvite ? group.inviteUrl : 'Invitation link not yet provided.'}</td>
                 <td className="px-3 py-3">{group.isActive ? 'Active' : 'Inactive'}</td>
                 <td className="px-3 py-3 whitespace-nowrap">
-                  <button onClick={() => setEditing(group)} className="text-blue-700 mr-3">Edit</button>
-                  <button onClick={() => toggleActive(group)} className="text-gray-700">{group.isActive ? 'Deactivate' : 'Activate'}</button>
+                  {group.canManage ? (
+                    <>
+                      <button onClick={() => setEditing(group)} className="text-blue-700 mr-3">Edit</button>
+                      <button onClick={() => toggleActive(group)} className="text-gray-700">{group.isActive ? 'Deactivate' : 'Activate'}</button>
+                    </>
+                  ) : (
+                    <span className="text-gray-400 text-xs">Managed by Super Admin</span>
+                  )}
                 </td>
               </tr>
             ))}
