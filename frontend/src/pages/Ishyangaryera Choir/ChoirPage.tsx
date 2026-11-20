@@ -726,7 +726,8 @@ export default function ChoirPage() {
           {section === 'support' && (
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center"><i data-lucide="heart-handshake" className="mr-2 text-blue-600" /> Support Our Ministry</h2>
-              {loadingSupport ? (
+              <SupportItems group="choir" />
+{loadingSupport ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-pulse text-gray-600">Loading support information...</div>
                 </div>
@@ -788,7 +789,6 @@ export default function ChoirPage() {
                 WhatsApp Group
               </h2>
               <p className="text-gray-600 mb-4">Enter the contact number saved on your choir membership. Registration and a password are not required.</p>
-              <SupportItems group="choir" />
               <WhatsAppAccessForm slug="choir" />
             </div>
           )}

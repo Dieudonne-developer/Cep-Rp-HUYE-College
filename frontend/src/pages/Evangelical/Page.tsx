@@ -665,6 +665,7 @@ export default function EvangelicalPage() {
           {section === 'support' && (
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h2 className="text-3xl font-bold text-gray-800 mb-6 flex items-center"><i data-lucide="heart-handshake" className="mr-2 text-blue-600" /> Support Our Family</h2>
+              <SupportItems group="evangelical" />
               <div className="grid md:grid-cols-2 gap-8">
                 <div>
                   <h3 className="text-2xl font-semibold text-gray-700 mb-4">Financial Support</h3>
@@ -695,7 +696,6 @@ export default function EvangelicalPage() {
                 WhatsApp Group
               </h2>
               <p className="text-gray-600 mb-4">Enter the contact number saved on your Evangelical membership. Registration and a password are not required.</p>
-              <SupportItems group="evangelical" />
               <WhatsAppAccessForm slug="evangelical" />
             </div>
           )}

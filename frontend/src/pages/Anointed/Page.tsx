@@ -371,7 +371,8 @@ export default function AnointedPage() {
           {section === 'support' && (
             <div className="p-6 bg-white rounded-lg shadow-md">
               <h2 className="text-3xl font-bold text-gray-800 mb-6">Support Our Ministry</h2>
-              {loadingSupport ? (
+              <SupportItems group="anointed" />
+{loadingSupport ? (
                 <div className="flex items-center justify-center py-12">
                   <div className="animate-pulse text-gray-600">Loading support information...</div>
                 </div>
@@ -436,7 +437,6 @@ export default function AnointedPage() {
             <div className="p-6 bg-white rounded-lg shadow-md max-w-lg mx-auto">
               <h2 className="text-3xl font-bold text-gray-800 mb-3 flex items-center"><MessageCircle className="mr-2 text-blue-600" /> WhatsApp Group</h2>
               <p className="text-gray-600 mb-4">Enter the contact number saved on your Anointed membership. Registration and a password are not required.</p>
-              <SupportItems group="anointed" />
               <WhatsAppAccessForm slug="anointed" />
             </div>
           )}
