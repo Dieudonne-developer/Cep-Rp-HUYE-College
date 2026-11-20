@@ -19,14 +19,14 @@ export default function SupportPage() {
       const response = await fetch(`${baseUrl}/api/home/support`)
       const data = await response.json()
       
-      if (data.success && data.support) {
-        setSupportData(data.support)
+      if (data.success) {
+        setSupportData(data.support || {})
       } else {
-        setError('Failed to load support information')
+        setSupportData({})
       }
     } catch (err) {
       console.error('Error fetching support data:', err)
-      setError('Failed to load support information. Please try again later.')
+      setSupportData({})
     } finally {
       setLoading(false)
     }

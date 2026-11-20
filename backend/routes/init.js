@@ -55,7 +55,8 @@ router.get('/support', async (_req, res) => {
     if (!doc) doc = await GlobalSupport.create({});
     res.json({ success: true, support: doc });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch support info' });
+    console.error('Error fetching global support:', error);
+    res.json({ success: true, support: {} });
   }
 });
 
@@ -71,7 +72,7 @@ router.get('/support/:group', async (req, res) => {
     res.json({ success: true, support: doc });
   } catch (error) {
     console.error('Error fetching group support:', error);
-    res.status(500).json({ success: false, message: 'Failed to fetch support info' });
+    res.json({ success: true, support: {} });
   }
 });
 
