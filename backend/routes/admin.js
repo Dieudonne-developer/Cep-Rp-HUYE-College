@@ -766,9 +766,56 @@ router.post('/members/:id/reject', async (req, res) => {
 
 router.post('/members', async (req, res) => {
   try {
-    res.json({ success: true, message: 'Member created successfully' });
+    const group = await resolveGroup(req);
+    const Model = getUserModelForGroup(group);
+    const { username, email, contactNumber } = req.body || {};
+    const uname = String(username || '').trim();
+    const emailLower = String(email || '').trim().toLowerCase();
+    if (!uname || !emailLower) {
+      return res.status(400).json({ success: false, message: 'Name and email are required' });
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailLower)) {
+      return res.status(400).json({ success: false, message: 'Enter a valid email address' });
+    }
+    const contactDigits = String(contactNumber || '').replace(/\D/g, '');
+    if (contactNumber && contactDigits.length < 9) {
+      return res.status(400).json({ success: false, message: 'Contact number must include at least 9 digits.' });
+    }
+    const existing = await Model.findOne({
+      $or: [{ email: emailLower }, { username: uname }],
+    });
+    if (existing) {
+      return res.status(400).json({ success: false, message: 'A member with this email or name already exists in this group' });
+    }
+    const adminEmail = String(req.header('x-admin-email') || '').trim().toLowerCase();
+    const member = await Model.create({
+      username: uname,
+      email: emailLower,
+      contactNumber: contactDigits || null,
+      isVerified: true,
+      isApproved: true,
+      approvedAt: new Date(),
+      approvedBy: adminEmail || 'admin',
+    });
+    res.json({
+      success: true,
+      message: 'Member registered successfully',
+      member: {
+        _id: member._id,
+        username: member.username,
+        email: member.email,
+        contactNumber: member.contactNumber || '',
+        userGroup: member.userGroup,
+        isApproved: member.isApproved,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to create member' });
+    console.error('Error creating member:', error);
+    const duplicate = /duplicate key|unique/i.test(error.message || '');
+    res.status(duplicate ? 400 : 500).json({
+      success: false,
+      message: duplicate ? 'A member with this email or name already exists in this group' : 'Failed to create member'
+    });
   }
 });
 
