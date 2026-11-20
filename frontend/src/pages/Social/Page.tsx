@@ -86,6 +86,7 @@ export default function SocialPage() {
         // Transform events to activities format
         const now = new Date()
         const upcoming: Activity[] = []
+        const regular: Activity[] = []
         const past: Activity[] = []
         
         events.forEach((event: any) => {
@@ -100,14 +101,17 @@ export default function SocialPage() {
             image: event.imageUrl
           }
           
-          if (eventDate >= now) {
-            upcoming.push(activity)
-          } else {
+          const status = String(event.status || '').toLowerCase()
+          if (status === 'regular') {
+            regular.push(activity)
+          } else if (status === 'completed' || status === 'cancelled' || eventDate < now) {
             past.push(activity)
+          } else {
+            upcoming.push(activity)
           }
         })
         
-        setActs({ upcoming, regular: [], past })
+        setActs({ upcoming, regular, past })
       }).catch(()=>{})
     } else if (section === 'ideas') {
       fetch(`${baseUrl}/api/choir/implemented-ideas?group=${groupParam}`).then(r=>r.json()).then(r=> setIdeas(r.data||[])).catch(()=>{})

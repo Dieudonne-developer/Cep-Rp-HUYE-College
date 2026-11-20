@@ -11,7 +11,7 @@ type Event = {
   eventTime?: string
   location: string
   imageUrl?: string
-  status: 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
+  status: 'upcoming' | 'ongoing' | 'regular' | 'completed' | 'cancelled'
   createdAt: string
 }
 
@@ -38,7 +38,7 @@ export default function AdminEvents() {
     eventTime: '',
     location: '',
     imageUrl: '',
-    status: (isAbanyamugishaAdmin ? 'completed' : 'upcoming') as 'upcoming' | 'ongoing' | 'completed' | 'cancelled'
+    status: (isAbanyamugishaAdmin ? 'completed' : 'upcoming') as 'upcoming' | 'ongoing' | 'regular' | 'completed' | 'cancelled'
   })
   const [uploading, setUploading] = useState(false)
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -179,6 +179,7 @@ export default function AdminEvents() {
       switch (status) {
         case 'upcoming': return 'bg-blue-100 text-blue-800'
         case 'ongoing': return 'bg-green-100 text-green-800'
+        case 'regular': return 'bg-purple-100 text-purple-800'
         case 'completed': return 'bg-gray-100 text-gray-800'
         case 'cancelled': return 'bg-red-100 text-red-800'
         default: return 'bg-gray-100 text-gray-800'
@@ -242,7 +243,7 @@ export default function AdminEvents() {
                 <span className={`px-2 py-1 rounded-full text-xs font-semibold ${getStatusColor(event.status)}`}>
                   {isAbanyamugishaAdmin 
                     ? (event.status === 'completed' ? 'Answered' : event.status === 'ongoing' ? 'Testimony' : event.status)
-                    : event.status}
+                    : event.status === 'regular' ? 'Regular' : event.status}
                 </span>
               </div>
               
@@ -442,6 +443,7 @@ export default function AdminEvents() {
                     <>
                       <option value="upcoming">Upcoming</option>
                       <option value="ongoing">Ongoing</option>
+                      <option value="regular">Regular / Recurring</option>
                       <option value="completed">Completed</option>
                       <option value="cancelled">Cancelled</option>
                     </>

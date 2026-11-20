@@ -128,10 +128,13 @@ export default function AnointedPage() {
             schedule: event.schedule
           }
           
-          if (eventDate >= now) {
-            upcoming.push(activity)
-          } else {
+          const status = String(event.status || '').toLowerCase()
+          if (status === 'regular') {
+            regular.push(activity)
+          } else if (status === 'completed' || status === 'cancelled' || eventDate < now) {
             past.push(activity)
+          } else {
+            upcoming.push(activity)
           }
         })
         setActs({ upcoming, regular, past })

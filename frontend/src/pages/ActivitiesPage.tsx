@@ -13,6 +13,7 @@ type Activity = {
   location?: string
   imageUrl?: string
   image?: string
+  status?: string
 }
 
 export default function ActivitiesPage() {
@@ -36,15 +37,19 @@ export default function ActivitiesPage() {
     }
   }, [selectedEvent])
 
-  const { upcoming, past } = useMemo(() => {
+  const { upcoming, regular, past } = useMemo(() => {
     const now = new Date()
     const up: Activity[] = []
+    const re: Activity[] = []
     const pa: Activity[] = []
     events.forEach((e) => {
+      const status = String(e.status || '').toLowerCase()
       const d = e.eventDate ? new Date(e.eventDate) : (e.date ? new Date(e.date) : null)
-      if (d && d >= now) up.push(e); else pa.push(e)
+      if (status === 'regular') re.push(e)
+      else if (status === 'completed' || status === 'cancelled' || !d || d < now) pa.push(e)
+      else up.push(e)
     })
-    return { upcoming: up, past: pa }
+    return { upcoming: up, regular: re, past: pa }
   }, [events])
 
   return (
@@ -114,6 +119,50 @@ export default function ActivitiesPage() {
               </div>
             </div>
           ))
+        )}
+      </section>
+
+      <section className="mb-8">
+        <h3 className="text-2xl font-semibold text-gray-700 mb-4">Regular Activities</h3>
+        {regular.length === 0 ? (
+          <div className="text-center py-8 text-gray-500">
+            <Calendar className="w-12 h-12 mx-auto mb-4 text-gray-300" />
+            <p>No regular activities.</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {regular.map((ev) => (
+              <div
+                key={ev._id}
+                className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow cursor-pointer"
+                onClick={() => setSelectedEvent(ev)}
+              >
+                {(ev.imageUrl || ev.image) && (
+                  <img
+                    src={ev.imageUrl || ev.image}
+                    alt={ev.title}
+                    className="w-full h-48 object-cover"
+                    onError={(e) => {
+                      e.currentTarget.style.display = 'none'
+                    }}
+                  />
+                )}
+                <div className="p-4">
+                  <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-bold text-gray-800">{ev.title}</h4>
+                    <Eye className="w-4 h-4 text-gray-400" />
+                  </div>
+                  {(ev.eventDate || ev.date) && (
+                    <p className="text-sm text-gray-600 mb-2 flex items-center">
+                      <Calendar className="inline mr-1 w-4 h-4" />
+                      {new Date(ev.eventDate || ev.date || '').toLocaleDateString()}
+                    </p>
+                  )}
+                  {ev.description && <p className="text-gray-700 text-sm line-clamp-2">{ev.description}</p>}
+                </div>
+              </div>
+            ))}
+          </div>
         )}
       </section>
 

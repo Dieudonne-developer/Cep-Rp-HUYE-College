@@ -17,9 +17,7 @@ type Member = {
 
 export default function AdminMembers() {
   const [members, setMembers] = useState<Member[]>([])
-  const [pendingMembers, setPendingMembers] = useState<Member[]>([])
   const [loading, setLoading] = useState(true)
-  const [activeTab, setActiveTab] = useState<'all' | 'pending'>('pending')
   const [editingMember, setEditingMember] = useState<Member | null>(null)
   const [editForm, setEditForm] = useState({ username: '', email: '', contactNumber: '' })
   const baseUrl = getApiBaseUrl()
@@ -39,7 +37,6 @@ export default function AdminMembers() {
 
   useEffect(() => {
     fetchMembers()
-    fetchPendingMembers()
   }, [])
 
   useLucideIcons()
@@ -58,18 +55,6 @@ export default function AdminMembers() {
     }
   }
 
-  const fetchPendingMembers = async () => {
-    try {
-    const adminRaw = localStorage.getItem('admin')
-    const admin = adminRaw ? JSON.parse(adminRaw) : {}
-    const response = await fetch(`${baseUrl}/api/admin/members/pending?${groupQuery}`, { headers: { 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' } })
-      const data = await response.json()
-      setPendingMembers(data)
-    } catch (error) {
-      console.error('Failed to fetch pending members:', error)
-    }
-  }
-
   const handleApprove = async (member: Member) => {
     try {
       const adminUsername = sessionStorage.getItem('adminUser') || 'admin'
@@ -84,7 +69,6 @@ export default function AdminMembers() {
       if (response.ok) {
         alert('User approved successfully!')
         fetchMembers()
-        fetchPendingMembers()
       }
     } catch (error) {
       console.error('Failed to approve user:', error)
@@ -115,7 +99,6 @@ export default function AdminMembers() {
       }
       setEditingMember(null)
       fetchMembers()
-      fetchPendingMembers()
     } catch (error) {
       console.error('Failed to update member:', error)
       alert('Failed to update member')
@@ -137,7 +120,6 @@ export default function AdminMembers() {
         return
       }
       fetchMembers()
-      fetchPendingMembers()
     } catch (error) {
       console.error('Failed to delete member:', error)
       alert('Failed to delete member')
@@ -167,7 +149,6 @@ export default function AdminMembers() {
         setShowAddModal(false)
         setAddMessage(null)
         fetchMembers()
-        fetchPendingMembers()
       }, 1200)
     } catch (error) {
       console.error('Failed to register member:', error)
@@ -191,7 +172,6 @@ export default function AdminMembers() {
       if (response.ok) {
         alert(member.isApproved ? 'User approval revoked successfully!' : 'User rejected successfully!')
         fetchMembers()
-        fetchPendingMembers()
       }
     } catch (error) {
       console.error('Failed to reject user:', error)
@@ -215,43 +195,45 @@ export default function AdminMembers() {
     )
   }
 
-  const displayMembers = activeTab === 'pending' ? pendingMembers : members
+  const downloadCSV = () => {
+    const escape = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const header = ['Name', 'Email', 'Contact Number', 'Status', 'Registered']
+    const rows = members.map((m) => [
+      m.username || '',
+      m.email || '',
+      m.contactNumber || '',
+      m.isApproved ? 'Approved' : 'Pending',
+      m.createdAt ? new Date(m.createdAt).toLocaleDateString() : '',
+    ])
+    const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${adminGroup}-members.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
 
   return (
     <div className="p-6">
       <div className="mb-8">
         <div className="flex justify-between items-center mb-4">
           <h1 className="text-3xl font-bold text-gray-800">Manage Members</h1>
-          <button
-            onClick={() => { setAddForm({ username: '', email: '', contactNumber: '' }); setAddMessage(null); setShowAddModal(true) }}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
-          >
-            <i data-lucide="user-plus" className="w-4 h-4 mr-2"></i> Register Member
-          </button>
-        </div>
-        
-        {/* Tabs */}
-        <div className="flex space-x-4 border-b border-gray-200">
-          <button
-            onClick={() => setActiveTab('pending')}
-            className={`px-4 py-2 font-medium ${
-              activeTab === 'pending'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            Pending Approval ({pendingMembers.length})
-          </button>
-          <button
-            onClick={() => setActiveTab('all')}
-            className={`px-4 py-2 font-medium ${
-              activeTab === 'all'
-                ? 'text-blue-600 border-b-2 border-blue-600'
-                : 'text-gray-500 hover:text-gray-700'
-            }`}
-          >
-            All Members ({members.length})
-          </button>
+          <div className="flex space-x-3">
+            <button
+              onClick={downloadCSV}
+              className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg flex items-center"
+            >
+              <i data-lucide="download" className="w-4 h-4 mr-2"></i> Download CSV
+            </button>
+            <button
+              onClick={() => { setAddForm({ username: '', email: '', contactNumber: '' }); setAddMessage(null); setShowAddModal(true) }}
+              className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+            >
+              <i data-lucide="user-plus" className="w-4 h-4 mr-2"></i> Register Member
+            </button>
+          </div>
         </div>
       </div>
 
@@ -268,7 +250,7 @@ export default function AdminMembers() {
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {displayMembers.map(member => (
+              {members.map(member => (
                 <tr key={member._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
@@ -447,12 +429,9 @@ export default function AdminMembers() {
           </div>
         )}
 
-        {displayMembers.length === 0 && (
+        {members.length === 0 && (
           <div className="text-center py-8 text-gray-500">
-            {activeTab === 'pending' 
-              ? 'No pending members to approve.'
-              : 'No members found.'
-            }
+            No members found. Use "Register Member" to add one.
           </div>
         )}
       </div>
