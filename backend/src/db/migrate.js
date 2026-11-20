@@ -191,16 +191,22 @@ INSERT INTO whatsapp_groups (slug, name, description, invite_url, is_active)
 VALUES
   ('cep', 'CEP Group', 'Main CEP community WhatsApp group.', 'https://chat.whatsapp.com/KshHGDS0KdVL7RFhe7wOUi', TRUE),
   ('anointed', 'The Anointed Group', 'Anointed worship team WhatsApp group.', 'https://chat.whatsapp.com/JfnnXpYnWN51i4thUGshw4', TRUE),
-  ('protocol', 'Protocol Family', 'Protocol family WhatsApp group. The invitation link has not been provided yet.', NULL, TRUE),
+  ('protocol', 'Protocol Family', 'Protocol family WhatsApp group.', 'https://chat.whatsapp.com/KIUahpUhQ4A0gRVLk7edYY', TRUE),
   ('choir', 'Ishyanga Ryera Choir', 'Choir family WhatsApp group.', NULL, TRUE),
   ('abanyamugisha', 'Abanyamugisha Family', 'Abanyamugisha family WhatsApp group.', NULL, TRUE),
   ('psalm23', 'Psalm 23 Family', 'Psalm 23 family WhatsApp group.', NULL, TRUE),
   ('psalm46', 'Psalm 46 Family', 'Psalm 46 family WhatsApp group.', NULL, TRUE),
   ('social', 'Social Family', 'Social family WhatsApp group.', NULL, TRUE),
-  ('evangelical', 'Evangelical Family', 'Evangelical family WhatsApp group.', NULL, TRUE),
-  ('cepier', 'CEPier', 'CEPier members WhatsApp group.', NULL, TRUE)
+  ('evangelical', 'Evangelical Family', 'Evangelical family WhatsApp group.', NULL, TRUE)
 ON CONFLICT (slug) DO UPDATE SET
-  invite_url = COALESCE(whatsapp_groups.invite_url, EXCLUDED.invite_url);
+  invite_url = COALESCE(whatsapp_groups.invite_url, EXCLUDED.invite_url),
+  description = CASE
+    WHEN whatsapp_groups.invite_url IS NULL AND EXCLUDED.invite_url IS NOT NULL
+    THEN EXCLUDED.description
+    ELSE whatsapp_groups.description
+  END;
+
+DELETE FROM whatsapp_groups WHERE slug = 'cepier';
 CREATE INDEX IF NOT EXISTS idx_chat_group ON chat_messages ("group");
 `;
 
