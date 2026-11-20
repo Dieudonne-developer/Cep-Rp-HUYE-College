@@ -75,17 +75,19 @@ router.get('/support/:group', async (req, res) => {
   }
 });
 
-// Public: published support items for a group (or 'global')
+// Public: published support items — all groups, or filtered by ?group=
 router.get('/support-items', async (req, res) => {
   try {
-    const group = String(req.query.group || 'global').toLowerCase();
-    const items = await SupportItem.find({ group, isActive: true }).sort({ sortOrder: 1, createdAt: -1 });
+    const groupParam = req.query.group ? String(req.query.group).toLowerCase() : null;
+    const filter = groupParam && groupParam !== 'all' ? { group: groupParam, isActive: true } : { isActive: true };
+    const items = await SupportItem.find(filter).sort({ group: 1, sortOrder: 1, createdAt: -1 });
     res.json({
       success: true,
       items: items.map((item) => {
         const obj = item.toObject ? item.toObject() : item;
         return {
           id: obj._id,
+          group: obj.group,
           title: obj.title,
           description: obj.description || '',
           kind: obj.kind || 'other',

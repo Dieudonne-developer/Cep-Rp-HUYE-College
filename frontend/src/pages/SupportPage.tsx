@@ -144,7 +144,7 @@ export default function SupportPage() {
       </div>
 
       <div className="mt-8">
-        <SupportItems group="global" />
+        <SupportItems group="all" />
       </div>
     </div>
   )
