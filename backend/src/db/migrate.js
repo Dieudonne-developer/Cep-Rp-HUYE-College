@@ -148,6 +148,21 @@ CREATE TABLE IF NOT EXISTS group_support (
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS support_items (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "group" TEXT NOT NULL,
+  title TEXT NOT NULL,
+  description TEXT,
+  kind TEXT DEFAULT 'other',
+  details TEXT,
+  url TEXT,
+  is_active BOOLEAN DEFAULT TRUE,
+  sort_order INTEGER DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+CREATE INDEX IF NOT EXISTS idx_support_items_group ON support_items ("group");
+
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS contact_number TEXT;
 

@@ -4,6 +4,7 @@ const GlobalEvent = require('../models/GlobalEvent');
 const GlobalIdea = require('../models/GlobalIdea');
 const GlobalSupport = require('../models/GlobalSupport');
 const GroupSupport = require('../models/GroupSupport');
+const SupportItem = require('../models/SupportItem');
 
 // Public: list global activities
 router.get('/activities', async (_req, res) => {
@@ -71,6 +72,32 @@ router.get('/support/:group', async (req, res) => {
   } catch (error) {
     console.error('Error fetching group support:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch support info' });
+  }
+});
+
+// Public: published support items for a group (or 'global')
+router.get('/support-items', async (req, res) => {
+  try {
+    const group = String(req.query.group || 'global').toLowerCase();
+    const items = await SupportItem.find({ group, isActive: true }).sort({ sortOrder: 1, createdAt: -1 });
+    res.json({
+      success: true,
+      items: items.map((item) => {
+        const obj = item.toObject ? item.toObject() : item;
+        return {
+          id: obj._id,
+          title: obj.title,
+          description: obj.description || '',
+          kind: obj.kind || 'other',
+          details: obj.details || '',
+          url: obj.url || '',
+          sortOrder: obj.sortOrder || 0,
+        };
+      }),
+    });
+  } catch (error) {
+    console.error('Error fetching support items:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch support items' });
   }
 });
 

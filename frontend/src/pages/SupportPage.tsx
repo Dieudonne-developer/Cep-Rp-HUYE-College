@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { getApiBaseUrl } from '../utils/api'
+import SupportItems from '../components/SupportItems'
 
 const baseUrl = getApiBaseUrl()
 
@@ -140,6 +141,10 @@ export default function SupportPage() {
             Donate via Paystack
           </button>
         </div>
+      </div>
+
+      <div className="mt-8">
+        <SupportItems group="global" />
       </div>
     </div>
   )

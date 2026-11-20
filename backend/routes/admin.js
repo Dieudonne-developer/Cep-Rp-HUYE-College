@@ -1255,12 +1255,20 @@ router.get('/super-admins', checkSuperAdmin, async (req, res) => {
 // Create new admin account
 router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
   try {
-    const { email, username, adminGroup, role } = req.body;
+    const { email, username, adminGroup, role, contactNumber } = req.body;
 
     if (!email || !username || !adminGroup) {
       return res.status(400).json({
         success: false,
         message: 'Email, username, and adminGroup are required'
+      });
+    }
+
+    const contactDigits = String(contactNumber || '').replace(/\D/g, '');
+    if (contactNumber && contactDigits.length < 9) {
+      return res.status(400).json({
+        success: false,
+        message: 'Contact number must include at least 9 digits.'
       });
     }
 
@@ -1297,7 +1305,8 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
       isVerified: false, // Will be set to true when they set password
       isApproved: true,
       approvedBy: req.superAdmin.email,
-      approvedAt: new Date()
+      approvedAt: new Date(),
+      contactNumber: contactDigits || null
     });
 
     await newAdmin.save();
@@ -1490,6 +1499,142 @@ router.delete('/super-admins/:id', checkSuperAdmin, async (req, res) => {
       message: 'Failed to delete admin',
       error: error.message
     });
+  }
+});
+
+// Get all registered users across every group (super admin only)
+router.get('/super-admin/members', checkSuperAdmin, async (req, res) => {
+  try {
+    const { query } = require('../src/db/pool');
+    const result = await query(
+      `SELECT id, username, email, user_group, role, is_verified, is_approved, contact_number, created_at
+       FROM app_users
+       ORDER BY created_at DESC`
+    );
+    res.json({
+      success: true,
+      members: result.rows.map((row) => ({
+        _id: row.id,
+        username: row.username,
+        email: row.email,
+        userGroup: row.user_group,
+        role: row.role,
+        isVerified: row.is_verified,
+        isApproved: row.is_approved,
+        contactNumber: row.contact_number || '',
+        createdAt: row.created_at,
+      })),
+    });
+  } catch (error) {
+    console.error('Failed to fetch all members:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch members' });
+  }
+});
+
+// ==================== SUPPORT ITEMS (publishable support entries) ====================
+const SupportItem = require('../models/SupportItem');
+const SUPPORT_KINDS = ['bank', 'mobile', 'link', 'help', 'other'];
+
+function mapSupportItem(item) {
+  const obj = item.toObject ? item.toObject() : item;
+  return {
+    id: obj._id,
+    group: obj.group,
+    title: obj.title,
+    description: obj.description || '',
+    kind: obj.kind || 'other',
+    details: obj.details || '',
+    url: obj.url || '',
+    isActive: obj.isActive !== false,
+    sortOrder: obj.sortOrder || 0,
+    createdAt: obj.createdAt,
+  };
+}
+
+function validateSupportItem(body, { partial = false } = {}) {
+  const out = {};
+  if (!partial || body.title !== undefined) {
+    const title = String(body.title || '').trim();
+    if (!title) return { error: 'Title is required' };
+    out.title = title;
+  }
+  if (body.description !== undefined) out.description = String(body.description || '').trim();
+  if (body.kind !== undefined) {
+    const kind = String(body.kind || 'other').toLowerCase();
+    if (!SUPPORT_KINDS.includes(kind)) return { error: 'Invalid support type' };
+    out.kind = kind;
+  }
+  if (body.details !== undefined) out.details = String(body.details || '').trim();
+  if (body.url !== undefined) {
+    const url = String(body.url || '').trim();
+    if (url) {
+      try {
+        const u = new URL(url);
+        if (u.protocol !== 'https:' && u.protocol !== 'http:') return { error: 'Link must start with http:// or https://' };
+      } catch {
+        return { error: 'Enter a valid link (https://...)' };
+      }
+    }
+    out.url = url;
+  }
+  if (body.isActive !== undefined) out.isActive = Boolean(body.isActive);
+  if (body.sortOrder !== undefined) {
+    const n = parseInt(body.sortOrder, 10);
+    out.sortOrder = Number.isFinite(n) ? n : 0;
+  }
+  return { data: out };
+}
+
+router.get('/support-items', async (req, res) => {
+  try {
+    const group = await resolveGroup(req);
+    const items = await SupportItem.find({ group }).sort({ sortOrder: 1, createdAt: -1 });
+    res.json({ success: true, items: items.map(mapSupportItem) });
+  } catch (error) {
+    console.error('Error fetching support items:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch support items' });
+  }
+});
+
+router.post('/support-items', async (req, res) => {
+  try {
+    const group = await resolveGroup(req);
+    const { data, error } = validateSupportItem(req.body || {});
+    if (error) return res.status(400).json({ success: false, message: error });
+    const item = await SupportItem.create({ group, ...data });
+    res.json({ success: true, message: 'Support item published', item: mapSupportItem(item) });
+  } catch (error) {
+    console.error('Error creating support item:', error);
+    res.status(500).json({ success: false, message: 'Failed to publish support item' });
+  }
+});
+
+router.put('/support-items/:id', async (req, res) => {
+  try {
+    const group = await resolveGroup(req);
+    const { data, error } = validateSupportItem(req.body || {}, { partial: true });
+    if (error) return res.status(400).json({ success: false, message: error });
+    const item = await SupportItem.findOne({ _id: req.params.id, group });
+    if (!item) return res.status(404).json({ success: false, message: 'Support item not found' });
+    Object.assign(item, data);
+    await item.save();
+    res.json({ success: true, message: 'Support item updated', item: mapSupportItem(item) });
+  } catch (error) {
+    console.error('Error updating support item:', error);
+    res.status(500).json({ success: false, message: 'Failed to update support item' });
+  }
+});
+
+router.delete('/support-items/:id', async (req, res) => {
+  try {
+    const group = await resolveGroup(req);
+    const item = await SupportItem.findOne({ _id: req.params.id, group });
+    if (!item) return res.status(404).json({ success: false, message: 'Support item not found' });
+    await SupportItem.findByIdAndDelete(item._id);
+    res.json({ success: true, message: 'Support item deleted' });
+  } catch (error) {
+    console.error('Error deleting support item:', error);
+    res.status(500).json({ success: false, message: 'Failed to delete support item' });
   }
 });
 

@@ -83,6 +83,10 @@ const GlobalSupport = createModel('global_support', {
   jsonFields: ['bank', 'mobileMoney'],
 });
 
+const SupportItem = createModel('support_items', {
+  defaults: { isActive: true, kind: 'other', sortOrder: 0 },
+});
+
 const GroupSupport = createModel('group_support', {
   defaults: {
     bank: { bankName: '', accountName: '', accountNumber: '', swiftCode: '' },
@@ -103,4 +107,5 @@ module.exports = {
   GlobalIdea,
   GlobalSupport,
   GroupSupport,
+  SupportItem,
 };

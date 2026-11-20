@@ -4,6 +4,7 @@ import { io } from 'socket.io-client'
 import { Home, Users, Menu, Info, Calendar, Clock, MapPin, History, Lightbulb, HeartHandshake, MessageCircle, Banknote, Smartphone, CreditCard, Send, Eye, X } from 'lucide-react'
 import { getApiBaseUrl } from '../../utils/api'
 import { WhatsAppAccessForm } from '../WhatsAppGroupsPage'
+import SupportItems from '../../components/SupportItems'
 
 type Activity = { _id: string; title: string; description?: string; date?: string; time?: string; location?: string; image?: string; schedule?: string }
 
@@ -602,6 +603,7 @@ export default function SocialPage() {
                 WhatsApp Group
               </h2>
               <p className="text-gray-600 mb-4">Enter the contact number saved on your Social membership. Registration and a password are not required.</p>
+              <SupportItems group="social" />
               <WhatsAppAccessForm slug="social" />
             </div>
           )}

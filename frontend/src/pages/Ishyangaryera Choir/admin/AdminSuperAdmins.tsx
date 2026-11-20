@@ -57,6 +57,7 @@ export default function AdminSuperAdmins() {
   const [formData, setFormData] = useState({
     email: '',
     username: '',
+    contactNumber: '',
     adminGroup: 'choir',
     role: 'admin'
   })
@@ -196,7 +197,7 @@ export default function AdminSuperAdmins() {
       const data = await response.json()
       if (data.success) {
         setShowModal(false)
-        setFormData({ email: '', username: '', adminGroup: 'choir', role: 'admin' })
+        setFormData({ email: '', username: '', contactNumber: '', adminGroup: 'choir', role: 'admin' })
         fetchAdmins()
         
         if (data.emailSent) {
@@ -505,7 +506,7 @@ export default function AdminSuperAdmins() {
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex gap-2 mb-4">
           {(['activities','ideas','support','cepier-members'] as const).map(tab => (
-            <button key={tab} onClick={()=>setActiveGlobalTab(tab)} className={`px-3 py-2 rounded ${activeGlobalTab===tab?'bg-blue-600 text-white':'bg-gray-100 text-gray-800'}`}>{tab[0].toUpperCase()+tab.slice(1)}</button>
+            <button key={tab} onClick={()=>setActiveGlobalTab(tab)} className={`px-3 py-2 rounded ${activeGlobalTab===tab?'bg-blue-600 text-white':'bg-gray-100 text-gray-800'}`}>{tab === 'cepier-members' ? 'CEP Members' : tab[0].toUpperCase()+tab.slice(1)}</button>
           ))}
         </div>
         {activeGlobalTab==='activities' && (
@@ -569,7 +570,7 @@ export default function AdminSuperAdmins() {
           </form>
         )}
         {activeGlobalTab==='cepier-members' && (
-          <CepierMembers baseUrl={baseUrl} currentAdmin={currentAdmin} />
+          <CEPAllMembers baseUrl={baseUrl} currentAdmin={currentAdmin} />
         )}
       </div>
       )}
@@ -601,7 +602,7 @@ export default function AdminSuperAdmins() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Username *</label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Username / Full name *</label>
                 <input
                   type="text"
                   value={formData.username}
@@ -609,6 +610,19 @@ export default function AdminSuperAdmins() {
                   required
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Contact / Phone number</label>
+                <input
+                  type="tel"
+                  inputMode="tel"
+                  value={formData.contactNumber}
+                  onChange={(e) => setFormData({...formData, contactNumber: e.target.value})}
+                  placeholder="07..."
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                />
+                <p className="text-xs text-gray-500 mt-1">At least 9 digits. Used for WhatsApp group access.</p>
               </div>
               
               <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
@@ -669,70 +683,83 @@ export default function AdminSuperAdmins() {
   )
 }
 
-function CepierMembers({ baseUrl, currentAdmin }: { baseUrl: string; currentAdmin: any }) {
+const GROUP_LABELS: Record<string, string> = {
+  cepier: 'CEPier',
+  choir: 'Choir',
+  anointed: 'Anointed',
+  abanyamugisha: 'Abanyamugisha',
+
+  psalm23: 'Psalm 23',
+  psalm46: 'Psalm 46',
+  protocol: 'Protocol',
+  social: 'Social',
+  evangelical: 'Evangelical',
+}
+
+function CEPAllMembers({ baseUrl, currentAdmin }: { baseUrl: string; currentAdmin: any }) {
   const [members, setMembers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState<boolean>(false)
   async function load() {
     setLoading(true)
     try {
-      const res = await fetch(`${baseUrl}/api/admin/members`, { headers: { 'X-Admin-Email': currentAdmin?.email || '', 'X-Admin-Group': 'cepier' } })
-      const data = await res.json(); if (Array.isArray(data)) setMembers(data)
+      const res = await fetch(`${baseUrl}/api/admin/super-admin/members`, { headers: { 'X-Admin-Email': currentAdmin?.email || '' } })
+      const data = await res.json(); if (data.success) setMembers(data.members || [])
     } catch {}
     setLoading(false)
   }
   React.useEffect(() => { load() }, [])
-  async function approve(id: string) {
-    await fetch(`${baseUrl}/api/admin/members/${id}/approve`, { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Email': currentAdmin?.email || '', 'X-Admin-Group': 'cepier' }, body: JSON.stringify({ approvedBy: currentAdmin?.email||'super-admin' }) })
-    load()
+  function groupLabel(g: string) {
+    return GROUP_LABELS[g] || g
   }
-  async function reject(id: string) {
-    await fetch(`${baseUrl}/api/admin/members/${id}/reject`, { method: 'POST', headers: { 'X-Admin-Email': currentAdmin?.email || '', 'X-Admin-Group': 'cepier' } })
-    load()
+  function downloadCSV() {
+    const escape = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`
+    const header = ['Name', 'Email', 'Contact Number', 'Group', 'Role', 'Status', 'Registered']
+    const rows = members.map((m: any) => [
+      m.username || '',
+      m.email || '',
+      m.contactNumber || '',
+      groupLabel(m.userGroup || ''),
+      m.role || '',
+      m.isApproved ? 'Approved' : 'Pending',
+      m.createdAt ? new Date(m.createdAt).toLocaleDateString() : '',
+    ])
+    const csv = [header, ...rows].map((r) => r.map(escape).join(',')).join('\r\n')
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'cep-all-members.csv'
+    a.click()
+    URL.revokeObjectURL(url)
   }
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="text-lg font-semibold">CEPier Members</h3>
-        <button onClick={load} className="text-sm bg-gray-100 px-3 py-1 rounded">Refresh</button>
+        <div>
+          <h3 className="text-lg font-semibold">CEP Members</h3>
+          <p className="text-sm text-gray-500">All registered users across every CEP family group.</p>
+        </div>
+        <div className="flex gap-2">
+          <button onClick={downloadCSV} className="text-sm bg-green-600 text-white px-3 py-1 rounded flex items-center">
+            <i data-lucide="download" className="w-4 h-4 mr-1"></i> Download CSV
+          </button>
+          <button onClick={load} className="text-sm bg-gray-100 px-3 py-1 rounded">Refresh</button>
+        </div>
       </div>
       {loading ? <div className="text-sm text-gray-500">Loading...</div> : (
-        <div className="divide-y">
+        <div className="divide-y max-h-[32rem] overflow-y-auto">
           {members.map((m:any)=> (
             <div key={m._id} className="py-3 flex items-center justify-between">
               <div>
                 <div className="font-medium">{m.username || m.email}</div>
-                <div className="text-sm text-gray-600">{m.email}</div>
+                <div className="text-sm text-gray-600">{m.email} {m.contactNumber ? `• ${m.contactNumber}` : ''}</div>
               </div>
               <div className="flex gap-2 items-center">
-                {!m.isApproved && (
-                  <>
-                    <button
-                      onClick={() => approve(m._id)}
-                      className="px-3 py-1 rounded bg-green-600 hover:bg-green-700 text-white text-xs"
-                      title="Approve this member"
-                    >
-                      Approve
-                    </button>
-                    <button
-                      onClick={() => reject(m._id)}
-                      className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-xs"
-                      title="Reject this member"
-                    >
-                      Reject
-                    </button>
-                  </>
-                )}
-                {m.isApproved && (
-                  <>
-                    <span className="text-green-700 text-xs bg-green-100 px-2 py-1 rounded">Approved</span>
-                    <button
-                      onClick={() => reject(m._id)}
-                      className="px-3 py-1 rounded bg-orange-500 hover:bg-orange-600 text-white text-xs"
-                      title="Revoke approval"
-                    >
-                      Revoke
-                    </button>
-                  </>
+                <span className="text-xs bg-gray-100 text-gray-700 px-2 py-1 rounded">{groupLabel(m.userGroup || '')}</span>
+                {m.isApproved ? (
+                  <span className="text-green-700 text-xs bg-green-100 px-2 py-1 rounded">Approved</span>
+                ) : (
+                  <span className="text-yellow-700 text-xs bg-yellow-100 px-2 py-1 rounded">Pending</span>
                 )}
               </div>
             </div>

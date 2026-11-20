@@ -2,6 +2,27 @@ import React, { useEffect, useState } from 'react'
 import { useLucideIcons } from '../../../utils/lucideIcons'
 import { getApiBaseUrl } from '../../../utils/api'
 
+type SupportItem = {
+  id: string
+  title: string
+  description: string
+  kind: 'bank' | 'mobile' | 'link' | 'help' | 'other'
+  details: string
+  url: string
+  isActive: boolean
+  sortOrder: number
+}
+
+const KIND_LABELS: Record<string, string> = {
+  bank: 'Bank Transfer',
+  mobile: 'Mobile Money',
+  link: 'Link / Website',
+  help: 'Help / Info',
+  other: 'Other',
+}
+
+const EMPTY_FORM = { title: '', description: '', kind: 'other' as SupportItem['kind'], details: '', url: '', sortOrder: 0, isActive: true }
+
 export default function AdminSupport() {
   const baseUrl = getApiBaseUrl()
   const adminGroup = (() => {
@@ -12,249 +33,295 @@ export default function AdminSupport() {
       return obj?.adminGroup || 'choir'
     } catch { return 'choir' }
   })()
+  const isGlobal = adminGroup === 'cepier'
+  const groupQuery = isGlobal ? 'group=global' : `group=${adminGroup}`
 
-  const [supportDoc, setSupportDoc] = useState<any>(null)
+  const [items, setItems] = useState<SupportItem[]>([])
   const [loading, setLoading] = useState(true)
-  const [savingSupport, setSavingSupport] = useState(false)
+  const [showModal, setShowModal] = useState(false)
+  const [editing, setEditing] = useState<SupportItem | null>(null)
+  const [form, setForm] = useState({ ...EMPTY_FORM })
+  const [saving, setSaving] = useState(false)
+  const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
-  const groupQuery = adminGroup === 'anointed' ? 'group=anointed' : adminGroup === 'abanyamugisha' ? 'group=abanyamugisha' : adminGroup === 'psalm23' ? 'group=psalm23' : adminGroup === 'psalm46' ? 'group=psalm46' : adminGroup === 'protocol' ? 'group=protocol' : adminGroup === 'social' ? 'group=social' : adminGroup === 'evangelical' ? 'group=evangelical' : adminGroup === 'cepier' ? 'group=cepier' : 'group=choir'
-
-  useEffect(() => {
-    fetchSupport()
-  }, [])
-
+  useEffect(() => { fetchItems() }, [])
   useLucideIcons()
 
-  async function fetchSupport() {
+  async function fetchItems() {
     try {
       setLoading(true)
       const adminRaw = localStorage.getItem('admin')
       const admin = adminRaw ? JSON.parse(adminRaw) : {}
-      const res = await fetch(`${baseUrl}/api/admin/support?${groupQuery}`, { 
-        headers: { 
-          'X-Admin-Group': adminGroup,
-          'X-Admin-Email': admin?.email || '' 
-        } 
+      const res = await fetch(`${baseUrl}/api/admin/support-items?${groupQuery}`, {
+        headers: { 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' }
       })
       const data = await res.json()
-      if (data.success && data.support) {
-        // Ensure nested objects exist
-        const support = {
-          ...data.support,
-          bank: data.support.bank || { bankName: '', accountName: '', accountNumber: '', swiftCode: '' },
-          mobileMoney: data.support.mobileMoney || { mtn: '', airtel: '' },
-          onlineDonationNote: data.support.onlineDonationNote || ''
-        }
-        setSupportDoc(support)
-      } else {
-        // Initialize with empty structure if no data
-        setSupportDoc({
-          bank: { bankName: '', accountName: '', accountNumber: '', swiftCode: '' },
-          mobileMoney: { mtn: '', airtel: '' },
-          onlineDonationNote: ''
-        })
-      }
-    } catch (error) {
-      console.error('Failed to fetch support:', error)
-      // Initialize with empty structure on error
-      setSupportDoc({
-        bank: { bankName: '', accountName: '', accountNumber: '', swiftCode: '' },
-        mobileMoney: { mtn: '', airtel: '' },
-        onlineDonationNote: ''
-      })
+      if (data.success) setItems(data.items || [])
+      else setMessage({ type: 'error', text: data.message || 'Failed to load support items' })
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to load support items' })
     } finally {
       setLoading(false)
     }
   }
 
-  async function saveSupport(e: React.FormEvent) {
-    e.preventDefault()
-    setSavingSupport(true)
-    try {
-      // Ensure we send the complete structure
-      const payload = {
-        bank: {
-          bankName: supportDoc?.bank?.bankName || '',
-          accountName: supportDoc?.bank?.accountName || '',
-          accountNumber: supportDoc?.bank?.accountNumber || '',
-          swiftCode: supportDoc?.bank?.swiftCode || ''
-        },
-        mobileMoney: {
-          mtn: supportDoc?.mobileMoney?.mtn || '',
-          airtel: supportDoc?.mobileMoney?.airtel || ''
-        },
-        onlineDonationNote: supportDoc?.onlineDonationNote || ''
-      }
+  function openAdd() {
+    setEditing(null)
+    setForm({ ...EMPTY_FORM })
+    setMessage(null)
+    setShowModal(true)
+  }
 
+  function openEdit(item: SupportItem) {
+    setEditing(item)
+    setForm({
+      title: item.title,
+      description: item.description || '',
+      kind: item.kind || 'other',
+      details: item.details || '',
+      url: item.url || '',
+      sortOrder: item.sortOrder || 0,
+      isActive: item.isActive !== false,
+    })
+    setMessage(null)
+    setShowModal(true)
+  }
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault()
+    setSaving(true)
+    setMessage(null)
+    try {
       const adminRaw = localStorage.getItem('admin')
       const admin = adminRaw ? JSON.parse(adminRaw) : {}
-      const res = await fetch(`${baseUrl}/api/admin/support?${groupQuery}`, { 
-        method: 'PUT', 
-        headers: { 
-          'Content-Type': 'application/json',
-          'X-Admin-Group': adminGroup,
-          'X-Admin-Email': admin?.email || '' 
-        }, 
-        body: JSON.stringify(payload) 
+      const url = editing
+        ? `${baseUrl}/api/admin/support-items/${editing.id}?${groupQuery}`
+        : `${baseUrl}/api/admin/support-items?${groupQuery}`
+      const res = await fetch(url, {
+        method: editing ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' },
+        body: JSON.stringify(form)
       })
-      const data = await res.json()
-      if (data.success) {
-        alert('Support information saved successfully! The support page has been updated.')
-        fetchSupport() // Refresh to show updated data
-      } else {
-        alert(data.message || 'Failed to save support information')
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.success) {
+        setMessage({ type: 'error', text: data.message || 'Failed to save support item' })
+        return
       }
-    } catch (error) {
-      console.error('Error saving support:', error)
-      alert('Failed to save support information. Please try again.')
-    } finally { 
-      setSavingSupport(false) 
+      setShowModal(false)
+      fetchItems()
+    } catch {
+      setMessage({ type: 'error', text: 'Failed to save support item' })
+    } finally {
+      setSaving(false)
     }
   }
 
-  if (loading) {
-    return (
-      <div className="p-6">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-1/4 mb-6"></div>
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="h-4 bg-gray-200 rounded mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded mb-4"></div>
-            <div className="h-4 bg-gray-200 rounded"></div>
-          </div>
-        </div>
-      </div>
-    )
+  async function handleDelete(item: SupportItem) {
+    if (!confirm(`Delete "${item.title}"? This cannot be undone.`)) return
+    try {
+      const adminRaw = localStorage.getItem('admin')
+      const admin = adminRaw ? JSON.parse(adminRaw) : {}
+      const res = await fetch(`${baseUrl}/api/admin/support-items/${item.id}?${groupQuery}`, {
+        method: 'DELETE',
+        headers: { 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' }
+      })
+      const data = await res.json().catch(() => ({}))
+      if (!res.ok || !data.success) {
+        alert(data.message || 'Failed to delete support item')
+        return
+      }
+      fetchItems()
+    } catch {
+      alert('Failed to delete support item')
+    }
+  }
+
+  async function toggleActive(item: SupportItem) {
+    try {
+      const adminRaw = localStorage.getItem('admin')
+      const admin = adminRaw ? JSON.parse(adminRaw) : {}
+      await fetch(`${baseUrl}/api/admin/support-items/${item.id}?${groupQuery}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' },
+        body: JSON.stringify({ isActive: !item.isActive })
+      })
+      fetchItems()
+    } catch {
+      alert('Failed to update support item')
+    }
   }
 
   return (
     <div className="p-6">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Manage Support Page</h1>
-        <p className="text-sm text-gray-600">Update the information displayed on your group's support page</p>
+      <div className="mb-6 flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">Manage Support</h1>
+          <p className="text-sm text-gray-600">
+            Publish support options (bank accounts, mobile money, links, help info). Members see them on the public support page and choose what they want.
+          </p>
+        </div>
+        <button
+          onClick={openAdd}
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg flex items-center"
+        >
+          <i data-lucide="plus" className="w-4 h-4 mr-2"></i> Publish Support Option
+        </button>
       </div>
 
-      <form onSubmit={saveSupport} className="bg-white rounded-lg border border-gray-200 p-6 shadow-md">
-        <div className="mb-6">
-          <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <i data-lucide="building-2" className="w-5 h-5"></i>
-            Bank Transfer Information
-          </h4>
-          <div className="grid md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
-              <input 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                placeholder="e.g., Bank of Kigali" 
-                value={supportDoc?.bank?.bankName||''} 
-                onChange={(e)=>setSupportDoc((d:any)=>({...d, bank:{...d?.bank, bankName:e.target.value}}))} 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Name</label>
-              <input 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                placeholder="e.g., CEP Ishyanga Ryera Choir" 
-                value={supportDoc?.bank?.accountName||''} 
-                onChange={(e)=>setSupportDoc((d:any)=>({...d, bank:{...d?.bank, accountName:e.target.value}}))} 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Account Number</label>
-              <input 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono" 
-                placeholder="e.g., 00040-06945783-07" 
-                value={supportDoc?.bank?.accountNumber||''} 
-                onChange={(e)=>setSupportDoc((d:any)=>({...d, bank:{...d?.bank, accountNumber:e.target.value}}))} 
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Swift Code</label>
-              <input 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent font-mono" 
-                placeholder="e.g., BKIGRWRW" 
-                value={supportDoc?.bank?.swiftCode||''} 
-                onChange={(e)=>setSupportDoc((d:any)=>({...d, bank:{...d?.bank, swiftCode:e.target.value}}))} 
-              />
-            </div>
-          </div>
+      {loading ? (
+        <div className="bg-white rounded-lg shadow p-6 text-gray-500">Loading support options...</div>
+      ) : items.length === 0 ? (
+        <div className="bg-white rounded-lg shadow p-6 text-center text-gray-500">
+          No support options published yet. Click "Publish Support Option" to add one.
         </div>
+      ) : (
+        <div className="space-y-4">
+          {items.map((item) => (
+            <div key={item.id} className={`bg-white rounded-lg border p-5 shadow-sm ${item.isActive ? 'border-gray-200' : 'border-gray-200 opacity-60'}`}>
+              <div className="flex justify-between items-start gap-4">
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h3 className="text-lg font-semibold text-gray-800">{item.title}</h3>
+                    <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">{KIND_LABELS[item.kind] || item.kind}</span>
+                    {!item.isActive && <span className="px-2 py-0.5 text-xs font-semibold rounded-full bg-gray-200 text-gray-600">Hidden</span>}
+                  </div>
+                  {item.description && <p className="text-sm text-gray-600 mb-1">{item.description}</p>}
+                  {item.details && <p className="text-sm text-gray-700 whitespace-pre-wrap">{item.details}</p>}
+                  {item.url && (
+                    <a href={item.url} target="_blank" rel="noopener noreferrer" className="text-sm text-blue-600 hover:underline break-all">{item.url}</a>
+                  )}
+                </div>
+                <div className="flex gap-2 flex-shrink-0">
+                  <button
+                    onClick={() => toggleActive(item)}
+                    className={`px-3 py-1 rounded text-xs ${item.isActive ? 'bg-gray-200 hover:bg-gray-300 text-gray-700' : 'bg-green-600 hover:bg-green-700 text-white'}`}
+                  >
+                    {item.isActive ? 'Hide' : 'Show'}
+                  </button>
+                  <button
+                    onClick={() => openEdit(item)}
+                    className="px-3 py-1 rounded bg-blue-600 hover:bg-blue-700 text-white text-xs flex items-center"
+                  >
+                    <i data-lucide="edit" className="w-3 h-3 mr-1"></i> Update
+                  </button>
+                  <button
+                    onClick={() => handleDelete(item)}
+                    className="px-3 py-1 rounded bg-red-600 hover:bg-red-700 text-white text-xs flex items-center"
+                  >
+                    <i data-lucide="trash-2" className="w-3 h-3 mr-1"></i> Delete
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
 
-        <div className="mb-6">
-          <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <i data-lucide="smartphone" className="w-5 h-5"></i>
-            Mobile Money Information
-          </h4>
-          <div className="grid md:grid-cols-2 gap-4">
+      {showModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-40 flex items-center justify-center p-4 z-50">
+          <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-xl p-6 w-full max-w-lg space-y-4 max-h-screen overflow-y-auto">
+            <div className="flex justify-between items-center">
+              <h2 className="text-xl font-bold text-gray-800">{editing ? 'Update Support Option' : 'Publish Support Option'}</h2>
+              <button type="button" onClick={() => setShowModal(false)} className="text-gray-500 hover:text-gray-700">
+                <i data-lucide="x" className="w-6 h-6"></i>
+              </button>
+            </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">MTN Mobile Money</label>
-              <input 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                placeholder="e.g., 0788 123 456 (Alice Uwase)" 
-                value={supportDoc?.mobileMoney?.mtn||''} 
-                onChange={(e)=>setSupportDoc((d:any)=>({...d, mobileMoney:{...d?.mobileMoney, mtn:e.target.value}}))} 
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+              <input
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                placeholder="e.g., Bank Transfer, Momo Help Line, Scholarship Fund"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                required
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Airtel Money</label>
-              <input 
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-                placeholder="e.g., 0732 987 654 (Eric Mugisha)" 
-                value={supportDoc?.mobileMoney?.airtel||''} 
-                onChange={(e)=>setSupportDoc((d:any)=>({...d, mobileMoney:{...d?.mobileMoney, airtel:e.target.value}}))} 
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select
+                value={form.kind}
+                onChange={(e) => setForm({ ...form, kind: e.target.value as SupportItem['kind'] })}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                {Object.entries(KIND_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={form.description}
+                onChange={(e) => setForm({ ...form, description: e.target.value })}
+                rows={2}
+                placeholder="Explain what this support option is for (e.g., helps people in need, pays for events...)"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
               />
             </div>
-          </div>
-        </div>
 
-        <div className="mb-6">
-          <h4 className="text-md font-semibold text-gray-700 mb-3 flex items-center gap-2">
-            <i data-lucide="credit-card" className="w-5 h-5"></i>
-            Online Donation
-          </h4>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Donation Note/Message</label>
-          <textarea 
-            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
-            rows={3}
-            placeholder="e.g., Paystack verification pending server integration." 
-            value={supportDoc?.onlineDonationNote||''} 
-            onChange={(e)=>setSupportDoc((d:any)=>({...d, onlineDonationNote:e.target.value}))} 
-          />
-          <p className="text-xs text-gray-500 mt-1">This message will appear on the support page above the donation button.</p>
-        </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Details (account number, phone, instructions...)</label>
+              <textarea
+                value={form.details}
+                onChange={(e) => setForm({ ...form, details: e.target.value })}
+                rows={3}
+                placeholder="e.g., Bank: Bank of Kigali — Account: 00040-... — Name: CEP Huye"
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
 
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-200">
-          <button 
-            type="button"
-            onClick={() => fetchSupport()}
-            className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-          >
-            Reset
-          </button>
-          <button 
-            type="submit"
-            disabled={savingSupport} 
-            className="bg-blue-600 hover:bg-blue-700 text-white rounded-lg px-6 py-2 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-          >
-            {savingSupport ? (
-              <>
-                <i data-lucide="loader-2" className="w-4 h-4 animate-spin"></i>
-                Saving...
-              </>
-            ) : (
-              <>
-                <i data-lucide="save" className="w-4 h-4"></i>
-                Save Support Information
-              </>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Link (optional)</label>
+              <input
+                type="url"
+                value={form.url}
+                onChange={(e) => setForm({ ...form, url: e.target.value })}
+                placeholder="https://..."
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Sort order</label>
+                <input
+                  type="number"
+                  value={form.sortOrder}
+                  onChange={(e) => setForm({ ...form, sortOrder: parseInt(e.target.value, 10) || 0 })}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                />
+              </div>
+              <div className="flex items-end pb-2">
+                <label className="flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={form.isActive}
+                    onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                    className="w-4 h-4"
+                  />
+                  Visible to members
+                </label>
+              </div>
+            </div>
+
+            {message && (
+              <div className={`text-sm px-3 py-2 rounded border ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'}`}>
+                {message.text}
+              </div>
             )}
-          </button>
+
+            <div className="flex justify-end space-x-2 pt-2 border-t border-gray-200">
+              <button type="button" onClick={() => setShowModal(false)} className="px-4 py-2 rounded-lg border">Cancel</button>
+              <button type="submit" disabled={saving} className="px-4 py-2 rounded-lg bg-blue-600 text-white disabled:opacity-50">
+                {saving ? 'Saving...' : editing ? 'Update' : 'Publish'}
+              </button>
+            </div>
+          </form>
         </div>
-      </form>
+      )}
     </div>
   )
 }
-
-
-
-
-
