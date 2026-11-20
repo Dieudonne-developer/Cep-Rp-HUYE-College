@@ -64,6 +64,7 @@ function publicGroup(group) {
     description: group.description || '',
     isActive: group.isActive !== false,
     hasInvite: Boolean(group.inviteUrl),
+    inviteUrl: group.inviteUrl || null,
   };
 }
 
@@ -114,6 +115,13 @@ router.post('/open', async (req, res) => {
       : await WhatsAppGroup.findById(req.body.groupId);
     if (!group || group.isActive === false) {
       return res.status(404).json({ success: false, message: 'WhatsApp group not found' });
+    }
+    if (group.inviteUrl) {
+      return res.json({
+        success: true,
+        inviteUrl: group.inviteUrl,
+        message: 'Opening the WhatsApp group invitation.',
+      });
     }
     const found = await findApprovedMember(req.body.contactNumber, group.slug);
     if (found.error) return res.status(400).json({ success: false, message: found.error });
