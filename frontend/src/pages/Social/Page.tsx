@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { Home, Users, Menu, Info, Calendar, Clock, MapPin, History, Lightbulb, HeartHandshake, MessageCircle, Banknote, Smartphone, CreditCard, Send, Eye, X } from 'lucide-react'
 import { getApiBaseUrl } from '../../utils/api'
-import { WhatsAppAccessForm } from '../WhatsAppGroupsPage'
+import { WhatsAppGroupCard } from '../WhatsAppGroupsPage'
 import SupportItems from '../../components/SupportItems'
 import ActivitiesGrid from '../../components/ActivitiesGrid'
 
@@ -482,8 +482,8 @@ export default function SocialPage() {
                 <i data-lucide="message-circle" className="mr-2 text-blue-600" />
                 WhatsApp Group
               </h2>
-              <p className="text-gray-600 mb-4">Enter the contact number saved on your Social membership. Registration and a password are not required.</p>
-              <WhatsAppAccessForm slug="social" />
+                            <WhatsAppGroupCard slug="social" />
+
             </div>
           )}
         </div>

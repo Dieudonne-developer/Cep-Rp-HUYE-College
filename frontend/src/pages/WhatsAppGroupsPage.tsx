@@ -114,6 +114,41 @@ export function WhatsAppAccessForm({ slug, label, inviteUrl }: { slug: string; l
   )
 }
 
+export function WhatsAppGroupCard({ slug, group }: { slug: string; group?: { name: string; description?: string; hasInvite?: boolean; inviteUrl?: string | null } | null }) {
+  const baseUrl = getApiBaseUrl()
+  const [info, setInfo] = useState(group ?? null)
+  const [checked, setChecked] = useState(group !== undefined)
+
+  useEffect(() => {
+    if (group !== undefined) {
+      setInfo(group)
+      setChecked(true)
+      return
+    }
+    let cancelled = false
+    fetch(`${baseUrl}/api/whatsapp/groups`)
+      .then((res) => res.json())
+      .then((data) => {
+        if (cancelled) return
+        const g = ((data.groups || []) as WhatsAppGroup[]).find((x) => x.slug === slug)
+        setInfo(g ? { name: g.name, description: g.description, hasInvite: g.hasInvite, inviteUrl: g.inviteUrl } : null)
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setChecked(true) })
+    return () => { cancelled = true }
+  }, [slug, baseUrl, group])
+
+  if (!checked || !info) return null
+  return (
+    <div className="border border-gray-200 rounded-lg p-4">
+      <h3 className="text-lg font-semibold text-gray-800">{info.name}</h3>
+      {info.description && <p className="text-sm text-gray-600 mt-1 mb-3">{info.description}</p>}
+      {!info.hasInvite && !info.inviteUrl && <p className="text-sm text-gray-500 mb-3">Invitation link not yet provided.</p>}
+      <WhatsAppAccessForm slug={slug} inviteUrl={info.inviteUrl ?? null} />
+    </div>
+  )
+}
+
 export default function WhatsAppGroupsPage() {
   const baseUrl = getApiBaseUrl()
   const [groups, setGroups] = useState<WhatsAppGroup[]>([])

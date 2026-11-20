@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { getApiBaseUrl } from '../utils/api'
-import { WhatsAppAccessForm } from './WhatsAppGroupsPage'
+import { WhatsAppGroupCard } from './WhatsAppGroupsPage'
 
 const groups = [{ key: 'cepier', name: 'CEPier (General)' }]
 
@@ -121,11 +121,11 @@ export default function ChatHubPage() {
           <p className="text-gray-600 mb-4 text-sm">Invitation links are managed by each group's administrator.</p>
           <div className="grid md:grid-cols-2 gap-4">
             {waGroups.map((g) => (
-              <div key={g.id || g.slug} className="border border-gray-200 rounded-lg p-4 bg-gray-50">
-                <h4 className="font-semibold text-gray-800 mb-1">{g.name}</h4>
-                {g.description && <p className="text-sm text-gray-600 mb-3">{g.description}</p>}
-                <WhatsAppAccessForm slug={g.slug} inviteUrl={g.inviteUrl} />
-              </div>
+              <WhatsAppGroupCard
+                key={g.id || g.slug}
+                slug={g.slug}
+                group={{ name: g.name, description: g.description, hasInvite: Boolean(g.inviteUrl), inviteUrl: g.inviteUrl || null }}
+              />
             ))}
           </div>
         </div>

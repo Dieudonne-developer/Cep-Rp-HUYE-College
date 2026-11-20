@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { Home, Users, Music, Menu, Info, Calendar, Clock, MapPin, History, Lightbulb, HeartHandshake, MessageCircle, Banknote, Smartphone, CreditCard, Play, Download, Maximize, Video, Eye, X } from 'lucide-react'
 import { getApiBaseUrl } from '../../utils/api'
-import { WhatsAppAccessForm } from '../WhatsAppGroupsPage'
+import { WhatsAppGroupCard } from '../WhatsAppGroupsPage'
 import SupportItems from '../../components/SupportItems'
 import ActivitiesGrid from '../../components/ActivitiesGrid'
 
@@ -427,8 +427,8 @@ export default function AnointedPage() {
           {section === 'chat' && (
             <div className="p-6 bg-white rounded-lg shadow-md max-w-lg mx-auto">
               <h2 className="text-3xl font-bold text-gray-800 mb-3 flex items-center"><MessageCircle className="mr-2 text-blue-600" /> WhatsApp Group</h2>
-              <p className="text-gray-600 mb-4">Enter the contact number saved on your Anointed membership. Registration and a password are not required.</p>
-              <WhatsAppAccessForm slug="anointed" />
+                            <WhatsAppGroupCard slug="anointed" />
+
             </div>
           )}
         </div>

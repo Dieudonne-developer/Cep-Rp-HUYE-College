@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import { io } from 'socket.io-client'
 import { Home, Users, Music, Menu, Info, Calendar, Clock, MapPin, History, Lightbulb, HeartHandshake, MessageCircle, Banknote, Smartphone, CreditCard, Play, Download, Maximize, Video, Send, Eye, X } from 'lucide-react'
 import { getApiBaseUrl } from '../../utils/api'
-import { WhatsAppAccessForm } from '../WhatsAppGroupsPage'
+import { WhatsAppGroupCard } from '../WhatsAppGroupsPage'
 import SupportItems from '../../components/SupportItems'
 import ActivitiesGrid from '../../components/ActivitiesGrid'
 
@@ -676,8 +676,8 @@ export default function Psalm23Page() {
                 <i data-lucide="message-circle" className="mr-2 text-blue-600" />
                 WhatsApp Group
               </h2>
-              <p className="text-gray-600 mb-4">Enter the contact number saved on your Psalm 23 membership. Registration and a password are not required.</p>
-              <WhatsAppAccessForm slug="psalm23" />
+                            <WhatsAppGroupCard slug="psalm23" />
+
             </div>
           )}
         </div>
