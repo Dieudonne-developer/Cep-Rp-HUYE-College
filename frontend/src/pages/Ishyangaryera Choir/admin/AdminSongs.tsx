@@ -233,6 +233,7 @@ export default function AdminSongs() {
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
@@ -320,6 +321,7 @@ export default function AdminSongs() {
             {isProtocolAdmin ? 'No decorating videos found. Add your first video to get started.' : isEvangelicalAdmin ? 'No Bible teachings found. Add your first teaching to get started.' : isPsalmAdmin ? 'No videos found. Add your first video to get started.' : isAbanyamugishaAdmin ? 'No testimonies found. Add your first testimony to get started.' : 'No songs found. Add your first song to get started.'}
           </div>
         )}
+        </div>
       </div>
 
       {/* Add/Edit Song Modal */}

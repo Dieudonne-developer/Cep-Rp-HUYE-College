@@ -407,6 +407,7 @@ export default function AdminSuperAdmins() {
 
           {/* Admins Table */}
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
+            <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
@@ -491,6 +492,7 @@ export default function AdminSuperAdmins() {
                 ))}
               </tbody>
             </table>
+            </div>
           </div>
 
           {filteredAdmins.length === 0 && (
