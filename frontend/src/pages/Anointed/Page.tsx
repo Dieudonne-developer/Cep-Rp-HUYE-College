@@ -223,6 +223,9 @@ export default function AnointedPage() {
                 {s==='chat'?'WhatsApp':s[0].toUpperCase()+s.slice(1)}
               </button>
             ))}
+            <Link to="/my-attendance" className="px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-700">
+              Attendance
+            </Link>
           </div>
         </div>
       </nav>

@@ -417,6 +417,9 @@ export default function ChoirPage() {
                 <i data-lucide={s==='about'?'info': s==='media'?'music': s==='activities'?'calendar': s==='ideas'?'lightbulb': s==='support'?'heart-handshake':'message-circle'} className="mr-2 w-4 h-4" /> {s==='chat'?'WhatsApp':s[0].toUpperCase()+s.slice(1)}
               </button>
             ))}
+            <Link to="/my-attendance" className="px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-700 flex items-center">
+              <i data-lucide="calendar-check" className="mr-2 w-4 h-4" /> Attendance
+            </Link>
           </div>
         </div>
       </nav>
