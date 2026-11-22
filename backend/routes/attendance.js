@@ -13,7 +13,7 @@ async function adminContext(req, res) {
   const email = String(req.headers['x-admin-email'] || '').trim().toLowerCase();
   if (!email) { res.status(401).json({ message: 'Admin email required' }); return null; }
   const { rows } = await query(
-    `SELECT id, email, name, role, user_group, is_approved FROM app_users WHERE lower(email) = $1 LIMIT 1`,
+    `SELECT id, email, username, role, user_group, is_approved FROM app_users WHERE lower(email) = $1 LIMIT 1`,
     [email]
   );
   const user = rows[0];
@@ -37,7 +37,7 @@ async function memberFromToken(req) {
   const email = payload && payload.email ? String(payload.email).toLowerCase() : null;
   if (!email) return null;
   const { rows } = await query(
-    `SELECT id, email, name, user_group FROM app_users
+    `SELECT id, email, username, user_group FROM app_users
      WHERE lower(email) = $1 AND user_group = ANY($2) AND is_approved = true LIMIT 1`,
     [email, ALLOWED_GROUPS]
   );
@@ -48,8 +48,11 @@ async function memberFromToken(req) {
 router.get('/sessions', async (req, res) => {
   try {
     const ctx = await adminContext(req, res); if (!ctx) return;
-    const group = String(req.query.group || ctx.group).toLowerCase();
-    if (!ALLOWED_GROUPS.includes(group)) return res.status(400).json({ message: 'Invalid group' });
+    let group = String(req.query.group || ctx.group).toLowerCase();
+    if (!ALLOWED_GROUPS.includes(group)) {
+      if (!ctx.isSuper) return res.status(400).json({ message: 'Invalid group' });
+      group = 'choir';
+    }
     const { rows } = await query(
       `SELECT * FROM attendance_sessions WHERE "group" = $1 ORDER BY session_date DESC NULLS LAST, created_at DESC`,
       [group]
@@ -107,7 +110,7 @@ router.get('/sessions/:id/roster', async (req, res) => {
     if (!session) return res.status(404).json({ message: 'Session not found' });
     if (!ctx.isSuper && session.group !== ctx.group) return res.status(403).json({ message: 'Not your group' });
     const members = (await query(
-      `SELECT id, name, email, contact_number FROM app_users WHERE user_group=$1 AND is_approved=true AND role <> 'admin' AND role <> 'super-admin' ORDER BY name`,
+      `SELECT id, username AS name, email, contact_number FROM app_users WHERE user_group=$1 AND is_approved=true AND role <> 'admin' AND role <> 'super-admin' ORDER BY name`,
       [session.group]
     )).rows;
     const records = (await query(`SELECT * FROM attendance_records WHERE session_id=$1`, [session.id])).rows;
@@ -133,7 +136,7 @@ router.put('/sessions/:id/records', async (req, res) => {
       const reason = hasReason ? String(item.reason || '').trim() || null : null;
       await query(
         `INSERT INTO attendance_records (session_id, user_id, user_email, user_name, status, has_reason, reason, recorded_by)
-         SELECT $1, u.id, u.email, u.name, $3, $4, $5, $6 FROM app_users u WHERE u.id=$2
+         SELECT $1, u.id, u.email, u.username, $3, $4, $5, $6 FROM app_users u WHERE u.id=$2
          ON CONFLICT (session_id, user_id) DO UPDATE SET status=$3, has_reason=$4, reason=$5, recorded_by=$6, updated_at=now()`,
         [session.id, item.userId, status, hasReason, reason, ctx.admin.email]
       );
@@ -157,12 +160,11 @@ router.post('/singers', async (req, res) => {
     if (exists.rows.length) return res.status(400).json({ message: 'A member with this email already exists in this group' });
     const hashedPassword = await bcrypt.hash(crypto.randomBytes(24).toString('hex'), 12);
     const verificationToken = crypto.randomBytes(32).toString('hex');
-    const tokenExpires = new Date(Date.now() + 72 * 60 * 60 * 1000);
     const { rows } = await query(
-      `INSERT INTO app_users (email, password, name, contact_number, role, is_verified, is_approved,
-        user_group, admin_group, verification_token, token_expires_at, approved_at, approved_by, created_at, updated_at)
-       VALUES ($1,$2,$3,$4,'member',false,true,$5,$5,$6,$7,now(),$8,now(),now()) RETURNING id, email, name`,
-      [email, hashedPassword, name, phone || null, group, verificationToken, tokenExpires, ctx.admin.email]
+      `INSERT INTO app_users (email, username, password, contact_number, role, is_verified, is_approved,
+        user_group, admin_group, verification_token, approved_at, approved_by, created_at, updated_at)
+       VALUES ($1,$2,$3,$4,'member',false,true,$5,$5,$6,now(),$7,now(),now()) RETURNING id, email, username`,
+      [email, name, hashedPassword, phone || null, group, verificationToken, ctx.admin.email]
     );
     const baseUrl = process.env.FRONTEND_URL || 'https://cep-rp-huye-college-lrkj.vercel.app';
     const setupLink = `${baseUrl}/api/auth/verify?token=${verificationToken}`;
