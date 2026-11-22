@@ -20,6 +20,8 @@ import AdminSuperAdmins from './pages/Ishyangaryera Choir/admin/AdminSuperAdmins
 import SuperAdminDashboard from './pages/Ishyangaryera Choir/admin/SuperAdminDashboard'
 import ChatPage from './pages/WhatsAppGroupsPage'
 import AdminWhatsApp from './pages/Ishyangaryera Choir/admin/AdminWhatsApp'
+import AdminAttendance from './pages/Ishyangaryera Choir/admin/AdminAttendance'
+import MyAttendancePage from './pages/MyAttendancePage'
 import RegisterPage from './pages/Ishyangaryera Choir/RegisterPage'
 import ForgotPasswordPage from './pages/Ishyangaryera Choir/ForgotPasswordPage'
 import AnointedPage from './pages/Anointed/Page'
@@ -32,7 +34,7 @@ import EvangelicalPage from './pages/Evangelical/Page'
 import ActivitiesPage from './pages/ActivitiesPage'
 import SupportPage from './pages/SupportPage'
 import IdeasPage from './pages/IdeasPage'
-import ChatHubPage from './pages/WhatsAppGroupsPage'
+import ChatHubPage from './pages/ChatHubPage'
 import MemberPage from './pages/MemberPage'
 import CepRegisterPage from './pages/CepRegisterPage'
 import CepMembersPage from './pages/CepMembersPage'
@@ -335,6 +337,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
           <Route path="super-admin-dashboard" element={<SuperAdminDashboard />} />
           <Route path="super-admins" element={<AdminSuperAdmins />} />
         </Route>
@@ -355,6 +358,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
         </Route>
       </Routes>
     )
@@ -373,6 +377,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
         </Route>
       </Routes>
     )
@@ -391,6 +396,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
         </Route>
       </Routes>
     )
@@ -409,6 +415,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
         </Route>
       </Routes>
     )
@@ -427,6 +434,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
         </Route>
       </Routes>
     )
@@ -445,6 +453,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
         </Route>
       </Routes>
     )
@@ -463,6 +472,7 @@ function App() {
           <Route path="ideas" element={<AdminIdeas />} />
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
+          <Route path="attendance" element={<AdminAttendance />} />
         </Route>
       </Routes>
     )
@@ -479,6 +489,7 @@ function App() {
         <Route path="/support" element={<SupportPage />} />
         <Route path="/ideas" element={<IdeasPage />} />
         <Route path="/chat" element={<ChatHubPage />} />
+        <Route path="/my-attendance" element={<MyAttendancePage />} />
         <Route path="/member" element={<MemberPage />} />
       </Routes>
     </MainLayout>

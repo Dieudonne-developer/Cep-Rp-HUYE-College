@@ -229,6 +229,37 @@ ON CONFLICT (slug) DO UPDATE SET
 
 DELETE FROM whatsapp_groups WHERE slug = 'cepier';
 CREATE INDEX IF NOT EXISTS idx_chat_group ON chat_messages ("group");
+
+CREATE TABLE IF NOT EXISTS attendance_sessions (
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "group" TEXT NOT NULL,
+  "title" TEXT NOT NULL,
+  "session_date" TIMESTAMPTZ,
+  "location" TEXT,
+  "notes" TEXT,
+  "created_by" TEXT,
+  "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
+  "updated_at" TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE TABLE IF NOT EXISTS attendance_records (
+  "id" UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  "session_id" UUID NOT NULL REFERENCES attendance_sessions("id") ON DELETE CASCADE,
+  "user_id" UUID,
+  "user_email" TEXT NOT NULL,
+  "user_name" TEXT,
+  "status" TEXT NOT NULL CHECK (status IN ('present', 'absent', 'late')),
+  "has_reason" BOOLEAN NOT NULL DEFAULT false,
+  "reason" TEXT,
+  "recorded_by" TEXT,
+  "created_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
+  "updated_at" TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE ("session_id", "user_id")
+);
+
+CREATE INDEX IF NOT EXISTS idx_attendance_sessions_group ON attendance_sessions ("group");
+CREATE INDEX IF NOT EXISTS idx_attendance_records_session ON attendance_records ("session_id");
+CREATE INDEX IF NOT EXISTS idx_attendance_records_email ON attendance_records ("user_email");
 `;
 
 async function migrate() {

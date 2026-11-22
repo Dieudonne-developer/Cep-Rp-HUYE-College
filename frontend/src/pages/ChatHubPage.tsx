@@ -3,7 +3,11 @@ import { Link } from 'react-router-dom'
 import { getApiBaseUrl } from '../utils/api'
 import { WhatsAppGroupCard } from './WhatsAppGroupsPage'
 
-const groups = [{ key: 'cepier', name: 'CEPier (General)' }]
+const groups = [
+  { key: 'cepier', name: 'CEPier (General)' },
+  { key: 'choir', name: 'Ishyangaryera Choir' },
+  { key: 'anointed', name: 'Anointed' },
+]
 
 type WaGroup = { id: string; slug: string; name: string; description?: string; inviteUrl?: string | null; isActive?: boolean }
 
@@ -36,6 +40,7 @@ export default function ChatHubPage() {
       })
       const data = await res.json()
       if (!data.success) throw new Error(data.message || 'Login failed')
+      if (data.accessToken) sessionStorage.setItem('accessToken', data.accessToken)
       sessionStorage.setItem('chatUser', data.user.username)
       sessionStorage.setItem('userInfo', JSON.stringify(data.user))
       sessionStorage.setItem('userGroup', data.user.userGroup || form.group)
@@ -78,9 +83,15 @@ export default function ChatHubPage() {
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Family</label>
-              <div className="px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 text-gray-700">
-                CEPier (General)
-              </div>
+              <select
+                value={form.group}
+                onChange={(e) => setForm((p) => ({ ...p, group: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+              >
+                {groups.map((g) => (
+                  <option key={g.key} value={g.key}>{g.name}</option>
+                ))}
+              </select>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
@@ -130,6 +141,10 @@ export default function ChatHubPage() {
           </div>
         </div>
       )}
+
+      <p className="mt-6 text-center text-sm">
+        <Link to="/my-attendance" className="text-blue-700 hover:text-blue-900 underline">View my practice attendance</Link>
+      </p>
     </div>
   )
 }
