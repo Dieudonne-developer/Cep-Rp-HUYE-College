@@ -34,7 +34,6 @@ import EvangelicalPage from './pages/Evangelical/Page'
 import ActivitiesPage from './pages/ActivitiesPage'
 import SupportPage from './pages/SupportPage'
 import IdeasPage from './pages/IdeasPage'
-import ChatHubPage from './pages/ChatHubPage'
 import MemberPage from './pages/MemberPage'
 import CepRegisterPage from './pages/CepRegisterPage'
 import CepMembersPage from './pages/CepMembersPage'
@@ -488,7 +487,7 @@ function App() {
         <Route path="/activities" element={<ActivitiesPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/ideas" element={<IdeasPage />} />
-        <Route path="/chat" element={<ChatHubPage />} />
+        <Route path="/chat" element={<MyAttendancePage />} />
         <Route path="/my-attendance" element={<MyAttendancePage />} />
         <Route path="/member" element={<MemberPage />} />
       </Routes>
