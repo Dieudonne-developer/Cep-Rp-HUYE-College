@@ -161,7 +161,8 @@ export default function AdminMembers() {
         setAddMessage({ type: 'error', text: data.message || 'Failed to register member' })
         return
       }
-      setAddMessage({ type: 'success', text: 'Member registered successfully!' })
+      const linkNote = data.passwordSetupLink ? ` Password setup link (share manually if no email arrives): ${data.passwordSetupLink}` : ''
+      setAddMessage({ type: 'success', text: `Member registered successfully! Password setup email is being sent.${linkNote}` })
       setAddForm({ username: '', email: '', contactNumber: '' })
       setTimeout(() => {
         setShowAddModal(false)

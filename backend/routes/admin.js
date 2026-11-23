@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const UserRegistration = require('../models/UserRegistration');
 const ChoirUser = require('../models/UserRegistration');
@@ -788,18 +789,32 @@ router.post('/members', async (req, res) => {
       return res.status(400).json({ success: false, message: 'A member with this email or name already exists in this group' });
     }
     const adminEmail = String(req.header('x-admin-email') || '').trim().toLowerCase();
+    const hashedPassword = await bcrypt.hash(crypto.randomBytes(24).toString('hex'), 12);
+    const verificationToken = crypto.randomBytes(32).toString('hex');
     const member = await Model.create({
       username: uname,
       email: emailLower,
+      password: hashedPassword,
       contactNumber: contactDigits || null,
-      isVerified: true,
+      verificationToken,
+      isVerified: false,
       isApproved: true,
       approvedAt: new Date(),
       approvedBy: adminEmail || 'admin',
     });
+
+    const protocol = req.get('x-forwarded-proto') || 'https';
+    const backendUrl = process.env.BACKEND_URL || `${protocol}://${req.get('host')}`;
+    const setupLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
+    const { sendAdminInvitationEmail } = require('../utils/email');
+    sendAdminInvitationEmail(emailLower, uname, setupLink, group, 'member')
+      .then(r => console.log('member invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
+      .catch(err => console.error('member invite email failed:', err));
+
     res.json({
       success: true,
-      message: 'Member registered successfully',
+      message: 'Member registered successfully! Password setup email is being sent.',
+      passwordSetupLink: setupLink,
       member: {
         _id: member._id,
         username: member.username,

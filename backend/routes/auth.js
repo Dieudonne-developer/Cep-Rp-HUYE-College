@@ -439,10 +439,14 @@ router.get('/verify', async (req, res) => {
               const data = await response.json();
               
               if (data.success) {
-                messageDiv.innerHTML = '<div class="success">Password set successfully! You can now login to the chat.</div>';
-                setTimeout(() => {
-                  window.location.href = '${userRedirectUrl}';
-                }, 2000);
+                document.body.innerHTML =
+                  '<div style="font-family: Arial, sans-serif; text-align: center; padding: 60px 20px;">' +
+                  '<div style="max-width: 480px; margin: 0 auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 48px 32px;">' +
+                  '<div style="width: 72px; height: 72px; margin: 0 auto 24px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; color: #16a34a;">&#10003;</div>' +
+                  '<h1 style="color: #166534; font-size: 26px; margin-bottom: 12px;">Password Set Successfully!</h1>' +
+                  '<p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 28px;">Your password has been set. You can now log in with your email and this password.</p>' +
+                  '<a href="' + '${userRedirectUrl}' + '" style="display: inline-block; background: #2563eb; color: #fff; text-decoration: none; font-weight: 600; padding: 12px 32px; border-radius: 10px;">Go to Login / Chat</a>' +
+                  '</div></div>';
               } else {
                 messageDiv.innerHTML = '<div class="error">' + data.message + '</div>';
                 // If already verified, redirect to appropriate page after showing message
@@ -664,10 +668,14 @@ router.get('/set-password', async (req, res) => {
               const data = await response.json();
               
               if (data.success) {
-                messageDiv.innerHTML = '<div class="success">Password set successfully! You can now login to the chat.</div>';
-                setTimeout(() => {
-                  window.location.href = '${userRedirectUrl}';
-                }, 2000);
+                document.body.innerHTML =
+                  '<div style="font-family: Arial, sans-serif; text-align: center; padding: 60px 20px;">' +
+                  '<div style="max-width: 480px; margin: 0 auto; background: #fff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); padding: 48px 32px;">' +
+                  '<div style="width: 72px; height: 72px; margin: 0 auto 24px; background: #dcfce7; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 36px; color: #16a34a;">&#10003;</div>' +
+                  '<h1 style="color: #166534; font-size: 26px; margin-bottom: 12px;">Password Set Successfully!</h1>' +
+                  '<p style="color: #4b5563; font-size: 15px; line-height: 1.6; margin-bottom: 28px;">Your password has been set. You can now log in with your email and this password.</p>' +
+                  '<a href="' + '${userRedirectUrl}' + '" style="display: inline-block; background: #2563eb; color: #fff; text-decoration: none; font-weight: 600; padding: 12px 32px; border-radius: 10px;">Go to Login / Chat</a>' +
+                  '</div></div>';
               } else {
                 messageDiv.innerHTML = '<div class="error">' + data.message + '</div>';
                 if (data.alreadyVerified) {
