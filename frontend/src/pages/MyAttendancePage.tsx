@@ -123,9 +123,38 @@ export default function MyAttendancePage() {
     )
   }
 
+  const escCsv = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`
+
+  const downloadCsv = () => {
+    const header = ['Session', 'Date', 'Time', 'Group', 'Status', 'Reason']
+    const rows = records.map(r => [
+      r.session_title,
+      r.session_date ? new Date(r.session_date).toLocaleDateString() : '',
+      r.session_time || '',
+      r.session_group || '',
+      r.status,
+      r.status === 'absent' && r.has_reason ? (r.reason || 'Valid reason recorded') : '',
+    ])
+    const csv = '﻿' + [header, ...rows].map(r => r.map(escCsv).join(',')).join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = 'my-attendance.csv'
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   return (
     <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">My Attendance</h1>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
+        <h1 className="text-2xl font-bold text-gray-900">My Attendance</h1>
+        {records.length > 0 && (
+          <button onClick={downloadCsv} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+            Download CSV
+          </button>
+        )}
+      </div>
       <p className="text-sm text-gray-500 mb-6">
         {userInfo?.username || userInfo?.email || 'Your'} practice attendance records.
       </p>

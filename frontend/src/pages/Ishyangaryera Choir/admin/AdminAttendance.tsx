@@ -170,6 +170,26 @@ export default function AdminAttendance() {
     setSingerBusy(false)
   }
 
+  const escCsv = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`
+
+  const downloadRosterCsv = () => {
+    if (!selected) return
+    const header = ['Name', 'Email', 'Phone', 'Status', 'Valid Reason', 'Reason']
+    const rows = roster.map(m => [
+      m.name, m.email, m.contact_number || '', m.mark || 'Not marked',
+      m.mark === 'absent' && m.hasReason ? 'Yes' : 'No',
+      m.mark === 'absent' && m.hasReason ? m.reason : '',
+    ])
+    const csv = '﻿' + [header, ...rows].map(r => r.map(escCsv).join(',')).join('\r\n')
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `attendance-${selected.title.replace(/[^a-z0-9]+/gi, '-').toLowerCase()}.csv`
+    a.click()
+    URL.revokeObjectURL(url)
+  }
+
   const marked = roster.filter(m => m.mark).length
 
   return (
@@ -230,9 +250,14 @@ export default function AdminAttendance() {
                   <h2 className="font-semibold text-gray-800">{selected.title}</h2>
                   <p className="text-xs text-gray-500">{marked} of {roster.length} marked</p>
                 </div>
-                <button onClick={saveRecords} disabled={saving} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium">
-                  {saving ? 'Saving...' : 'Save Attendance'}
-                </button>
+                <div className="flex gap-2">
+                  <button onClick={downloadRosterCsv} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    Download CSV
+                  </button>
+                  <button onClick={saveRecords} disabled={saving} className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-4 py-2 rounded-lg text-sm font-medium">
+                    {saving ? 'Saving...' : 'Save Attendance'}
+                  </button>
+                </div>
               </div>
               {roster.length === 0 ? (
                 <p className="text-sm text-gray-400">No members found for this group. Add singers first.</p>
