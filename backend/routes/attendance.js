@@ -180,6 +180,24 @@ router.post('/singers', async (req, res) => {
 router.post('/test-email', async (req, res) => {
   try {
     const ctx = await adminContext(req, res); if (!ctx) return;
+    const brevoApiKey = process.env.BREVO_API_KEY;
+    if (brevoApiKey) {
+      const senderEmail = (process.env.EMAIL_USER || 'rphuyecollegecep@gmail.com').trim();
+      const res2 = await fetch('https://api.brevo.com/v3/smtp/email', {
+        method: 'POST',
+        headers: { 'api-key': brevoApiKey, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+        body: JSON.stringify({
+          sender: { email: senderEmail, name: 'CEP RP Huye College' },
+          to: [{ email: ctx.admin.email }],
+          subject: 'CEP SMTP Test',
+          textContent: 'If you received this, email is working from the server (Brevo API).',
+        }),
+      });
+      const data = await res2.json().catch(() => ({}));
+      return res.json(res2.ok
+        ? { success: true, provider: 'brevo-api', messageId: data.messageId, sentTo: ctx.admin.email }
+        : { success: false, provider: 'brevo-api', reason: data.message || ('HTTP ' + res2.status) });
+    }
     const nodemailer = require('nodemailer');
     const user = process.env.EMAIL_USER;
     const pass = process.env.EMAIL_APP_PASSWORD;

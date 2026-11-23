@@ -2,6 +2,40 @@ const nodemailer = require('nodemailer');
 
 // Create transporter for Gmail
 const createTransporter = () => {
+  // Brevo HTTPS API - works from Render where SMTP ports are blocked
+  const brevoApiKey = process.env.BREVO_API_KEY?.trim();
+  if (brevoApiKey) {
+    const senderEmail = (process.env.EMAIL_USER || 'rphuyecollegecep@gmail.com').trim();
+    return {
+      sendMail: async (mail) => {
+        const toList = (Array.isArray(mail.to) ? mail.to : [mail.to]).map(t => {
+          const m = String(t).match(/<([^>]+)>/);
+          return { email: (m ? m[1] : String(t)).trim() };
+        }).filter(t => t.email);
+        const payload = {
+          sender: { email: senderEmail, name: 'CEP RP Huye College' },
+          to: toList,
+          subject: mail.subject || '(no subject)',
+          ...(mail.html ? { htmlContent: mail.html } : {}),
+          ...(mail.text ? { textContent: mail.text } : {}),
+        };
+        const res = await fetch('https://api.brevo.com/v3/smtp/email', {
+          method: 'POST',
+          headers: { 'api-key': brevoApiKey, 'Content-Type': 'application/json', 'Accept': 'application/json' },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          const err = new Error(data.message || ('Brevo API error ' + res.status));
+          err.code = 'EBREVO';
+          throw err;
+        }
+        return { messageId: String(data.messageId || '') };
+      },
+      verify: async () => true,
+    };
+  }
+
   // Get email credentials from environment variables
   const emailUser = process.env.EMAIL_USER?.trim();
   // Remove spaces from app password (Gmail app passwords are 16 characters without spaces)
