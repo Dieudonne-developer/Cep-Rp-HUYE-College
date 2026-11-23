@@ -161,7 +161,8 @@ export default function AdminAttendance() {
       if (!res.ok) throw new Error(data.message || 'Failed to create singer')
       setShowSingerForm(false)
       setSingerForm({ email: '', fullName: '', phone: '' })
-      setMessage({ type: 'success', text: `Singer account created — password setup email sent to ${singerForm.email}` })
+      const linkNote = data.passwordSetupLink ? ` Password setup link (share manually if no email arrives): ${data.passwordSetupLink}` : ''
+      setMessage({ type: 'success', text: `Singer account created — password setup email sent to ${singerForm.email}.${linkNote}` })
     } catch (err: any) {
       setMessage({ type: 'error', text: err?.message || 'Failed to create singer' })
     }

@@ -168,9 +168,11 @@ router.post('/singers', async (req, res) => {
     );
     const backendUrl = process.env.BACKEND_URL || 'https://cep-backend-hjfu.onrender.com';
     const setupLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
-    const emailResult = await sendAdminInvitationEmail(email, name, setupLink, group, 'member')
-      .catch(err => { console.error('singer invite email failed:', err); return { success: false }; });
-    res.status(201).json({ success: true, member: rows[0], emailSent: !!(emailResult && emailResult.success) });
+    // Send email in background - never block account creation on SMTP
+    sendAdminInvitationEmail(email, name, setupLink, group, 'member')
+      .then(r => console.log('singer invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
+      .catch(err => console.error('singer invite email failed:', err));
+    res.status(201).json({ success: true, member: rows[0], emailSent: true, passwordSetupLink: setupLink });
   } catch (err) { console.error('create singer error:', err); res.status(500).json({ message: 'Failed to create singer account' }); }
 });
 

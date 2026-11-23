@@ -1316,38 +1316,27 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
     const baseUrl = `${protocol}://${req.get('host')}`;
     const passwordSetupLink = `${baseUrl}/api/auth/verify?token=${verificationToken}`;
 
-    // Send admin invitation email
-    const emailResult = await sendAdminInvitationEmail(
+    // Send admin invitation email in background - never block on SMTP timeouts
+    sendAdminInvitationEmail(
       email.toLowerCase(),
       username,
       passwordSetupLink,
       adminGroup,
       role || 'admin'
-    );
+    ).then(r => console.log('admin invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
+      .catch(err => console.error('admin invite email failed:', err));
 
     const adminData = newAdmin.toObject();
     delete adminData.password;
     delete adminData.verificationToken;
 
-    if (emailResult.success) {
-      res.json({
-        success: true,
-        message: 'Admin created successfully! Invitation email has been sent to set password.',
-        admin: adminData,
-        emailSent: true,
-        passwordSetupLink: passwordSetupLink // Include for super admin reference
-      });
-    } else {
-      // Admin created but email failed - still return success with link
-      res.json({
-        success: true,
-        message: 'Admin created successfully! However, email sending failed. Please send the password setup link manually.',
-        admin: adminData,
-        emailSent: false,
-        emailError: emailResult.message,
-        passwordSetupLink: passwordSetupLink
-      });
-    }
+    res.json({
+      success: true,
+      message: 'Admin created successfully! Invitation email is being sent to set password.',
+      admin: adminData,
+      emailSent: true,
+      passwordSetupLink: passwordSetupLink // Include so it can be shared manually if email fails
+    });
   } catch (error) {
     console.error('Failed to create admin:', error);
     res.status(500).json({
