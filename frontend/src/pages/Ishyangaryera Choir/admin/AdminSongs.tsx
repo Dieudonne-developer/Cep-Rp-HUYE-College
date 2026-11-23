@@ -207,7 +207,7 @@ export default function AdminSongs() {
   
   return (
     <div className="p-6">
-      <div className="flex justify-between items-center mb-8">
+      <div className="flex flex-wrap justify-between items-center gap-3 mb-8">
         <h1 className="text-3xl font-bold text-gray-800">{pageTitle}</h1>
         <div className="flex space-x-3">
           <button
@@ -328,7 +328,7 @@ export default function AdminSongs() {
       {showModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
               <h3 className="text-xl font-bold text-gray-800">
                 {editingSong ? (isProtocolAdmin ? 'Edit Decorating Video' : isEvangelicalAdmin ? 'Edit Bible Teaching' : isPsalmAdmin ? 'Edit Video' : isAbanyamugishaAdmin ? 'Edit Testimony' : 'Edit Song') : (isProtocolAdmin ? 'Add New Decorating Video' : isEvangelicalAdmin ? 'Add New Bible Teaching' : isPsalmAdmin ? 'Add New Video' : isAbanyamugishaAdmin ? 'Add New Testimony' : 'Add New Song')}
               </h3>
@@ -451,7 +451,7 @@ export default function AdminSongs() {
       {showUploadModal && (
         <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md">
-            <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-wrap justify-between items-center gap-3 mb-4">
               <h3 className="text-xl font-bold text-gray-800">{isProtocolAdmin ? 'Upload Decorating Video' : isEvangelicalAdmin ? 'Upload Bible Teaching' : isPsalmAdmin ? 'Upload Video' : isAbanyamugishaAdmin ? 'Upload Testimony' : 'Upload Song/Video'}</h3>
               <button
                 onClick={() => setShowUploadModal(false)}

@@ -153,7 +153,7 @@ export default function AdminSupport() {
 
   return (
     <div className="p-6">
-      <div className="mb-6 flex justify-between items-start">
+      <div className="mb-6 flex flex-wrap justify-between items-start gap-3">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">Manage Support</h1>
           <p className="text-sm text-gray-600">

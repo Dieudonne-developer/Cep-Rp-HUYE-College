@@ -176,6 +176,34 @@ router.post('/singers', async (req, res) => {
   } catch (err) { console.error('create singer error:', err); res.status(500).json({ message: 'Failed to create singer account' }); }
 });
 
+// ---- Admin: SMTP diagnostic ----
+router.post('/test-email', async (req, res) => {
+  try {
+    const ctx = await adminContext(req, res); if (!ctx) return;
+    const nodemailer = require('nodemailer');
+    const user = process.env.EMAIL_USER;
+    const pass = process.env.EMAIL_APP_PASSWORD;
+    if (!user || !pass) {
+      return res.json({ success: false, reason: 'EMAIL_USER or EMAIL_APP_PASSWORD not set in environment' });
+    }
+    const t = nodemailer.createTransport({
+      host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true,
+      auth: { user, pass: pass.replace(/\s+/g, '') },
+      tls: { rejectUnauthorized: false },
+      connectionTimeout: 20000, greetingTimeout: 20000, socketTimeout: 20000,
+    });
+    const info = await t.sendMail({
+      from: `CEP RP Huye College <${user}>`,
+      to: ctx.admin.email,
+      subject: 'CEP SMTP Test',
+      text: 'If you received this, SMTP is working from the server.',
+    });
+    res.json({ success: true, messageId: info.messageId, sentTo: ctx.admin.email });
+  } catch (err) {
+    res.json({ success: false, reason: err.message, code: err.code || null });
+  }
+});
+
 // ---- Singer: own attendance ----
 router.get('/me', async (req, res) => {
   try {
