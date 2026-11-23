@@ -20,8 +20,9 @@ function createTransporter() {
   // Try direct connection without service name (sometimes works better)
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465, // Try SSL port first (sometimes works better on Render)
-    secure: true, // SSL
+    port: 587, // STARTTLS port - reliable through Render's network
+    secure: false,
+    requireTLS: true,
     auth: {
       user: emailUser,
       pass: emailPassword

@@ -87,9 +87,10 @@ router.post('/register', upload.single('profileImage'), async (req, res) => {
     
     // Send verification email
     console.log('Sending verification email to:', emailLower);
-    // Use frontend URL for verification link (not backend URL)
-    const frontendUrl = process.env.FRONTEND_URL || process.env.CLIENT_ORIGIN || 'http://localhost:5173';
-    const verificationLink = `${frontendUrl}/choir/set-password?token=${verificationToken}`;
+    // Password setup link hits the backend verify endpoint, which renders the set-password form
+    const protocol = req.get('x-forwarded-proto') || 'https';
+    const backendUrl = process.env.BACKEND_URL || `${protocol}://${req.get('host')}`;
+    const verificationLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
     console.log('Email link:', verificationLink);
     console.log('User group for email:', userGroup);
     

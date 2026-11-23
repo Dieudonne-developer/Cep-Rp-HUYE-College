@@ -166,11 +166,11 @@ router.post('/singers', async (req, res) => {
        VALUES ($1,$2,$3,$4,'member',false,true,$5,$5,$6,now(),$7,now(),now()) RETURNING id, email, username`,
       [email, name, hashedPassword, phone || null, group, verificationToken, ctx.admin.email]
     );
-    const baseUrl = process.env.FRONTEND_URL || 'https://cep-rp-huye-college-lrkj.vercel.app';
-    const setupLink = `${baseUrl}/api/auth/verify?token=${verificationToken}`;
-    sendAdminInvitationEmail(email, name, setupLink, group, 'member').catch(err =>
-      console.error('singer invite email failed:', err));
-    res.status(201).json({ success: true, member: rows[0], emailSent: true });
+    const backendUrl = process.env.BACKEND_URL || 'https://cep-backend-hjfu.onrender.com';
+    const setupLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
+    const emailResult = await sendAdminInvitationEmail(email, name, setupLink, group, 'member')
+      .catch(err => { console.error('singer invite email failed:', err); return { success: false }; });
+    res.status(201).json({ success: true, member: rows[0], emailSent: !!(emailResult && emailResult.success) });
   } catch (err) { console.error('create singer error:', err); res.status(500).json({ message: 'Failed to create singer account' }); }
 });
 

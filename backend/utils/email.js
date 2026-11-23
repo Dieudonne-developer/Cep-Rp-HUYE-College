@@ -12,12 +12,12 @@ const createTransporter = () => {
     return null;
   }
   
-  // Configure for Gmail SMTP with Render compatibility
-  // Render free tier may block SMTP - use SSL port 465
+  // Gmail SMTP via port 587 STARTTLS - more reliable through Render's network
   return nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465, // SSL port (sometimes works better on Render)
-    secure: true, // SSL
+    port: 587,
+    secure: false,
+    requireTLS: true,
     auth: {
       user: emailUser,
       pass: emailPassword

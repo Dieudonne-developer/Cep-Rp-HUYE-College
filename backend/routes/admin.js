@@ -1312,7 +1312,8 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
     await newAdmin.save();
 
     // Generate password setup link
-    const baseUrl = req.protocol + '://' + req.get('host');
+    const protocol = req.get('x-forwarded-proto') || 'https';
+    const baseUrl = `${protocol}://${req.get('host')}`;
     const passwordSetupLink = `${baseUrl}/api/auth/verify?token=${verificationToken}`;
 
     // Send admin invitation email
