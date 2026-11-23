@@ -1268,6 +1268,14 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
       });
     }
 
+    const emailClean = String(email).trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailClean)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address (e.g. name@gmail.com). The password setup link is sent to this email.'
+      });
+    }
+
     const contactDigits = String(contactNumber || '').replace(/\D/g, '');
     if (contactNumber && contactDigits.length < 9) {
       return res.status(400).json({
