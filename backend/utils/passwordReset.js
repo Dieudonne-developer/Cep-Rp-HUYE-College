@@ -18,15 +18,26 @@ function createTransporter() {
   
   // Render free tier blocks SMTP - use minimal configuration
   // Try direct connection without service name (sometimes works better)
-  return nodemailer.createTransport({
+  const brevoKey = process.env.BREVO_SMTP_KEY?.trim();
+  const brevoUser = process.env.BREVO_SMTP_USER?.trim() || emailUser;
+  const transportConfig = brevoKey ? {
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: { user: brevoUser, pass: brevoKey }
+  } : {
     host: 'smtp.gmail.com',
-    port: 587, // STARTTLS port - reliable through Render's network
+    port: 587,
     secure: false,
     requireTLS: true,
     auth: {
       user: emailUser,
       pass: emailPassword
-    },
+    }
+  };
+  return nodemailer.createTransport({
+    ...transportConfig,
     tls: {
       rejectUnauthorized: false,
       minVersion: 'TLSv1.2'

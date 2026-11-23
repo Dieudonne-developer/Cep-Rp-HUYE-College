@@ -12,8 +12,17 @@ const createTransporter = () => {
     return null;
   }
   
-  // Gmail SMTP via port 587 STARTTLS - more reliable through Render's network
-  return nodemailer.createTransport({
+  // Provider selection: Brevo SMTP if configured (works from Render), else Gmail
+  const brevoKey = process.env.BREVO_SMTP_KEY?.trim();
+  const brevoUser = process.env.BREVO_SMTP_USER?.trim() || emailUser;
+  const useBrevo = !!brevoKey;
+  const transportConfig = useBrevo ? {
+    host: 'smtp-relay.brevo.com',
+    port: 587,
+    secure: false,
+    requireTLS: true,
+    auth: { user: brevoUser, pass: brevoKey }
+  } : {
     host: 'smtp.gmail.com',
     port: 587,
     secure: false,
@@ -21,7 +30,10 @@ const createTransporter = () => {
     auth: {
       user: emailUser,
       pass: emailPassword
-    },
+    }
+  };
+  return nodemailer.createTransport({
+    ...transportConfig,
     tls: {
       rejectUnauthorized: false,
       minVersion: 'TLSv1.2'

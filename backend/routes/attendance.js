@@ -183,12 +183,20 @@ router.post('/test-email', async (req, res) => {
     const nodemailer = require('nodemailer');
     const user = process.env.EMAIL_USER;
     const pass = process.env.EMAIL_APP_PASSWORD;
-    if (!user || !pass) {
-      return res.json({ success: false, reason: 'EMAIL_USER or EMAIL_APP_PASSWORD not set in environment' });
+    const brevoKey = process.env.BREVO_SMTP_KEY;
+    const brevoUser = process.env.BREVO_SMTP_USER || user;
+    if (!brevoKey && (!user || !pass)) {
+      return res.json({ success: false, reason: 'EMAIL_USER/EMAIL_APP_PASSWORD or BREVO_SMTP_KEY not set in environment' });
     }
-    const t = nodemailer.createTransport({
+    const cfg = brevoKey ? {
+      host: 'smtp-relay.brevo.com', port: 587, secure: false, requireTLS: true,
+      auth: { user: brevoUser, pass: brevoKey },
+    } : {
       host: 'smtp.gmail.com', port: 587, secure: false, requireTLS: true,
-      auth: { user, pass: pass.replace(/\s+/g, '') },
+      auth: { user, pass: String(pass).replace(/\s+/g, '') },
+    };
+    const t = nodemailer.createTransport({
+      ...cfg,
       tls: { rejectUnauthorized: false },
       connectionTimeout: 20000, greetingTimeout: 20000, socketTimeout: 20000,
     });
