@@ -22,7 +22,7 @@ export default function ForgotPasswordPage() {
   const getGroupInfo = () => {
     const path = location.pathname.toLowerCase()
     if (path.includes('/cepier/forgot-password')) {
-      return { group: 'CEPier', redirectPath: '/cepier/members' }
+      return { group: 'CEP', redirectPath: '/cepier/members' }
     } else if (path.includes('/anointed/forgot-password')) {
       return { group: 'Anointed Worship Team', redirectPath: '/anointed' }
     } else if (path.includes('/abanyamugisha/forgot-password')) {

@@ -18,7 +18,7 @@ type Admin = {
 }
 
 const ALL_GROUPS = [
-  { value: 'cepier', label: 'CEPier' },
+  { value: 'cepier', label: 'CEP' },
   { value: 'choir', label: 'Choir' },
   { value: 'anointed', label: 'Anointed' },
   { value: 'abanyamugisha', label: 'Abanyamugisha' },
@@ -686,7 +686,7 @@ export default function AdminSuperAdmins() {
 }
 
 const GROUP_LABELS: Record<string, string> = {
-  cepier: 'CEPier',
+  cepier: 'CEP',
   choir: 'Choir',
   anointed: 'Anointed',
   abanyamugisha: 'Abanyamugisha',

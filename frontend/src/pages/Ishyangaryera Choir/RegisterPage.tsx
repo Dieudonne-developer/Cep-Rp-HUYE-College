@@ -315,7 +315,7 @@ export default function RegisterPage() {
                   onChange={(e) => setSelectedFamily(e.target.value)}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-colors"
                 >
-                  <option value="cepier">CEPier (General)</option>
+                  <option value="cepier">CEP (General)</option>
                   <option disabled>──────────</option>
                   <option value="choir">Ishyanga Ryera Choir</option>
                   <option value="anointed">Anointed worship team</option>

@@ -216,7 +216,7 @@ function App() {
     return <ChatPage />
   }
 
-  // CEPier chat page (standalone)
+  // CEP chat page (standalone)
   if (location.pathname === '/cepier/chat') {
     return <ChatPage />
   }
@@ -310,7 +310,7 @@ function App() {
     return <ForgotPasswordPage />
   }
 
-  // CEPier forgot password page (standalone)
+  // CEP forgot password page (standalone)
   if (location.pathname === '/cepier/forgot-password') {
     return <ForgotPasswordPage />
   }

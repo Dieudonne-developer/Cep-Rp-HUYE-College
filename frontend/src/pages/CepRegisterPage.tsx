@@ -47,7 +47,7 @@ export default function CepRegisterPage() {
       if (form.contactNumber.trim()) fd.append('contactNumber', form.contactNumber.trim())
       if (form.profileImage) fd.append('profileImage', form.profileImage)
       fd.append('userGroup', family)
-      // brand email as CEPier when choosing CEPier (general = choir group)
+      // brand email as CEP when choosing CEP (general = choir group)
       if (family === 'choir') fd.append('displayAs', 'cepier')
       const res = await fetch(`${baseUrl}/api/auth/register`, { method: 'POST', body: fd })
       const data = await res.json()
@@ -75,7 +75,7 @@ export default function CepRegisterPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>
             </button>
-            <h1 className="text-xl md:text-3xl font-extrabold tracking-tight">CEPier Registration</h1>
+            <h1 className="text-xl md:text-3xl font-extrabold tracking-tight">CEP Registration</h1>
           </div>
           <nav className="hidden md:flex space-x-6">
             <a href="/" className="px-3 py-2 rounded-lg hover:bg-blue-600">Home</a>
@@ -130,7 +130,7 @@ export default function CepRegisterPage() {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Select your family</label>
               <select value={family} onChange={(e)=>setFamily(e.target.value)} className="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500">
-                <option value="cepier">CEPier (General)</option>
+                <option value="cepier">CEP (General)</option>
                 <option disabled>──────────</option>
                 <option value="choir">Ishyanga Ryera Choir</option>
                 <option value="anointed">Anointed Worship Team</option>

@@ -54,7 +54,7 @@ const sendVerificationEmail = async (email, username, verificationLink, userGrou
 
     // Map userGroup to family name
     const familyNames = {
-      'cepier': 'CEPier',
+      'cepier': 'CEP',
       'choir': 'Ishyanga Ryera Choir',
       'anointed': 'Anointed Worship Team',
       'abanyamugisha': 'Abanyamugisha Family',
@@ -486,7 +486,7 @@ const sendAdminInvitationEmail = async (email, username, passwordSetupLink, admi
 
     // Map userGroup to family name
     const familyNames = {
-      'cepier': 'CEPier',
+      'cepier': 'CEP',
       'choir': 'Ishyanga Ryera Choir',
       'anointed': 'Anointed Worship Team',
       'abanyamugisha': 'Abanyamugisha Family',

@@ -91,7 +91,7 @@ export default function TestLoginPage() {
         <div className="p-8">
           <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Admin Login</h2>
           <p className="text-sm text-gray-600 text-center mb-6">
-            Login for all CEP administrators (Choir, Anointed, Abanyamugisha, Psalm23, Psalm46, Protocol, Social, Evangelical, CEPier)
+            Login for all CEP administrators (Choir, Anointed, Abanyamugisha, Psalm23, Psalm46, Protocol, Social, Evangelical, CEP)
           </p>
 
           {/* Success Message */}

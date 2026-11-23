@@ -67,7 +67,7 @@ export default function ChatPage() {
   const groupDisplayName = useMemo(() => {
     const names: Record<string, string> = {
       admins: 'Admin Chat',
-      cepier: 'CEPier Chat',
+      cepier: 'CEP Chat',
       choir: 'Ishyanga Ryera Choir',
       anointed: 'Anointed Worship Team',
       abanyamugisha: 'Abanyamugisha Family',

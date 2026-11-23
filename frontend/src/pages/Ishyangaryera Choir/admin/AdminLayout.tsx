@@ -86,7 +86,7 @@ export default function AdminLayout() {
 
   const getAdminGroupLabel = () => {
     const groups: Record<string, string> = {
-      'cepier': 'CEPier',
+      'cepier': 'CEP',
       'choir': 'Choir',
       'anointed': 'Anointed',
       'abanyamugisha': 'Abanyamugisha',
@@ -203,7 +203,7 @@ export default function AdminLayout() {
                       className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${location.search.includes('global=cepier-members') ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'}`}
                     >
                       <i data-lucide="user-check" className="mr-3 w-5 h-5"></i>
-                      CEPier Members
+                      CEP Members
                     </Link>
                   </div>
                   

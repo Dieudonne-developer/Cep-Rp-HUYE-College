@@ -21,7 +21,7 @@ const KIND_LABELS: Record<string, string> = {
 
 const GROUP_LABELS: Record<string, string> = {
   global: 'CEP General',
-  cepier: 'CEPier',
+  cepier: 'CEP',
   choir: 'Ishyanga Ryera Choir',
   anointed: 'Anointed',
   abanyamugisha: 'Abanyamugisha',

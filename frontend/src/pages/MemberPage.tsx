@@ -30,7 +30,7 @@ export default function MemberPage() {
           <div className="flex flex-wrap gap-3">
             <a href={`/${user.userGroup || group}/chat`} className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Open Chat</a>
             <a href={`/${user.userGroup || group}`} className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded-lg">Open Family Page</a>
-            <a href={`/`} className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">CEPier Home</a>
+            <a href={`/`} className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-4 py-2 rounded-lg">CEP Home</a>
           </div>
         </div>
       )}
