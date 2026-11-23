@@ -8,6 +8,7 @@ interface AttendanceRecord {
   reason?: string
   session_title: string
   session_date?: string
+  session_time?: string
   session_location?: string
   session_group?: string
 }
@@ -150,7 +151,10 @@ export default function MyAttendancePage() {
               {records.map(r => (
                 <tr key={r.id} className="border-t border-gray-100">
                   <td className="px-4 py-3 font-medium text-gray-800">{r.session_title}</td>
-                  <td className="px-4 py-3 text-gray-600">{r.session_date ? new Date(r.session_date).toLocaleDateString() : '—'}</td>
+                  <td className="px-4 py-3 text-gray-600">
+                    {r.session_date ? new Date(r.session_date).toLocaleDateString() : '—'}
+                    {r.session_time ? <span className="block text-xs text-gray-400">{r.session_time}</span> : null}
+                  </td>
                   <td className="px-4 py-3">
                     <span className={`px-2 py-1 rounded-full text-xs font-medium capitalize ${STATUS_STYLE[r.status] || 'bg-gray-100 text-gray-600'}`}>
                       {r.status}

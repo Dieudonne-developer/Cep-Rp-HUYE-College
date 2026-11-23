@@ -6,6 +6,7 @@ interface Session {
   group: string
   title: string
   session_date?: string
+  session_time?: string
   location?: string
   notes?: string
 }
@@ -52,7 +53,7 @@ export default function AdminAttendance() {
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   const [showSessionForm, setShowSessionForm] = useState(false)
-  const [sessionForm, setSessionForm] = useState({ title: '', date: '', location: '', notes: '' })
+  const [sessionForm, setSessionForm] = useState({ title: '', date: '', time: '', location: '', notes: '' })
   const [showSingerForm, setShowSingerForm] = useState(false)
   const [singerForm, setSingerForm] = useState({ email: '', fullName: '', phone: '' })
   const [singerBusy, setSingerBusy] = useState(false)
@@ -133,7 +134,7 @@ export default function AdminAttendance() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.message || 'Failed to create session')
       setShowSessionForm(false)
-      setSessionForm({ title: '', date: '', location: '', notes: '' })
+      setSessionForm({ title: '', date: '', time: '', location: '', notes: '' })
       fetchSessions()
     } catch (err: any) {
       setMessage({ type: 'error', text: err?.message || 'Failed to create session' })
@@ -207,7 +208,7 @@ export default function AdminAttendance() {
                   onClick={() => openRoster(s)}>
                   <div>
                     <p className="text-sm font-medium text-gray-800">{s.title}</p>
-                    <p className="text-xs text-gray-500">{s.session_date ? new Date(s.session_date).toLocaleDateString() : 'No date'}{s.location ? ` • ${s.location}` : ''}</p>
+                    <p className="text-xs text-gray-500">{s.session_date ? new Date(s.session_date).toLocaleDateString() : 'No date'}{s.session_time ? ` • ${s.session_time}` : ''}{s.location ? ` • ${s.location}` : ''}</p>
                   </div>
                   <button onClick={(e) => { e.stopPropagation(); deleteSession(s.id) }} className="text-red-500 hover:text-red-700 text-xs">Delete</button>
                 </li>
@@ -300,7 +301,10 @@ export default function AdminAttendance() {
           <form onSubmit={createSession} className="bg-white rounded-xl p-6 w-full max-w-md space-y-4">
             <h3 className="text-lg font-bold text-gray-900">New Practice Session</h3>
             <input required value={sessionForm.title} onChange={e => setSessionForm({ ...sessionForm, title: e.target.value })} placeholder="Title (e.g. Saturday Rehearsal)" className="w-full border border-gray-300 rounded-lg px-3 py-2" />
-            <input type="date" value={sessionForm.date} onChange={e => setSessionForm({ ...sessionForm, date: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+            <div className="grid grid-cols-2 gap-3">
+              <input type="date" value={sessionForm.date} onChange={e => setSessionForm({ ...sessionForm, date: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+              <input type="time" value={sessionForm.time} onChange={e => setSessionForm({ ...sessionForm, time: e.target.value })} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
+            </div>
             <input value={sessionForm.location} onChange={e => setSessionForm({ ...sessionForm, location: e.target.value })} placeholder="Location (optional)" className="w-full border border-gray-300 rounded-lg px-3 py-2" />
             <textarea value={sessionForm.notes} onChange={e => setSessionForm({ ...sessionForm, notes: e.target.value })} placeholder="Notes (optional)" rows={2} className="w-full border border-gray-300 rounded-lg px-3 py-2" />
             <div className="flex justify-end gap-2">

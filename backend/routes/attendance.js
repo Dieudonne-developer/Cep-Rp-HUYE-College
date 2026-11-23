@@ -69,9 +69,9 @@ router.post('/sessions', async (req, res) => {
     const title = String(req.body.title || '').trim();
     if (!title) return res.status(400).json({ message: 'Session title is required' });
     const { rows } = await query(
-      `INSERT INTO attendance_sessions ("group", title, session_date, location, notes, created_by)
-       VALUES ($1,$2,$3,$4,$5,$6) RETURNING *`,
-      [group, title, req.body.date || null, req.body.location || null, req.body.notes || null, ctx.admin.email]
+      `INSERT INTO attendance_sessions ("group", title, session_date, session_time, location, notes, created_by)
+       VALUES ($1,$2,$3,$4,$5,$6,$7) RETURNING *`,
+      [group, title, req.body.date || null, req.body.time || null, req.body.location || null, req.body.notes || null, ctx.admin.email]
     );
     res.status(201).json({ session: rows[0] });
   } catch (err) { console.error('create session error:', err); res.status(500).json({ message: 'Failed to create session' }); }
@@ -81,9 +81,9 @@ router.put('/sessions/:id', async (req, res) => {
   try {
     const ctx = await adminContext(req, res); if (!ctx) return;
     const { rows } = await query(
-      `UPDATE attendance_sessions SET title=$2, session_date=$3, location=$4, notes=$5, updated_at=now()
-       WHERE id=$1 AND ("group" = $6 OR $7) RETURNING *`,
-      [req.params.id, req.body.title, req.body.date || null, req.body.location || null, req.body.notes || null, ctx.group, ctx.isSuper]
+      `UPDATE attendance_sessions SET title=$2, session_date=$3, session_time=$4, location=$5, notes=$6, updated_at=now()
+       WHERE id=$1 AND ("group" = $7 OR $8) RETURNING *`,
+      [req.params.id, req.body.title, req.body.date || null, req.body.time || null, req.body.location || null, req.body.notes || null, ctx.group, ctx.isSuper]
     );
     if (!rows.length) return res.status(404).json({ message: 'Session not found' });
     res.json({ session: rows[0] });
@@ -182,7 +182,7 @@ router.get('/me', async (req, res) => {
     const member = await memberFromToken(req);
     if (!member) return res.status(401).json({ message: 'Login required' });
     const { rows } = await query(
-      `SELECT r.*, s.title AS session_title, s.session_date, s.location AS session_location, s."group" AS session_group
+      `SELECT r.*, s.title AS session_title, s.session_date, s.session_time, s.location AS session_location, s."group" AS session_group
        FROM attendance_records r JOIN attendance_sessions s ON s.id = r.session_id
        WHERE lower(r.user_email) = $1 ORDER BY s.session_date DESC NULLS LAST`,
       [member.email]

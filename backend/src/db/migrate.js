@@ -235,6 +235,7 @@ CREATE TABLE IF NOT EXISTS attendance_sessions (
   "group" TEXT NOT NULL,
   "title" TEXT NOT NULL,
   "session_date" TIMESTAMPTZ,
+  "session_time" TEXT,
   "location" TEXT,
   "notes" TEXT,
   "created_by" TEXT,
@@ -258,6 +259,7 @@ CREATE TABLE IF NOT EXISTS attendance_records (
 );
 
 CREATE INDEX IF NOT EXISTS idx_attendance_sessions_group ON attendance_sessions ("group");
+ALTER TABLE attendance_sessions ADD COLUMN IF NOT EXISTS "session_time" TEXT;
 CREATE INDEX IF NOT EXISTS idx_attendance_records_session ON attendance_records ("session_id");
 CREATE INDEX IF NOT EXISTS idx_attendance_records_email ON attendance_records ("user_email");
 `;
