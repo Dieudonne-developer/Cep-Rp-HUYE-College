@@ -137,6 +137,7 @@ CREATE TABLE IF NOT EXISTS global_support (
   bank JSONB DEFAULT '{}'::jsonb,
   mobile_money JSONB DEFAULT '{}'::jsonb,
   online_donation_note TEXT DEFAULT 'Paystack verification pending server integration.',
+  created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -167,6 +168,8 @@ CREATE INDEX IF NOT EXISTS idx_support_items_group ON support_items ("group");
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS contact_number TEXT;
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS is_current BOOLEAN NOT NULL DEFAULT TRUE;
+ALTER TABLE global_support ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE group_support ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 ALTER TABLE events ADD COLUMN IF NOT EXISTS event_time TEXT;
 ALTER TABLE events ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'upcoming';
