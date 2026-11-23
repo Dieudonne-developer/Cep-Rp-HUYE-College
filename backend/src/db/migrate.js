@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS app_users (
   user_group TEXT NOT NULL,
   is_verified BOOLEAN DEFAULT FALSE,
   is_approved BOOLEAN DEFAULT FALSE,
+  is_current BOOLEAN NOT NULL DEFAULT TRUE,
   verification_token TEXT,
   password TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -165,6 +166,7 @@ CREATE INDEX IF NOT EXISTS idx_support_items_group ON support_items ("group");
 
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 ALTER TABLE app_users ADD COLUMN IF NOT EXISTS contact_number TEXT;
+ALTER TABLE app_users ADD COLUMN IF NOT EXISTS is_current BOOLEAN NOT NULL DEFAULT TRUE;
 
 ALTER TABLE events ADD COLUMN IF NOT EXISTS event_time TEXT;
 ALTER TABLE events ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'upcoming';

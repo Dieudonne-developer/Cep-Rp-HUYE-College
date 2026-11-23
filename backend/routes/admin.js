@@ -688,7 +688,7 @@ router.get('/members', async (req, res) => {
     const Model = getUserModelForGroup(group);
     // Include all users for the group (verified or not) so newly registered users show up for approval
     const members = await Model.find({ userGroup: group })
-      .select('email username profileImage createdAt isApproved approvedAt approvedBy userGroup contactNumber')
+      .select('email username profileImage createdAt isApproved approvedAt approvedBy userGroup contactNumber isCurrent')
       .sort({ createdAt: -1 });
     res.json(members);
   } catch (error) {
@@ -824,21 +824,25 @@ router.put('/members/:id', async (req, res) => {
     const { id } = req.params;
     const group = await resolveGroup(req);
     const Model = getUserModelForGroup(group);
-    const { username, email, contactNumber } = req.body || {};
-    if (!username || !String(username).trim() || !email || !String(email).trim()) {
+    const { username, email, contactNumber, isCurrent } = req.body || {};
+    const togglingOnly = isCurrent !== undefined && username === undefined && email === undefined;
+    if (!togglingOnly && (!username || !String(username).trim() || !email || !String(email).trim())) {
       return res.status(400).json({ success: false, message: 'Username and email are required' });
     }
-    const contactDigits = String(contactNumber || '').replace(/\D/g, '');
-    if (contactNumber && contactDigits.length < 9) {
+    const contactDigits = togglingOnly ? null : String(contactNumber || '').replace(/\D/g, '');
+    if (!togglingOnly && contactNumber && contactDigits.length < 9) {
       return res.status(400).json({ success: false, message: 'Contact number must include at least 9 digits.' });
     }
     const user = await Model.findById(id);
     if (!user) {
       return res.status(404).json({ success: false, message: 'Member not found' });
     }
-    user.username = String(username).trim();
-    user.email = String(email).trim().toLowerCase();
-    user.contactNumber = contactDigits ? contactDigits : null;
+    if (isCurrent !== undefined) user.isCurrent = !!isCurrent;
+    if (!togglingOnly) {
+      user.username = String(username).trim();
+      user.email = String(email).trim().toLowerCase();
+      user.contactNumber = contactDigits ? contactDigits : null;
+    }
     await user.save();
     res.json({ success: true, message: 'Member updated successfully', member: user });
   } catch (error) {

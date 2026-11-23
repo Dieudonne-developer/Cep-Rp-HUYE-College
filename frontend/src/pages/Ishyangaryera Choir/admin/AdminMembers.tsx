@@ -11,6 +11,7 @@ type Member = {
   profileImage?: string
   createdAt: string
   isApproved?: boolean
+  isCurrent?: boolean
   approvedAt?: string
   approvedBy?: string
 }
@@ -103,6 +104,23 @@ export default function AdminMembers() {
       console.error('Failed to update member:', error)
       alert('Failed to update member')
     }
+  }
+
+  const handleToggleCurrent = async (member: Member) => {
+    const next = !(member.isCurrent !== false)
+    if (!confirm(`${next ? 'Mark as current member' : 'Mark as not current'} for ${member.username || member.email}?`)) return
+    try {
+      const adminRaw = localStorage.getItem('admin')
+      const admin = adminRaw ? JSON.parse(adminRaw) : {}
+      const response = await fetch(`${baseUrl}/api/admin/members/${member._id}?${groupQuery}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Group': adminGroup, 'X-Admin-Email': admin?.email || '' },
+        body: JSON.stringify({ isCurrent: next })
+      })
+      const data = await response.json().catch(() => ({}))
+      if (!response.ok) { alert(data.message || 'Failed to update member'); return }
+      fetchMembers()
+    } catch { alert('Failed to update member') }
   }
 
   const handleDelete = async (member: Member) => {
@@ -311,6 +329,15 @@ export default function AdminMembers() {
                         >
                           <i data-lucide="ban" className="w-4 h-4 mr-1"></i>
                           Revoke
+                        </button>
+                      )}
+                      {(adminGroup === 'choir' || adminGroup === 'anointed') && (
+                        <button
+                          onClick={() => handleToggleCurrent(member)}
+                          className={`inline-flex items-center px-3 py-1.5 text-sm font-medium rounded-lg transition-colors ${member.isCurrent !== false ? 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200' : 'bg-gray-200 text-gray-600 hover:bg-gray-300'}`}
+                          title={member.isCurrent !== false ? 'Current member - click to mark not current' : 'Not current - click to mark current'}
+                        >
+                          {member.isCurrent !== false ? 'Current' : 'Not current'}
                         </button>
                       )}
                       <button

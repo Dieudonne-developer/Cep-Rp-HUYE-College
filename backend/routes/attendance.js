@@ -110,7 +110,7 @@ router.get('/sessions/:id/roster', async (req, res) => {
     if (!session) return res.status(404).json({ message: 'Session not found' });
     if (!ctx.isSuper && session.group !== ctx.group) return res.status(403).json({ message: 'Not your group' });
     const members = (await query(
-      `SELECT id, username AS name, email, contact_number FROM app_users WHERE user_group=$1 AND is_approved=true AND role <> 'admin' AND role <> 'super-admin' ORDER BY name`,
+      `SELECT id, username AS name, email, contact_number FROM app_users WHERE user_group=$1 AND is_approved=true AND (is_current IS NULL OR is_current = true) AND role <> 'admin' AND role <> 'super-admin' ORDER BY name`,
       [session.group]
     )).rows;
     const records = (await query(`SELECT * FROM attendance_records WHERE session_id=$1`, [session.id])).rows;
