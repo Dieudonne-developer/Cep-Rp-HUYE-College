@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 const { query } = require('../src/db/pool');
 const { readAccessToken } = require('../src/auth/accessToken');
-const { sendAdminInvitationEmail } = require('../utils/email');
+const { sendAdminInvitationEmail, sendEmailInBackground } = require('../utils/email');
 
 const ALLOWED_GROUPS = ['choir', 'anointed'];
 const STATUSES = ['present', 'absent', 'late'];
@@ -169,9 +169,10 @@ router.post('/singers', async (req, res) => {
     const backendUrl = process.env.BACKEND_URL || 'https://cep-backend-hjfu.onrender.com';
     const setupLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
     // Send email in background - never block account creation on SMTP
-    sendAdminInvitationEmail(email, name, setupLink, group, 'member')
-      .then(r => console.log('singer invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
-      .catch(err => console.error('singer invite email failed:', err));
+    sendEmailInBackground(
+      sendAdminInvitationEmail(email, name, setupLink, group, 'member')
+        .then(r => console.log('singer invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
+    );
     res.status(201).json({ success: true, member: rows[0], emailSent: true, passwordSetupLink: setupLink });
   } catch (err) { console.error('create singer error:', err); res.status(500).json({ message: 'Failed to create singer account' }); }
 });

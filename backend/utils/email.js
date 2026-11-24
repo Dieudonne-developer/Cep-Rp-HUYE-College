@@ -863,7 +863,19 @@ const sendAdminInvitationEmail = async (email, username, passwordSetupLink, admi
   }
 };
 
+
+// Fire-and-forget email that survives Vercel serverless freeze
+function sendEmailInBackground(promise) {
+  try {
+    const { waitUntil } = require('@vercel/functions');
+    waitUntil(promise);
+  } catch {
+    promise.catch(err => console.error('background email failed:', err));
+  }
+}
+
 module.exports = {
+  sendEmailInBackground,
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendAdminInvitationEmail,

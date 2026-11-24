@@ -806,10 +806,11 @@ router.post('/members', async (req, res) => {
     const protocol = req.get('x-forwarded-proto') || 'https';
     const backendUrl = process.env.BACKEND_URL || `${protocol}://${req.get('host')}`;
     const setupLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
-    const { sendAdminInvitationEmail } = require('../utils/email');
-    sendAdminInvitationEmail(emailLower, uname, setupLink, group, 'member')
-      .then(r => console.log('member invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
-      .catch(err => console.error('member invite email failed:', err));
+    const { sendAdminInvitationEmail, sendEmailInBackground } = require('../utils/email');
+    sendEmailInBackground(
+      sendAdminInvitationEmail(emailLower, uname, setupLink, group, 'member')
+        .then(r => console.log('member invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
+    );
 
     res.json({
       success: true,
@@ -1300,7 +1301,7 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
     }
 
     const UserModel = getUserModelForGroup(adminGroup);
-    const { sendAdminInvitationEmail } = require('../utils/email');
+    const { sendAdminInvitationEmail, sendEmailInBackground } = require('../utils/email');
 
     // Check if admin already exists
     const existingAdmin = await UserModel.findOne({
@@ -1344,14 +1345,15 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
     const passwordSetupLink = `${baseUrl}/api/auth/verify?token=${verificationToken}`;
 
     // Send admin invitation email in background - never block on SMTP timeouts
-    sendAdminInvitationEmail(
-      email.toLowerCase(),
-      username,
-      passwordSetupLink,
-      adminGroup,
-      role || 'admin'
-    ).then(r => console.log('admin invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
-      .catch(err => console.error('admin invite email failed:', err));
+    sendEmailInBackground(
+      sendAdminInvitationEmail(
+        email.toLowerCase(),
+        username,
+        passwordSetupLink,
+        adminGroup,
+        role || 'admin'
+      ).then(r => console.log('admin invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
+    );
 
     const adminData = newAdmin.toObject();
     delete adminData.password;
