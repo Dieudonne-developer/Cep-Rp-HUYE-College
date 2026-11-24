@@ -45,9 +45,9 @@ export default function AdminSuperAdmins() {
   const [filterGroup, setFilterGroup] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   // Main tab: 'admins' or 'homepage'
-  const [mainTab, setMainTab] = useState<'admins'|'homepage'|'slides'>('admins')
+  const [mainTab, setMainTab] = useState<'admins'|'homepage'>('admins')
   // Global content management state
-  const [activeGlobalTab, setActiveGlobalTab] = useState<'activities'|'ideas'|'support'|'slides'|'cepier-members'>('activities')
+  const [activeGlobalTab, setActiveGlobalTab] = useState<'activities'|'ideas'|'support'|'cepier-members'>('activities')
   const [globalActivities, setGlobalActivities] = useState<any[]>([])
   const [savingActivity, setSavingActivity] = useState(false)
   const [activityForm, setActivityForm] = useState({ title: '', description: '', eventDate: '', eventTime: '', location: '', imageUrl: '' })
@@ -55,10 +55,6 @@ export default function AdminSuperAdmins() {
   const [globalIdeas, setGlobalIdeas] = useState<any[]>([])
   const [supportDoc, setSupportDoc] = useState<any>(null)
   const [savingSupport, setSavingSupport] = useState(false)
-  const [slides, setSlides] = useState<any[]>([])
-  const [slideForm, setSlideForm] = useState({ imageUrl: '', caption: '' })
-  const [slideImgUploading, setSlideImgUploading] = useState(false)
-  const [savingSlide, setSavingSlide] = useState(false)
   const [formData, setFormData] = useState({
     email: '',
     username: '',
@@ -81,7 +77,7 @@ export default function AdminSuperAdmins() {
     const globalTab = params.get('global') || 'activities'
     
     if (mainTabParam === 'homepage') {
-      if (['activities','ideas','support','slides','cepier-members'].includes(globalTab)) {
+      if (['activities','ideas','support','cepier-members'].includes(globalTab)) {
         setMainTab('homepage')
         setActiveGlobalTab(globalTab as any)
       } else {
@@ -189,49 +185,6 @@ export default function AdminSuperAdmins() {
       const data = await res.json(); if (data.success) setSupportDoc(data.support)
     } catch {}
   }
-  async function fetchSlides() {
-    try {
-      const res = await fetch(`${baseUrl}/api/admin/super-admin/home/slides`, { headers:{ 'X-Admin-Email': currentAdmin?.email || '' } })
-      const data = await res.json(); if (data.success) setSlides(data.slides || [])
-    } catch {}
-  }
-  async function uploadSlideImage(file: File) {
-    setSlideImgUploading(true)
-    try {
-      const fd = new FormData()
-      fd.append('file', file)
-      const res = await fetch(`${baseUrl}/api/admin/super-admin/home/slides/upload`, {
-        method: 'POST',
-        headers: { 'X-Admin-Email': currentAdmin?.email || '' },
-        body: fd,
-      })
-      const data = await res.json()
-      if (data.url || data.fileUrl) setSlideForm(f => ({ ...f, imageUrl: data.url || data.fileUrl }))
-      else alert(data.message || 'Image upload failed')
-    } catch { alert('Image upload failed') }
-    setSlideImgUploading(false)
-  }
-  async function createSlide(e: React.FormEvent) {
-    e.preventDefault(); setSavingSlide(true)
-    try {
-      const res = await fetch(`${baseUrl}/api/admin/super-admin/home/slides`, {
-        method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Email': currentAdmin?.email || '' },
-        body: JSON.stringify({ imageUrl: slideForm.imageUrl, caption: slideForm.caption || undefined })
-      })
-      const data = await res.json()
-      if (data.success) { setSlideForm({ imageUrl:'', caption:'' }); fetchSlides() } else alert(data.message||'Failed to add slide')
-    } catch { alert('Failed to add slide') } finally { setSavingSlide(false) }
-  }
-  async function toggleSlide(id: string, isActive: boolean) {
-    await fetch(`${baseUrl}/api/admin/super-admin/home/slides/${id}`, { method:'PUT', headers:{ 'Content-Type':'application/json', 'X-Admin-Email': currentAdmin?.email || '' }, body: JSON.stringify({ isActive: !isActive }) })
-    fetchSlides()
-  }
-  async function deleteSlide(id: string) {
-    if (!confirm('Delete this slide image?')) return
-    await fetch(`${baseUrl}/api/admin/super-admin/home/slides/${id}`, { method:'DELETE', headers:{ 'X-Admin-Email': currentAdmin?.email || '' } })
-    fetchSlides()
-  }
-
   async function saveSupport(e: React.FormEvent) {
     e.preventDefault(); setSavingSupport(true)
     try {
@@ -242,7 +195,7 @@ export default function AdminSuperAdmins() {
 
   useEffect(() => {
     // load globals initially
-    fetchGlobalActivities(); fetchGlobalIdeas(); fetchSupport(); fetchSlides()
+    fetchGlobalActivities(); fetchGlobalIdeas(); fetchSupport()
   }, [])
 
   const handleCreate = async (e: React.FormEvent) => {
@@ -366,39 +319,6 @@ export default function AdminSuperAdmins() {
     }
   }
 
-
-  function renderSlidesTab() {
-    return (
-      <div>
-        <p className="text-sm text-gray-600 mb-3">Homepage slider images. Add images to rotate on the home page banner; inactive slides are hidden.</p>
-        <form onSubmit={createSlide} className="grid md:grid-cols-2 gap-3 mb-4">
-          <div className="flex gap-2">
-            <input type="file" accept="image/*" onChange={(e)=>{ const f=e.target.files?.[0]; if(f) uploadSlideImage(f) }} className="border rounded p-2 text-sm w-full" disabled={slideImgUploading} />
-            {slideImgUploading && <span className="text-xs text-gray-500 self-center">Uploading...</span>}
-          </div>
-          <input placeholder="Image URL (or paste link)" className="border rounded p-2" value={slideForm.imageUrl} onChange={(e)=>setSlideForm({...slideForm,imageUrl:e.target.value})} required />
-          <input placeholder="Caption (optional)" className="border rounded p-2 md:col-span-2" value={slideForm.caption} onChange={(e)=>setSlideForm({...slideForm,caption:e.target.value})} />
-          <div className="md:col-span-2 flex justify-end"><button disabled={savingSlide || !slideForm.imageUrl.trim()} className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50">{savingSlide?'Adding...':'Add Slide'}</button></div>
-        </form>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-          {slides.map((sl:any)=> (
-            <div key={sl._id} className="border rounded-lg overflow-hidden">
-              <img src={sl.imageUrl} alt={sl.caption || 'Slide'} className="w-full h-24 object-cover bg-gray-100" />
-              <div className="p-2 text-xs">
-                {sl.caption && <div className="truncate text-gray-600 mb-1">{sl.caption}</div>}
-                <div className="flex items-center justify-between">
-                  <button onClick={()=>toggleSlide(sl._id, !!sl.isActive)} className={sl.isActive?'text-green-600':'text-gray-400'}>{sl.isActive?'Active':'Hidden'}</button>
-                  <button onClick={()=>deleteSlide(sl._id)} className="text-red-600">Delete</button>
-                </div>
-              </div>
-            </div>
-          ))}
-          {slides.length===0 && <div className="text-gray-500 text-sm col-span-full">No slides yet. The homepage shows the default banner until you add images.</div>}
-        </div>
-      </div>
-    )
-  }
-
   const filteredAdmins = admins.filter(admin => {
     if (filterGroup !== 'all' && admin.adminGroup !== filterGroup) return false
     if (filterStatus === 'approved' && !admin.isApproved) return false
@@ -456,26 +376,8 @@ export default function AdminSuperAdmins() {
             <i data-lucide="globe" className="w-4 h-4 inline mr-2"></i>
             Homepage Management
           </button>
-          <button
-            onClick={() => setMainTab('slides')}
-            className={`py-4 px-1 border-b-2 font-medium text-sm ${
-              mainTab === 'slides'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <i data-lucide="image" className="w-4 h-4 inline mr-2"></i>
-            Homepage Slider
-          </button>
         </nav>
       </div>
-
-      {/* Homepage Slider Section */}
-      {mainTab === 'slides' && (
-        <div className="bg-white rounded-lg shadow p-4">
-          {renderSlidesTab()}
-        </div>
-      )}
 
       {/* Admin Management Section */}
       {mainTab === 'admins' && (
@@ -622,7 +524,7 @@ export default function AdminSuperAdmins() {
       {mainTab === 'homepage' && (
       <div className="bg-white rounded-lg shadow p-4">
         <div className="flex gap-2 mb-4">
-          {(['activities','ideas','support','slides','cepier-members'] as const).map(tab => (
+          {(['activities','ideas','support','cepier-members'] as const).map(tab => (
             <button key={tab} onClick={()=>setActiveGlobalTab(tab)} className={`px-3 py-2 rounded ${activeGlobalTab===tab?'bg-blue-600 text-white':'bg-gray-100 text-gray-800'}`}>{tab === 'cepier-members' ? 'CEP Members' : tab[0].toUpperCase()+tab.slice(1)}</button>
           ))}
         </div>
@@ -691,7 +593,6 @@ export default function AdminSuperAdmins() {
             <div className="md:col-span-2 flex justify-end"><button disabled={savingSupport} className="bg-blue-600 text-white rounded px-4 py-2">{savingSupport?'Saving...':'Save Support'}</button></div>
           </form>
         )}
-        {activeGlobalTab==='slides' && renderSlidesTab()}
         {activeGlobalTab==='cepier-members' && (
           <CEPAllMembers baseUrl={baseUrl} currentAdmin={currentAdmin} />
         )}

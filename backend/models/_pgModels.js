@@ -88,10 +88,6 @@ const SupportItem = createModel('support_items', {
   defaults: { isActive: true, kind: 'other', sortOrder: 0 },
 });
 
-const HomeSlide = createModel('home_slides', {
-  defaults: { isActive: true, sortOrder: 0 },
-});
-
 const GroupSupport = createModel('group_support', {
   defaults: {
     bank: { bankName: '', accountName: '', accountNumber: '', swiftCode: '' },
@@ -113,5 +109,4 @@ module.exports = {
   GlobalSupport,
   GroupSupport,
   SupportItem,
-  HomeSlide,
 };

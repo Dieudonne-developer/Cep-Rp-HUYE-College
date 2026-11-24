@@ -1661,7 +1661,6 @@ router.delete('/support-items/:id', async (req, res) => {
 const GlobalEvent = require('../models/GlobalEvent');
 const GlobalIdea = require('../models/GlobalIdea');
 const GlobalSupport = require('../models/GlobalSupport');
-const HomeSlide = require('../models/HomeSlide');
 
 // Activities (Events)
 router.get('/super-admin/home/activities', checkSuperAdmin, async (_req, res) => {
@@ -1717,76 +1716,6 @@ router.delete('/super-admin/home/activities/:id', checkSuperAdmin, async (req, r
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to delete activity' });
-  }
-});
-
-// Homepage slider slides (super admin managed)
-router.get('/super-admin/home/slides', checkSuperAdmin, async (_req, res) => {
-  try {
-    const slides = await HomeSlide.find().sort({ sortOrder: 1, createdAt: 1 });
-    res.json({ success: true, slides });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to fetch slides' });
-  }
-});
-
-router.post('/super-admin/home/slides', checkSuperAdmin, async (req, res) => {
-  try {
-    const { imageUrl, caption, isActive } = req.body || {};
-    if (!imageUrl || !String(imageUrl).trim()) {
-      return res.status(400).json({ success: false, message: 'imageUrl is required' });
-    }
-    const count = await HomeSlide.countDocuments();
-    const slide = await HomeSlide.create({
-      imageUrl: String(imageUrl).trim(),
-      caption: caption ? String(caption).trim() : undefined,
-      sortOrder: count,
-      isActive: isActive === undefined ? true : !!isActive,
-    });
-    res.json({ success: true, slide });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to create slide' });
-  }
-});
-
-router.post('/super-admin/home/slides/upload', checkSuperAdmin, upload.single('file'), async (req, res) => {
-  try {
-    if (!req.file) {
-      return res.status(400).json({ success: false, message: 'No file uploaded' });
-    }
-    const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:4000';
-    const protocol = req.get('x-forwarded-proto') || req.protocol || 'http';
-    const fileUrl = `${protocol}://${host}/uploads/${req.file.filename}`;
-    res.json({ success: true, url: fileUrl, fileUrl });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to upload slide image' });
-  }
-});
-
-router.put('/super-admin/home/slides/:id', checkSuperAdmin, async (req, res) => {
-  try {
-    const { id } = req.params;
-    const update = {};
-    if (req.body.imageUrl !== undefined) update.imageUrl = String(req.body.imageUrl).trim();
-    if (req.body.caption !== undefined) update.caption = req.body.caption ? String(req.body.caption).trim() : null;
-    if (req.body.isActive !== undefined) update.isActive = !!req.body.isActive;
-    if (req.body.sortOrder !== undefined) update.sortOrder = parseInt(req.body.sortOrder, 10) || 0;
-    update.updatedAt = new Date();
-    const slide = await HomeSlide.findByIdAndUpdate(id, update, { new: true });
-    if (!slide) return res.status(404).json({ success: false, message: 'Slide not found' });
-    res.json({ success: true, slide });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to update slide' });
-  }
-});
-
-router.delete('/super-admin/home/slides/:id', checkSuperAdmin, async (req, res) => {
-  try {
-    const slide = await HomeSlide.findByIdAndDelete(req.params.id);
-    if (!slide) return res.status(404).json({ success: false, message: 'Slide not found' });
-    res.json({ success: true });
-  } catch (error) {
-    res.status(500).json({ success: false, message: 'Failed to delete slide' });
   }
 });
 
