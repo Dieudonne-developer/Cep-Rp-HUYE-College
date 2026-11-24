@@ -45,7 +45,7 @@ export default function AdminSuperAdmins() {
   const [filterGroup, setFilterGroup] = useState<string>('all')
   const [filterStatus, setFilterStatus] = useState<string>('all')
   // Main tab: 'admins' or 'homepage'
-  const [mainTab, setMainTab] = useState<'admins'|'homepage'>('admins')
+  const [mainTab, setMainTab] = useState<'admins'|'homepage'|'slides'>('admins')
   // Global content management state
   const [activeGlobalTab, setActiveGlobalTab] = useState<'activities'|'ideas'|'support'|'slides'|'cepier-members'>('activities')
   const [globalActivities, setGlobalActivities] = useState<any[]>([])
@@ -366,6 +366,39 @@ export default function AdminSuperAdmins() {
     }
   }
 
+
+  function renderSlidesTab() {
+    return (
+      <div>
+        <p className="text-sm text-gray-600 mb-3">Homepage slider images. Add images to rotate on the home page banner; inactive slides are hidden.</p>
+        <form onSubmit={createSlide} className="grid md:grid-cols-2 gap-3 mb-4">
+          <div className="flex gap-2">
+            <input type="file" accept="image/*" onChange={(e)=>{ const f=e.target.files?.[0]; if(f) uploadSlideImage(f) }} className="border rounded p-2 text-sm w-full" disabled={slideImgUploading} />
+            {slideImgUploading && <span className="text-xs text-gray-500 self-center">Uploading...</span>}
+          </div>
+          <input placeholder="Image URL (or paste link)" className="border rounded p-2" value={slideForm.imageUrl} onChange={(e)=>setSlideForm({...slideForm,imageUrl:e.target.value})} required />
+          <input placeholder="Caption (optional)" className="border rounded p-2 md:col-span-2" value={slideForm.caption} onChange={(e)=>setSlideForm({...slideForm,caption:e.target.value})} />
+          <div className="md:col-span-2 flex justify-end"><button disabled={savingSlide || !slideForm.imageUrl.trim()} className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50">{savingSlide?'Adding...':'Add Slide'}</button></div>
+        </form>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          {slides.map((sl:any)=> (
+            <div key={sl._id} className="border rounded-lg overflow-hidden">
+              <img src={sl.imageUrl} alt={sl.caption || 'Slide'} className="w-full h-24 object-cover bg-gray-100" />
+              <div className="p-2 text-xs">
+                {sl.caption && <div className="truncate text-gray-600 mb-1">{sl.caption}</div>}
+                <div className="flex items-center justify-between">
+                  <button onClick={()=>toggleSlide(sl._id, !!sl.isActive)} className={sl.isActive?'text-green-600':'text-gray-400'}>{sl.isActive?'Active':'Hidden'}</button>
+                  <button onClick={()=>deleteSlide(sl._id)} className="text-red-600">Delete</button>
+                </div>
+              </div>
+            </div>
+          ))}
+          {slides.length===0 && <div className="text-gray-500 text-sm col-span-full">No slides yet. The homepage shows the default banner until you add images.</div>}
+        </div>
+      </div>
+    )
+  }
+
   const filteredAdmins = admins.filter(admin => {
     if (filterGroup !== 'all' && admin.adminGroup !== filterGroup) return false
     if (filterStatus === 'approved' && !admin.isApproved) return false
@@ -423,8 +456,26 @@ export default function AdminSuperAdmins() {
             <i data-lucide="globe" className="w-4 h-4 inline mr-2"></i>
             Homepage Management
           </button>
+          <button
+            onClick={() => setMainTab('slides')}
+            className={`py-4 px-1 border-b-2 font-medium text-sm ${
+              mainTab === 'slides'
+                ? 'border-blue-500 text-blue-600'
+                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+            }`}
+          >
+            <i data-lucide="image" className="w-4 h-4 inline mr-2"></i>
+            Homepage Slider
+          </button>
         </nav>
       </div>
+
+      {/* Homepage Slider Section */}
+      {mainTab === 'slides' && (
+        <div className="bg-white rounded-lg shadow p-4">
+          {renderSlidesTab()}
+        </div>
+      )}
 
       {/* Admin Management Section */}
       {mainTab === 'admins' && (
@@ -640,35 +691,7 @@ export default function AdminSuperAdmins() {
             <div className="md:col-span-2 flex justify-end"><button disabled={savingSupport} className="bg-blue-600 text-white rounded px-4 py-2">{savingSupport?'Saving...':'Save Support'}</button></div>
           </form>
         )}
-        {activeGlobalTab==='slides' && (
-          <div>
-            <p className="text-sm text-gray-600 mb-3">Homepage slider images. Add images to rotate on the home page banner; inactive slides are hidden.</p>
-            <form onSubmit={createSlide} className="grid md:grid-cols-2 gap-3 mb-4">
-              <div className="flex gap-2">
-                <input type="file" accept="image/*" onChange={(e)=>{ const f=e.target.files?.[0]; if(f) uploadSlideImage(f) }} className="border rounded p-2 text-sm w-full" disabled={slideImgUploading} />
-                {slideImgUploading && <span className="text-xs text-gray-500 self-center">Uploading...</span>}
-              </div>
-              <input placeholder="Image URL (or paste link)" className="border rounded p-2" value={slideForm.imageUrl} onChange={(e)=>setSlideForm({...slideForm,imageUrl:e.target.value})} required />
-              <input placeholder="Caption (optional)" className="border rounded p-2 md:col-span-2" value={slideForm.caption} onChange={(e)=>setSlideForm({...slideForm,caption:e.target.value})} />
-              <div className="md:col-span-2 flex justify-end"><button disabled={savingSlide || !slideForm.imageUrl.trim()} className="bg-blue-600 text-white rounded px-4 py-2 disabled:opacity-50">{savingSlide?'Adding...':'Add Slide'}</button></div>
-            </form>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
-              {slides.map((sl:any)=> (
-                <div key={sl._id} className="border rounded-lg overflow-hidden">
-                  <img src={sl.imageUrl} alt={sl.caption || 'Slide'} className="w-full h-24 object-cover bg-gray-100" />
-                  <div className="p-2 text-xs">
-                    {sl.caption && <div className="truncate text-gray-600 mb-1">{sl.caption}</div>}
-                    <div className="flex items-center justify-between">
-                      <button onClick={()=>toggleSlide(sl._id, !!sl.isActive)} className={sl.isActive?'text-green-600':'text-gray-400'}>{sl.isActive?'Active':'Hidden'}</button>
-                      <button onClick={()=>deleteSlide(sl._id)} className="text-red-600">Delete</button>
-                    </div>
-                  </div>
-                </div>
-              ))}
-              {slides.length===0 && <div className="text-gray-500 text-sm col-span-full">No slides yet. The homepage shows the default banner until you add images.</div>}
-            </div>
-          </div>
-        )}
+        {activeGlobalTab==='slides' && renderSlidesTab()}
         {activeGlobalTab==='cepier-members' && (
           <CEPAllMembers baseUrl={baseUrl} currentAdmin={currentAdmin} />
         )}
