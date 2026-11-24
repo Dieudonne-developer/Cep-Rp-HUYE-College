@@ -5,6 +5,7 @@ const GlobalIdea = require('../models/GlobalIdea');
 const GlobalSupport = require('../models/GlobalSupport');
 const GroupSupport = require('../models/GroupSupport');
 const SupportItem = require('../models/SupportItem');
+const HomeSlide = require('../models/HomeSlide');
 
 // Public: list global activities
 router.get('/activities', async (_req, res) => {
@@ -22,6 +23,16 @@ router.get('/activities', async (_req, res) => {
     res.json(mapped);
   } catch (error) {
     res.status(500).json({ success: false, message: 'Failed to fetch activities' });
+  }
+});
+
+// Public: homepage slider images (active only, ordered)
+router.get('/slides', async (_req, res) => {
+  try {
+    const slides = await HomeSlide.find({ isActive: true }).sort({ sortOrder: 1, createdAt: 1 });
+    res.json({ success: true, slides });
+  } catch (error) {
+    res.status(500).json({ success: false, message: 'Failed to fetch slides' });
   }
 });
 

@@ -269,6 +269,16 @@ CREATE INDEX IF NOT EXISTS idx_attendance_sessions_group ON attendance_sessions 
 ALTER TABLE attendance_sessions ADD COLUMN IF NOT EXISTS "session_time" TEXT;
 CREATE INDEX IF NOT EXISTS idx_attendance_records_session ON attendance_records ("session_id");
 CREATE INDEX IF NOT EXISTS idx_attendance_records_email ON attendance_records ("user_email");
+
+CREATE TABLE IF NOT EXISTS home_slides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  image_url TEXT NOT NULL,
+  caption TEXT,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  is_active BOOLEAN NOT NULL DEFAULT TRUE,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
 `;
 
 async function migrate() {
