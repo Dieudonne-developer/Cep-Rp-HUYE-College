@@ -46,7 +46,12 @@ const createTransporter = () => {
     return null;
   }
   
-  // Provider selection: Brevo SMTP if configured (works from Render), else Gmail
+  // SMTP via env vars: SMTP_HOST/PORT/SECURE/USER/PASS, fallback to EMAIL_USER/EMAIL_APP_PASSWORD
+  const smtpHost = process.env.SMTP_HOST?.trim() || 'smtp.gmail.com';
+  const smtpPort = parseInt(process.env.SMTP_PORT || '587', 10);
+  const smtpSecure = String(process.env.SMTP_SECURE || 'false').toLowerCase() === 'true';
+  const smtpUser = process.env.SMTP_USER?.trim() || emailUser;
+  const smtpPass = (process.env.SMTP_PASS || emailPassword || '').trim().replace(/\s+/g, '');
   const brevoKey = process.env.BREVO_SMTP_KEY?.trim();
   const brevoUser = process.env.BREVO_SMTP_USER?.trim() || emailUser;
   const useBrevo = !!brevoKey;
@@ -57,13 +62,13 @@ const createTransporter = () => {
     requireTLS: true,
     auth: { user: brevoUser, pass: brevoKey }
   } : {
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false,
-    requireTLS: true,
+    host: smtpHost,
+    port: smtpPort,
+    secure: smtpSecure,
+    requireTLS: !smtpSecure,
     auth: {
-      user: emailUser,
-      pass: emailPassword
+      user: smtpUser,
+      pass: smtpPass
     }
   };
   return nodemailer.createTransport({
