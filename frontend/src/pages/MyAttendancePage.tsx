@@ -149,11 +149,24 @@ export default function MyAttendancePage() {
     <div className="max-w-3xl mx-auto p-6">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
         <h1 className="text-2xl font-bold text-gray-900">My Attendance</h1>
-        {records.length > 0 && (
-          <button onClick={downloadCsv} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
-            Download CSV
+        <div className="flex items-center gap-2">
+          {records.length > 0 && (
+            <button onClick={downloadCsv} className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-medium">
+              Download CSV
+            </button>
+          )}
+          <button
+            onClick={() => {
+              sessionStorage.removeItem('accessToken')
+              sessionStorage.removeItem('userInfo')
+              sessionStorage.removeItem('userGroup')
+              window.location.reload()
+            }}
+            className="bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium"
+          >
+            Logout
           </button>
-        )}
+        </div>
       </div>
       <p className="text-sm text-gray-500 mb-6">
         {userInfo?.username || userInfo?.email || 'Your'} practice attendance records.
