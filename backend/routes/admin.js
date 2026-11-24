@@ -1550,6 +1550,59 @@ router.get('/super-admin/members', checkSuperAdmin, async (req, res) => {
   }
 });
 
+// Bulk import members from CSV (no invitation emails are sent)
+router.post('/super-admin/members/import', checkSuperAdmin, async (req, res) => {
+  try {
+    const { query } = require('../src/db/pool');
+    const bcrypt = require('bcryptjs');
+    const crypto = require('crypto');
+    const VALID_GROUPS = ['cepier','choir','anointed','abanyamugisha','psalm23','psalm46','protocol','social','evangelical'];
+    const items = Array.isArray(req.body?.members) ? req.body.members : [];
+    if (!items.length) {
+      return res.status(400).json({ success: false, message: 'No members provided' });
+    }
+    if (items.length > 500) {
+      return res.status(400).json({ success: false, message: 'Maximum 500 members per import' });
+    }
+
+    let created = 0, skipped = 0;
+    const errors = [];
+    for (const raw of items) {
+      const name = String(raw.name || raw.username || '').trim();
+      const email = String(raw.email || '').trim().toLowerCase();
+      const phone = String(raw.contactNumber || raw.phone || raw.contact || '').replace(/\D/g, '') || null;
+      const group = VALID_GROUPS.includes(String(raw.group || raw.userGroup || '').toLowerCase())
+        ? String(raw.group || raw.userGroup).toLowerCase()
+        : 'cepier';
+      const passwordPlain = String(raw.password || '').trim();
+
+      if (!name || !email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        skipped++;
+        errors.push(`${email || name || '(empty)'}: invalid name/email`);
+        continue;
+      }
+
+      const hashedPassword = await bcrypt.hash(passwordPlain || crypto.randomBytes(24).toString('hex'), 12);
+      const verificationToken = crypto.randomBytes(32).toString('hex');
+      const result = await query(
+        `INSERT INTO app_users (email, username, password, contact_number, role, is_verified, is_approved,
+          user_group, admin_group, verification_token, approved_at, approved_by, created_at, updated_at)
+         VALUES ($1,$2,$3,$4,'member',true,true,$5,$5,$6,now(),$7,now(),now())
+         ON CONFLICT (user_group, email) DO NOTHING
+         RETURNING id`,
+        [email, name, hashedPassword, phone, group, verificationToken, req.superAdmin?.email || 'super-admin']
+      );
+      if (result.rows.length) created++;
+      else skipped++;
+    }
+
+    res.json({ success: true, created, skipped, errors: errors.slice(0, 20) });
+  } catch (error) {
+    console.error('Bulk member import failed:', error);
+    res.status(500).json({ success: false, message: 'Failed to import members' });
+  }
+});
+
 // ==================== SUPPORT ITEMS (publishable support entries) ====================
 const SupportItem = require('../models/SupportItem');
 const SUPPORT_KINDS = ['bank', 'mobile', 'link', 'help', 'other'];

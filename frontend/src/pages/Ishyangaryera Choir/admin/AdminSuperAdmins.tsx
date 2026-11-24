@@ -723,6 +723,65 @@ const GROUP_LABELS: Record<string, string> = {
 function CEPAllMembers({ baseUrl, currentAdmin }: { baseUrl: string; currentAdmin: any }) {
   const [members, setMembers] = React.useState<any[]>([])
   const [loading, setLoading] = React.useState<boolean>(false)
+  const [importing, setImporting] = React.useState<boolean>(false)
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
+
+  function parseCsv(text: string): any[] {
+    const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean)
+    if (!lines.length) return []
+    const parseRow = (line: string): string[] => {
+      const out: string[] = []; let cur = ''; let inQ = false
+      for (let i = 0; i < line.length; i++) {
+        const c = line[i]
+        if (c === '"') { if (inQ && line[i+1] === '"') { cur += '"'; i++ } else inQ = !inQ }
+        else if (c === ',' && !inQ) { out.push(cur); cur = '' }
+        else cur += c
+      }
+      out.push(cur); return out.map(x => x.trim())
+    }
+    const header = parseRow(lines[0]).map(h => h.toLowerCase().replace(/[^a-z]/g, ''))
+    const idx = (names: string[]) => header.findIndex(h => names.includes(h))
+    const iName = idx(['name','username','fullname'])
+    const iEmail = idx(['email','gmail','mail'])
+    const iPhone = idx(['phone','contact','contactnumber','tel','telephone'])
+    const iGroup = idx(['group','family','usergroup'])
+    const iPass = idx(['password','pass'])
+    return lines.slice(1).map(line => {
+      const c = parseRow(line)
+      return {
+        name: iName >= 0 ? c[iName] : '',
+        email: iEmail >= 0 ? c[iEmail] : '',
+        contactNumber: iPhone >= 0 ? c[iPhone] : '',
+        group: iGroup >= 0 ? c[iGroup] : '',
+        password: iPass >= 0 ? c[iPass] : '',
+      }
+    }).filter(m => m.email)
+  }
+
+  async function handleCsvUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    e.target.value = ''
+    if (!file) return
+    setImporting(true)
+    try {
+      const text = await file.text()
+      const membersList = parseCsv(text)
+      if (!membersList.length) { alert('No valid rows found. CSV needs at least a name and email column.'); setImporting(false); return }
+      const res = await fetch(`${baseUrl}/api/admin/super-admin/members/import`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-Admin-Email': currentAdmin?.email || '' },
+        body: JSON.stringify({ members: membersList }),
+      })
+      const data = await res.json().catch(() => ({}))
+      if (data.success) {
+        alert(`Import complete: ${data.created} added, ${data.skipped} skipped (duplicates/invalid).`)
+        load()
+      } else {
+        alert(data.message || 'Import failed')
+      }
+    } catch { alert('Import failed') }
+    setImporting(false)
+  }
   async function load() {
     setLoading(true)
     try {
@@ -761,12 +820,16 @@ function CEPAllMembers({ baseUrl, currentAdmin }: { baseUrl: string; currentAdmi
       <div className="flex items-center justify-between mb-3">
         <div>
           <h3 className="text-lg font-semibold">CEP Members</h3>
-          <p className="text-sm text-gray-500">All registered users across every CEP family group.</p>
+          <p className="text-sm text-gray-500">All registered users across every CEP family group. CSV columns: name, email, contact number, group (optional), password (optional). No emails are sent for CSV imports.</p>
         </div>
         <div className="flex gap-2">
           <button onClick={downloadCSV} className="text-sm bg-green-600 text-white px-3 py-1 rounded flex items-center">
             <i data-lucide="download" className="w-4 h-4 mr-1"></i> Download CSV
           </button>
+          <button onClick={()=>fileInputRef.current?.click()} disabled={importing} className="text-sm bg-blue-600 text-white px-3 py-1 rounded flex items-center disabled:opacity-50">
+            <i data-lucide="upload" className="w-4 h-4 mr-1"></i> {importing ? 'Importing...' : 'Upload CSV'}
+          </button>
+          <input ref={fileInputRef} type="file" accept=".csv,text/csv" className="hidden" onChange={handleCsvUpload} />
           <button onClick={load} className="text-sm bg-gray-100 px-3 py-1 rounded">Refresh</button>
         </div>
       </div>
