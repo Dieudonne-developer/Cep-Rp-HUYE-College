@@ -145,7 +145,7 @@ const sendVerificationEmail = async (email, username, verificationLink, userGrou
     }
 
     const mailOptions = {
-      from: `"${familyName}" <${process.env.EMAIL_FROM || emailUser}>`,
+      from: `"${familyName}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'rphuyecollegecep@gmail.com'}>`,
       to: email,
       subject: `Complete Your Registration - ${familyName}`,
       html: `
@@ -441,7 +441,7 @@ const sendPasswordResetEmail = async (email, username, resetLink) => {
     }
 
     const mailOptions = {
-      from: `"Ishyanga Ryera Choir" <${process.env.EMAIL_FROM || emailUser}>`,
+      from: `"Ishyanga Ryera Choir" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'rphuyecollegecep@gmail.com'}>`,
       to: email,
       subject: 'Password Reset - Ishyanga Ryera Choir',
       html: `
@@ -582,7 +582,7 @@ const sendAdminInvitationEmail = async (email, username, passwordSetupLink, admi
     }
 
     const mailOptions = {
-      from: `"${familyName} Admin" <${process.env.EMAIL_FROM || emailUser}>`,
+      from: `"${familyName} Admin" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'rphuyecollegecep@gmail.com'}>`,
       to: email,
       subject: `Admin Account Invitation - ${familyName}`,
       html: `
