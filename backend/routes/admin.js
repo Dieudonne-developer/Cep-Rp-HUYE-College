@@ -808,9 +808,9 @@ router.post('/members', async (req, res) => {
     const protocol = req.get('x-forwarded-proto') || 'https';
     const backendUrl = process.env.BACKEND_URL || `${protocol}://${req.get('host')}`;
     const setupLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
-    const { sendAdminInvitationEmail, sendEmailInBackground } = require('../utils/email');
+    const { sendMemberInvitationEmail, sendEmailInBackground } = require('../utils/email');
     sendEmailInBackground(
-      sendAdminInvitationEmail(emailLower, uname, setupLink, group, 'member')
+      sendMemberInvitationEmail(emailLower, uname, setupLink, group)
         .then(r => console.log('member invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
     );
 
@@ -1303,7 +1303,7 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
     }
 
     const UserModel = getUserModelForGroup(adminGroup);
-    const { sendAdminInvitationEmail, sendEmailInBackground } = require('../utils/email');
+    const { sendAdminInvitationEmail, sendMemberInvitationEmail, sendEmailInBackground } = require('../utils/email');
 
     // Check if admin already exists
     const existingAdmin = await UserModel.findOne({
@@ -1347,14 +1347,12 @@ router.post('/super-admins/create', checkSuperAdmin, async (req, res) => {
     const passwordSetupLink = `${baseUrl}/api/auth/verify?token=${verificationToken}`;
 
     // Send admin invitation email in background - never block on SMTP timeouts
+    const inviteRole = (role || 'admin').toLowerCase();
+    const inviteSender = inviteRole === 'member' || inviteRole === 'viewer'
+      ? sendMemberInvitationEmail(email.toLowerCase(), username, passwordSetupLink, adminGroup)
+      : sendAdminInvitationEmail(email.toLowerCase(), username, passwordSetupLink, adminGroup, inviteRole);
     sendEmailInBackground(
-      sendAdminInvitationEmail(
-        email.toLowerCase(),
-        username,
-        passwordSetupLink,
-        adminGroup,
-        role || 'admin'
-      ).then(r => console.log('admin invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
+      inviteSender.then(r => console.log('invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
     );
 
     const adminData = newAdmin.toObject();

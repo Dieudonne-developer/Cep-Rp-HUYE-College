@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const router = express.Router();
 const { query } = require('../src/db/pool');
 const { readAccessToken } = require('../src/auth/accessToken');
-const { sendAdminInvitationEmail, sendEmailInBackground } = require('../utils/email');
+const { sendMemberInvitationEmail, sendEmailInBackground } = require('../utils/email');
 
 const ALLOWED_GROUPS = ['choir', 'anointed'];
 const STATUSES = ['present', 'absent', 'late'];
@@ -166,11 +166,12 @@ router.post('/singers', async (req, res) => {
        VALUES ($1,$2,$3,$4,'member',false,true,$5,$5,$6,now(),$7,now(),now()) RETURNING id, email, username`,
       [email, name, hashedPassword, phone || null, group, verificationToken, ctx.admin.email]
     );
-    const backendUrl = process.env.BACKEND_URL || 'https://cep-backend-hjfu.onrender.com';
+    const proto = req.get('x-forwarded-proto') || 'https';
+    const backendUrl = process.env.BACKEND_URL || `${proto}://${req.get('host')}`;
     const setupLink = `${backendUrl}/api/auth/verify?token=${verificationToken}`;
     // Send email in background - never block account creation on SMTP
     sendEmailInBackground(
-      sendAdminInvitationEmail(email, name, setupLink, group, 'member')
+      sendMemberInvitationEmail(email, name, setupLink, group)
         .then(r => console.log('singer invite email result:', r && r.success ? 'sent' : (r && r.message) || 'failed'))
     );
     res.status(201).json({ success: true, member: rows[0], emailSent: true, passwordSetupLink: setupLink });

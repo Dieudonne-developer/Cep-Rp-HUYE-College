@@ -862,6 +862,94 @@ const sendAdminInvitationEmail = async (email, username, passwordSetupLink, admi
 };
 
 
+
+// Send member/singer account invitation email (set password to join the family portal)
+const sendMemberInvitationEmail = async (email, name, passwordSetupLink, userGroup = 'choir') => {
+  try {
+    const emailConfigured = !!(process.env.BREVO_API_KEY?.trim() || process.env.BREVO_SMTP_KEY?.trim() || process.env.SMTP_PASS?.trim() || (process.env.EMAIL_USER?.trim() && process.env.EMAIL_APP_PASSWORD?.trim()));
+
+    if (!emailConfigured) {
+      console.warn('Email configuration missing - no SMTP provider configured');
+      return { success: false, message: 'Email configuration not available' };
+    }
+
+    const familyNames = {
+      'cepier': 'CEP',
+      'choir': 'Ishyanga Ryera Choir',
+      'anointed': 'Anointed Worship Team',
+      'abanyamugisha': 'Abanyamugisha Family',
+      'psalm23': 'Psalm 23 Family',
+      'psalm46': 'Psalm 46 Family',
+      'protocol': 'Protocol Family',
+      'social': 'Social Family',
+      'evangelical': 'Evangelical Family'
+    };
+
+    const familyName = familyNames[String(userGroup || '').toLowerCase()] || 'Ishyanga Ryera Choir';
+    const transporter = createTransporter();
+    if (!transporter) {
+      return { success: false, message: 'Failed to create email transporter. Please check email configuration.' };
+    }
+
+    const mailOptions = {
+      from: `"${familyName}" <${process.env.EMAIL_FROM || process.env.EMAIL_USER || 'rphuyecollegecep@gmail.com'}>`,
+      to: email,
+      subject: `Welcome to ${familyName} - Set Your Password`,
+      html: `
+        <!DOCTYPE html>
+        <html>
+        <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Welcome to ${familyName}</title>
+        </head>
+        <body style="font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;line-height:1.6;color:#333;max-width:600px;margin:0 auto;padding:20px;background-color:#f4f4f4;">
+          <div style="background:white;padding:30px;border-radius:10px;box-shadow:0 4px 6px rgba(0,0,0,0.1);">
+            <div style="text-align:center;margin-bottom:30px;padding-bottom:20px;border-bottom:2px solid #059669;">
+              <h1 style="color:#059669;margin:0;font-size:28px;">${familyName}</h1>
+              <p style="color:#666;margin:10px 0 0 0;font-size:16px;">Member Account Created</p>
+            </div>
+            <div style="background:#ecfdf5;padding:20px;border-radius:8px;margin-bottom:20px;border-left:4px solid #059669;">
+              <h2 style="color:#065f46;margin:0 0 10px 0;font-size:20px;">Welcome, ${name}!</h2>
+              <p style="margin:0;color:#555;">Your member account has been created for the <strong>${familyName}</strong> family portal. To activate your account, please set your password by clicking the button below.</p>
+            </div>
+            <div style="text-align:center;margin:30px 0;">
+              <a href="${passwordSetupLink}" style="display:inline-block;background:#059669;color:white;padding:15px 30px;text-decoration:none;border-radius:5px;font-weight:bold;font-size:16px;">Set Password &amp; Join</a>
+            </div>
+            <div style="background:#f9f9f9;padding:20px;border-radius:8px;margin:20px 0;">
+              <h3 style="color:#333;margin:0 0 15px 0;font-size:18px;">What you can do after activating:</h3>
+              <ol style="margin:0;padding-left:20px;color:#555;">
+                <li style="margin-bottom:8px;">View your attendance history and practice records</li>
+                <li style="margin-bottom:8px;">Access family activities, songs, and announcements</li>
+                <li style="margin-bottom:8px;">Join the family WhatsApp group chats</li>
+              </ol>
+            </div>
+            <div style="background:#fff3cd;border:1px solid #ffeaa7;padding:15px;border-radius:5px;margin:20px 0;font-size:14px;color:#856404;">
+              <strong>Button not working?</strong> Copy and paste this link into your browser:<br>
+              <span style="word-break:break-all;">${passwordSetupLink}</span>
+            </div>
+            <p style="font-size:14px;color:#666;">If you did not expect this invitation, please ignore this email or contact the family administrator.</p>
+            <div style="text-align:center;margin-top:30px;padding-top:20px;border-top:1px solid #ddd;color:#666;font-size:14px;">
+              Best regards,<br>${familyName} Team
+            </div>
+          </div>
+        </body>
+        </html>
+      `,
+      text: `Welcome to ${familyName}, ${name}!\n\nYour member account has been created. Set your password to activate your account:\n${passwordSetupLink}\n\nAfter activating, you can view your attendance history and access family updates.`
+    };
+
+    console.log('Sending member invitation email to:', email);
+    const info = await transporter.sendMail(mailOptions);
+    console.log('Member invitation email sent successfully:', info.messageId);
+    return { success: true, message: 'Member invitation email sent successfully', messageId: info.messageId };
+  } catch (error) {
+    console.error('Error sending member invitation email:', error);
+    return { success: false, message: 'Failed to send member invitation email', error: error.message };
+  }
+};
+
+
 // Fire-and-forget email that survives Vercel serverless freeze
 function sendEmailInBackground(promise) {
   try {
@@ -877,5 +965,6 @@ module.exports = {
   sendVerificationEmail,
   sendPasswordResetEmail,
   sendAdminInvitationEmail,
+  sendMemberInvitationEmail,
   createTransporter
 };
