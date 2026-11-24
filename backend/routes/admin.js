@@ -687,10 +687,12 @@ router.get('/members', async (req, res) => {
   try {
     const group = await resolveGroup(req);
     const Model = getUserModelForGroup(group);
-    // Include all users for the group (verified or not) so newly registered users show up for approval
-    const members = await Model.find({ userGroup: group })
-      .select('email username profileImage createdAt isApproved approvedAt approvedBy userGroup contactNumber isCurrent')
+    // Include all users for the group (verified or not) so newly registered users show up for approval.
+    // Admin/super-admin accounts are excluded - they are managed from the Super Admins page.
+    const allMembers = await Model.find({ userGroup: group })
+      .select('email username profileImage createdAt isApproved approvedAt approvedBy userGroup contactNumber isCurrent role')
       .sort({ createdAt: -1 });
+    const members = allMembers.filter(m => !['admin', 'super-admin'].includes(String(m.role || '').toLowerCase()));
     res.json(members);
   } catch (error) {
     console.error('Error fetching members:', error);
