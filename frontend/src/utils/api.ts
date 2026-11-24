@@ -26,7 +26,7 @@ export function getApiBaseUrl(): string {
     // If frontend is on Vercel, use the Vercel backend URL
     if (hostname.includes('vercel.app')) {
       // Known production backend URL on Vercel
-      const knownBackendUrl = 'https://cep-backend-hjfu.onrender.com';
+      const knownBackendUrl = 'https://cep-rp-huye-college-yt6x-eight.vercel.app';
       console.log('Using Vercel backend URL for Vercel frontend:', knownBackendUrl);
       return knownBackendUrl;
     }
@@ -34,7 +34,7 @@ export function getApiBaseUrl(): string {
     // If frontend is on Render, use Render backend URL
     if (hostname.includes('onrender.com')) {
       // Known production backend URL - use this directly for production
-      const knownBackendUrl = 'https://cep-backend-hjfu.onrender.com';
+      const knownBackendUrl = 'https://cep-rp-huye-college-yt6x-eight.vercel.app';
       console.log('Using known production backend URL:', knownBackendUrl);
       return knownBackendUrl;
     }
