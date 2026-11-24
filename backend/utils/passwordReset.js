@@ -41,12 +41,13 @@ function createTransporter() {
   }
 
   // Get email credentials from environment variables
-  const emailUser = process.env.EMAIL_USER?.trim();
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || process.env.BREVO_SMTP_USER || 'rphuyecollegecep@gmail.com').trim();
   // Remove spaces from app password (Gmail app passwords are 16 characters without spaces)
-  const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+  const emailPassword = (process.env.EMAIL_APP_PASSWORD || process.env.SMTP_PASS || '').trim().replace(/\s+/g, '');
+  const brevoKeyEarly = process.env.BREVO_SMTP_KEY?.trim();
   
-  if (!emailUser || !emailPassword) {
-    console.error('Email configuration missing: EMAIL_USER or EMAIL_APP_PASSWORD not set');
+  if ((!emailUser || !emailPassword) && !brevoKeyEarly && !process.env.SMTP_PASS) {
+    console.error('Email configuration missing: no SMTP provider configured');
     return null;
   }
   
@@ -106,7 +107,8 @@ async function sendVerificationCode(email, code) {
   console.log('EMAIL_USER configured:', !!process.env.EMAIL_USER);
   console.log('EMAIL_APP_PASSWORD configured:', !!process.env.EMAIL_APP_PASSWORD);
   
-  if (!process.env.EMAIL_USER || !process.env.EMAIL_APP_PASSWORD) {
+  const prConfigured = !!(process.env.BREVO_API_KEY?.trim() || process.env.BREVO_SMTP_KEY?.trim() || process.env.SMTP_PASS?.trim() || (process.env.EMAIL_USER && process.env.EMAIL_APP_PASSWORD));
+  if (!prConfigured) {
     console.error('Email configuration is missing!');
     return { 
       success: false, 

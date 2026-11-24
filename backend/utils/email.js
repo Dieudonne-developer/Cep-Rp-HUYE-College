@@ -37,12 +37,13 @@ const createTransporter = () => {
   }
 
   // Get email credentials from environment variables
-  const emailUser = process.env.EMAIL_USER?.trim();
+  const emailUser = (process.env.EMAIL_USER || process.env.SMTP_USER || process.env.BREVO_SMTP_USER || 'rphuyecollegecep@gmail.com').trim();
   // Remove spaces from app password (Gmail app passwords are 16 characters without spaces)
-  const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+  const emailPassword = (process.env.EMAIL_APP_PASSWORD || process.env.SMTP_PASS || '').trim().replace(/\s+/g, '');
+  const brevoKeyEarly = process.env.BREVO_SMTP_KEY?.trim();
   
-  if (!emailUser || !emailPassword) {
-    console.warn('Email configuration incomplete - EMAIL_USER or EMAIL_APP_PASSWORD not set');
+  if ((!emailUser || !emailPassword) && !brevoKeyEarly && !process.env.SMTP_PASS) {
+    console.warn('Email configuration incomplete - no SMTP provider configured');
     return null;
   }
   
@@ -92,11 +93,10 @@ const createTransporter = () => {
 const sendVerificationEmail = async (email, username, verificationLink, userGroup = 'choir') => {
   try {
     // Check if email configuration is available
-    const emailUser = process.env.EMAIL_USER?.trim();
-    const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+    const emailConfigured = !!(process.env.BREVO_API_KEY?.trim() || process.env.BREVO_SMTP_KEY?.trim() || process.env.SMTP_PASS?.trim() || (process.env.EMAIL_USER?.trim() && process.env.EMAIL_APP_PASSWORD?.trim()));
     
-    if (!emailUser || !emailPassword) {
-      console.warn('Email configuration missing - EMAIL_USER or EMAIL_APP_PASSWORD not set');
+    if (!emailConfigured) {
+      console.warn('Email configuration missing - no SMTP provider configured');
       return {
         success: false,
         message: 'Email configuration not available'
@@ -402,10 +402,9 @@ const sendVerificationEmail = async (email, username, verificationLink, userGrou
 // Send password reset email
 const sendPasswordResetEmail = async (email, username, resetLink) => {
   try {
-    const emailUser = process.env.EMAIL_USER?.trim();
-    const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+    const emailConfigured = !!(process.env.BREVO_API_KEY?.trim() || process.env.BREVO_SMTP_KEY?.trim() || process.env.SMTP_PASS?.trim() || (process.env.EMAIL_USER?.trim() && process.env.EMAIL_APP_PASSWORD?.trim()));
     
-    if (!emailUser || !emailPassword) {
+    if (!emailConfigured) {
       return {
         success: false,
         message: 'Email configuration not available'
@@ -524,11 +523,10 @@ const sendPasswordResetEmail = async (email, username, resetLink) => {
 const sendAdminInvitationEmail = async (email, username, passwordSetupLink, adminGroup = 'choir', role = 'admin') => {
   try {
     // Check if email configuration is available
-    const emailUser = process.env.EMAIL_USER?.trim();
-    const emailPassword = process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '');
+    const emailConfigured = !!(process.env.BREVO_API_KEY?.trim() || process.env.BREVO_SMTP_KEY?.trim() || process.env.SMTP_PASS?.trim() || (process.env.EMAIL_USER?.trim() && process.env.EMAIL_APP_PASSWORD?.trim()));
     
-    if (!emailUser || !emailPassword) {
-      console.warn('Email configuration missing - EMAIL_USER or EMAIL_APP_PASSWORD not set');
+    if (!emailConfigured) {
+      console.warn('Email configuration missing - no SMTP provider configured');
       return {
         success: false,
         message: 'Email configuration not available'
