@@ -129,7 +129,7 @@ async function sendVerificationCode(email, code) {
   console.log('Email password length:', process.env.EMAIL_APP_PASSWORD?.trim().replace(/\s+/g, '').length);
   
   const mailOptions = {
-    from: `"Ishyanga Ryera Choir" <${process.env.EMAIL_USER}>`,
+    from: `"Ishyanga Ryera Choir" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
     to: email,
     subject: 'Password Reset Verification Code',
     html: `
