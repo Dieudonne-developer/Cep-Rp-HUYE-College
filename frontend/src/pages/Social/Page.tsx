@@ -340,14 +340,6 @@ export default function SocialPage() {
                     
                     <p>Social Family is characterized by love, unity, and a strong commitment to serving God through practical deeds. They uphold the Word of God, which calls believers to love others as Christ loved them, and they strive to live out that command daily through their acts of kindness. The fellowship's ultimate goal is to continue promoting Christian-based social welfare activities so that those who are suffering or in distress may find hope and feel God's care and presence in their lives.</p>
                   </div>
-                  
-                  <h3 className="text-2xl font-semibold text-gray-700 mb-3 mt-6">Leadership</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="bg-blue-50 p-4 rounded-lg"><h4 className="font-bold text-blue-800">Family Leader</h4><p className="text-gray-700">To be announced</p></div>
-                    <div className="bg-blue-50 p-4 rounded-lg"><h4 className="font-bold text-blue-800">Assistant Leader</h4><p className="text-gray-700">To be announced</p></div>
-                    <div className="bg-blue-50 p-4 rounded-lg"><h4 className="font-bold text-blue-800">Secretary</h4><p className="text-gray-700">To be announced</p></div>
-                    <div className="bg-blue-50 p-4 rounded-lg"><h4 className="font-bold text-blue-800">Treasurer</h4><p className="text-gray-700">To be announced</p></div>
-                  </div>
                 </div>
                 <div className="bg-blue-50 p-6 rounded-lg">
                   <h3 className="text-xl font-semibold text-blue-800 mb-4">Quick Facts</h3>
