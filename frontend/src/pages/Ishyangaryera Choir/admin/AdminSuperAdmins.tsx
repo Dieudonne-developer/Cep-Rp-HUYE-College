@@ -51,6 +51,7 @@ export default function AdminSuperAdmins() {
   const [globalActivities, setGlobalActivities] = useState<any[]>([])
   const [savingActivity, setSavingActivity] = useState(false)
   const [activityForm, setActivityForm] = useState({ title: '', description: '', eventDate: '', eventTime: '', location: '', imageUrl: '' })
+  const [activityImgUploading, setActivityImgUploading] = useState(false)
   const [globalIdeas, setGlobalIdeas] = useState<any[]>([])
   const [supportDoc, setSupportDoc] = useState<any>(null)
   const [savingSupport, setSavingSupport] = useState(false)
@@ -132,6 +133,22 @@ export default function AdminSuperAdmins() {
       const data = await res.json()
       if (data.success) setGlobalActivities(data.events || [])
     } catch {}
+  }
+  async function uploadActivityImage(file: File) {
+    setActivityImgUploading(true)
+    try {
+      const fd = new FormData()
+      fd.append('file', file)
+      const res = await fetch(`${baseUrl}/api/admin/events/upload`, {
+        method: 'POST',
+        headers: { 'X-Admin-Email': currentAdmin?.email || '' },
+        body: fd,
+      })
+      const data = await res.json()
+      if (data.url || data.fileUrl) setActivityForm(f => ({ ...f, imageUrl: data.url || data.fileUrl }))
+      else alert(data.message || 'Image upload failed')
+    } catch { alert('Image upload failed') }
+    setActivityImgUploading(false)
   }
   async function createGlobalActivity(e: React.FormEvent) {
     e.preventDefault(); setSavingActivity(true)
@@ -515,7 +532,11 @@ export default function AdminSuperAdmins() {
           <div>
             <form onSubmit={createGlobalActivity} className="grid md:grid-cols-2 gap-3 mb-4">
               <input placeholder="Title" className="border rounded p-2" value={activityForm.title} onChange={(e)=>setActivityForm({...activityForm,title:e.target.value})} required />
-              <input placeholder="Image URL" className="border rounded p-2" value={activityForm.imageUrl} onChange={(e)=>setActivityForm({...activityForm,imageUrl:e.target.value})} />
+              <div className="flex gap-2">
+                <input type="file" accept="image/*" onChange={(e)=>{ const f=e.target.files?.[0]; if(f) uploadActivityImage(f) }} className="border rounded p-2 text-sm w-full" disabled={activityImgUploading} />
+                {activityImgUploading && <span className="text-xs text-gray-500 self-center">Uploading...</span>}
+              </div>
+              <input placeholder="Image URL (or paste link)" className="border rounded p-2" value={activityForm.imageUrl} onChange={(e)=>setActivityForm({...activityForm,imageUrl:e.target.value})} />
               <input placeholder="Date (YYYY-MM-DD)" className="border rounded p-2" value={activityForm.eventDate} onChange={(e)=>setActivityForm({...activityForm,eventDate:e.target.value})} />
               <input placeholder="Time (eg. 10:00)" className="border rounded p-2" value={activityForm.eventTime} onChange={(e)=>setActivityForm({...activityForm,eventTime:e.target.value})} />
               <input placeholder="Location" className="border rounded p-2" value={activityForm.location} onChange={(e)=>setActivityForm({...activityForm,location:e.target.value})} />
@@ -561,6 +582,7 @@ export default function AdminSuperAdmins() {
         )}
         {activeGlobalTab==='support' && (
           <form onSubmit={saveSupport} className="grid md:grid-cols-2 gap-3">
+            <input className="border rounded p-2 md:col-span-2" placeholder="Support page title" value={supportDoc?.title||''} onChange={(e)=>setSupportDoc((d:any)=>({...d, title:e.target.value}))} />
             <input className="border rounded p-2" placeholder="Bank Name" value={supportDoc?.bank?.bankName||''} onChange={(e)=>setSupportDoc((d:any)=>({...d, bank:{...d?.bank, bankName:e.target.value}}))} />
             <input className="border rounded p-2" placeholder="Account Name" value={supportDoc?.bank?.accountName||''} onChange={(e)=>setSupportDoc((d:any)=>({...d, bank:{...d?.bank, accountName:e.target.value}}))} />
             <input className="border rounded p-2" placeholder="Account Number" value={supportDoc?.bank?.accountNumber||''} onChange={(e)=>setSupportDoc((d:any)=>({...d, bank:{...d?.bank, accountNumber:e.target.value}}))} />

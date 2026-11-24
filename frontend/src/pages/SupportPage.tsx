@@ -69,7 +69,7 @@ export default function SupportPage() {
 
   return (
     <div className="p-6 bg-white rounded-lg shadow-md">
-      <h2 className="text-3xl font-bold text-gray-800 mb-6">Support CEP</h2>
+      <h2 className="text-3xl font-bold text-gray-800 mb-6">{supportData?.title || 'Support CEP'}</h2>
       <p className="text-gray-600 mb-6">Your generous support helps us continue our mission and serve our community.</p>
       
       <div className="grid md:grid-cols-2 gap-8">

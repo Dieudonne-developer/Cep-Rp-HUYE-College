@@ -68,6 +68,7 @@ const GlobalIdea = createModel('global_ideas', {
 
 const GlobalSupport = createModel('global_support', {
   defaults: {
+    title: 'Support CEP RP Huye College',
     bank: {
       bankName: 'Bank of Kigali',
       accountName: 'CEP Ishyanga Ryera Choir',
