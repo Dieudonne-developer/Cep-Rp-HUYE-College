@@ -68,8 +68,8 @@ export default function TestLoginPage() {
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-purple-600 p-8 text-center text-white">
-          <div className="bg-white bg-opacity-20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-            <i data-lucide="shield-check" className="w-10 h-10"></i>
+          <div className="bg-white bg-opacity-20 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 overflow-hidden">
+            <img src={`${getApiBaseUrl()}/api/assets/logo`} alt="CEP RP Huye Logo" className="w-full h-full object-cover" />
           </div>
           <h1 className="text-2xl font-bold mb-2">CEP RP Huye</h1>
           <p className="text-blue-100">Administration Portal</p>
