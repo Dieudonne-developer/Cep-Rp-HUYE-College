@@ -1,6 +1,6 @@
 import Constants from 'expo-constants';
 
-const FALLBACK_API_URL = 'https://cep-backend-hjfu.onrender.com';
+const FALLBACK_API_URL = 'https://cep-rp-huye-college-yt6x-eight.vercel.app';
 const FALLBACK_GROUP = 'choir';
 
 const extra = Constants?.expoConfig?.extra ?? Constants?.manifest?.extra ?? {};
@@ -14,6 +14,7 @@ export const API_BASE_URL = resolvedBaseUrl;
 export const DEFAULT_ADMIN_GROUP: string = extra?.defaultGroup || FALLBACK_GROUP;
 
 export const API_ENDPOINTS = {
+  // Admin
   login: '/api/admin/login',
   dashboard: '/api/admin/dashboard',
   members: '/api/admin/members',
@@ -23,7 +24,12 @@ export const API_ENDPOINTS = {
   ideas: '/api/admin/ideas',
   events: '/api/admin/events',
   songs: '/api/admin/songs',
+  whatsappAdminGroups: '/api/whatsapp/admin/groups',
+  whatsappAdminRequests: '/api/whatsapp/admin/requests',
+  // Member / user
+  userLogin: '/api/auth/login',
+  attendanceMe: '/api/attendance/me',
+  homeActivities: '/api/home/activities',
+  whatsappGroups: '/api/whatsapp/groups',
   health: '/health'
 } as const;
-
-
