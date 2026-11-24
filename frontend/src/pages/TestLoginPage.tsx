@@ -62,18 +62,6 @@ export default function TestLoginPage() {
     }
   }
 
-  const testCredentials = [
-    { email: 'superadmin@cep.com', password: 'SuperAdmin@2024', role: 'Super Admin (All Groups - Full Access)' },
-    { email: 'admin@cep.com', password: 'admin123', role: 'Admin (All Groups)' },
-    { email: 'choir@cep.com', password: 'choir123', role: 'Ishyanga Ryera Choir Admin' },
-    { email: 'anointed@cep.com', password: 'anointed123', role: 'Anointed worship team Admin' },
-    { email: 'abanyamugisha@cep.com', password: 'abanyamugisha123', role: 'Abanyamugisha family Admin' },
-    { email: 'psalm23@cep.com', password: 'psalm23123', role: 'Psalm 23 family Admin' },
-    { email: 'psalm46@cep.com', password: 'psalm46123', role: 'Psalm 46 family Admin' },
-    { email: 'protocol@cep.com', password: 'protocol123', role: 'Protocol family Admin' },
-    { email: 'social@cep.com', password: 'social123', role: 'Social family Admin' },
-    { email: 'evangelical@cep.com', password: 'evangelical123', role: 'Evangelical family Admin' },
-  ]
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex items-center justify-center p-4">
@@ -170,56 +158,6 @@ export default function TestLoginPage() {
             </button>
           </form>
 
-          {/* Quick Actions */}
-          <div className="mt-8 space-y-3">
-            <div className="text-center">
-              <div className="relative inline-block">
-                <button
-                  onClick={(e) => {
-                    e.preventDefault()
-                    const select = document.getElementById('credential-select') as HTMLSelectElement
-                    if (select && select.value) {
-                      const selected = testCredentials[parseInt(select.value)]
-                      setEmail(selected.email)
-                      setPassword(selected.password)
-                    }
-                  }}
-                  className="text-sm text-blue-600 hover:text-blue-800 underline mr-2"
-                >
-                  Fill Test Credentials:
-                </button>
-                <select
-                  id="credential-select"
-                  onChange={(e) => {
-                    if (e.target.value) {
-                      const selected = testCredentials[parseInt(e.target.value)]
-                      setEmail(selected.email)
-                      setPassword(selected.password)
-                    }
-                  }}
-                  className="text-sm border border-blue-300 rounded px-2 py-1 bg-white text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  defaultValue=""
-                >
-                  <option value="">Select account...</option>
-                  {testCredentials.map((cred, index) => (
-                    <option key={index} value={index.toString()}>
-                      {cred.role}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            
-            <div className="text-center">
-              <button
-                onClick={() => navigate('/')}
-                className="text-sm text-gray-600 hover:text-gray-800 flex items-center justify-center mx-auto"
-              >
-                <i data-lucide="arrow-left" className="w-4 h-4 mr-1"></i>
-                Back to Home
-              </button>
-            </div>
-          </div>
         </div>
 
         {/* Footer */}
