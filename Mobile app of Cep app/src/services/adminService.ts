@@ -103,6 +103,17 @@ export const fetchWhatsAppGroups = async (admin: AdminAccount) => {
   const res = await apiClient.get(API_ENDPOINTS.whatsappAdminGroups, { headers: withAdminHeaders(admin) });
   return res.data?.groups || [];
 };
+export const createWhatsAppGroup = async (admin: AdminAccount, data: any) => {
+  const res = await apiClient.post(API_ENDPOINTS.whatsappAdminGroups, data, { headers: withAdminHeaders(admin) });
+  return res.data;
+};
+export const updateWhatsAppGroup = async (admin: AdminAccount, id: string, data: any) => {
+  const res = await apiClient.put(`${API_ENDPOINTS.whatsappAdminGroups}/${id}`, data, { headers: withAdminHeaders(admin) });
+  return res.data;
+};
+export const deleteWhatsAppGroup = async (admin: AdminAccount, id: string) => {
+  await apiClient.delete(`${API_ENDPOINTS.whatsappAdminGroups}/${id}`, { headers: withAdminHeaders(admin) });
+};
 export const fetchWhatsAppRequests = async (admin: AdminAccount) => {
   const res = await apiClient.get(API_ENDPOINTS.whatsappAdminRequests, { headers: withAdminHeaders(admin) });
   return res.data?.requests || [];
