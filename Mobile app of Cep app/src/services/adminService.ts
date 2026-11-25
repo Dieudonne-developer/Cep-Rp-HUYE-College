@@ -146,6 +146,12 @@ export const createSuperAdmin = async (admin: AdminAccount, data: any) => {
 export const deleteSuperAdmin = async (admin: AdminAccount, id: string) => {
   await apiClient.delete(`${API_BASE_URL}/api/admin/super-admins/${id}`, { headers: withAdminHeaders(admin) });
 };
+export const suspendSuperAdmin = async (admin: AdminAccount, id: string, adminGroup: string) => {
+  await apiClient.put(`${API_BASE_URL}/api/admin/super-admins/${id}/suspend?adminGroup=${adminGroup}`, {}, { headers: withAdminHeaders(admin) });
+};
+export const approveSuperAdmin = async (admin: AdminAccount, id: string, adminGroup: string) => {
+  await apiClient.put(`${API_BASE_URL}/api/admin/super-admins/${id}/approve?adminGroup=${adminGroup}`, {}, { headers: withAdminHeaders(admin) });
+};
 export const fetchGlobalActivities = async (admin: AdminAccount) => {
   const res = await apiClient.get(`${API_BASE_URL}/api/admin/super-admin/home/activities`, { headers: withAdminHeaders(admin) });
   return res.data?.events || [];
