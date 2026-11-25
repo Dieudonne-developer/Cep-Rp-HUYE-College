@@ -489,12 +489,18 @@ export const SuperAdminsScreen: React.FC = () => {
 
               {globalTab === 'Ideas' && (
                 <View style={styles.section}>
+                  <Text style={styles.sectionDescription}>
+                    Public submissions appear on homepage; you can mark as implemented or delete.
+                  </Text>
                   <View style={styles.list}>
                     {globalIdeas.map((item, idx) => (
                       <View key={item._id || item.id || idx} style={styles.listItem}>
                         <View style={{ flex: 1 }}>
                           <Text style={styles.itemTitle}>{item.idea}</Text>
-                          <Text style={styles.itemSub}>{item.anonymous ? 'Anonymous' : (item.name || 'Member')}</Text>
+                          <Text style={styles.itemSub}>
+                            {item.anonymous ? 'Anonymous' : (item.name || 'Member')}
+                            {item.implementedDate ? ' • Implemented ' + new Date(item.implementedDate).toLocaleDateString() : ''}
+                          </Text>
                         </View>
                         {!item.implementedDate && (
                           <TouchableOpacity onPress={async () => { await implementGlobalIdea(admin!, item._id || item.id); load(); }}>
@@ -783,6 +789,7 @@ const styles = StyleSheet.create({
   doneText: { fontSize: 12, color: '#16a34a', fontWeight: '600', marginRight: 12 },
   deleteText: { fontSize: 12, color: '#dc2626', fontWeight: '600' },
   sectionTitle: { fontSize: 16, fontWeight: '600', color: '#1f2937', marginBottom: 12 },
+  sectionDescription: { fontSize: 13, color: '#6b7280', marginBottom: 12 },
   note: { fontSize: 12, color: '#6b7280', marginBottom: 12, marginTop: 8 },
   pickerLabel: { fontSize: 14, color: '#1f2937' },
   modalOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)', justifyContent: 'center', padding: 16 },
