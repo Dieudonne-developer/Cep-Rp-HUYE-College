@@ -11,8 +11,10 @@ import {
   Modal,
   ScrollView,
   ActivityIndicator,
-  Dimensions
+  Dimensions,
+  Platform
 } from 'react-native';
+import * as ImagePicker from 'expo-image-picker';
 import { useAuth } from '@/context/AuthContext';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -32,6 +34,7 @@ import {
   fetchGlobalSupport,
   saveGlobalSupport
 } from '@/services/adminService';
+import { API_BASE_URL } from '@/config/api';
 
 const ALL_GROUPS = [
   { value: 'all', label: 'All Groups' },
@@ -86,6 +89,7 @@ export const SuperAdminsScreen: React.FC = () => {
     location: '',
     imageUrl: ''
   });
+  const [uploadingImage, setUploadingImage] = useState(false);
 
   const load = useCallback(async () => {
     if (!admin) return;
@@ -199,6 +203,50 @@ export const SuperAdminsScreen: React.FC = () => {
       Alert.alert('Success', 'Activity created');
     } catch (e: any) {
       Alert.alert('Error', e?.message || 'Failed');
+    }
+  };
+
+  const handlePickImage = async () => {
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: true,
+        aspect: [16, 9],
+        quality: 0.8,
+      });
+
+      if (!result.canceled && result.assets && result.assets[0]) {
+        setUploadingImage(true);
+        const formData = new FormData();
+        formData.append('file', {
+          uri: result.assets[0].uri,
+          type: result.assets[0].type || 'image/jpeg',
+          name: result.assets[0].fileName || 'activity-image.jpg',
+        } as any);
+
+        const response = await fetch(`${API_BASE_URL}/api/admin/events/upload`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+            'X-Admin-Email': admin?.email || '',
+            'X-Admin-Group': admin?.adminGroup || '',
+            'X-Admin-ID': admin?.id || '',
+          },
+          body: formData,
+        });
+
+        const data = await response.json();
+        if (data.success || data.url || data.fileUrl) {
+          setActivityForm({ ...activityForm, imageUrl: data.url || data.fileUrl });
+          Alert.alert('Success', 'Image uploaded');
+        } else {
+          Alert.alert('Error', data.message || 'Image upload failed');
+        }
+      }
+    } catch (e: any) {
+      Alert.alert('Error', e?.message || 'Failed to pick or upload image');
+    } finally {
+      setUploadingImage(false);
     }
   };
 
@@ -382,6 +430,17 @@ export const SuperAdminsScreen: React.FC = () => {
                       value={activityForm.title}
                       onChangeText={v => setActivityForm({ ...activityForm, title: v })}
                     />
+                    <TouchableOpacity style={styles.fileInputBtn} onPress={handlePickImage} disabled={uploadingImage}>
+                      <Text style={styles.fileInputBtnText}>{uploadingImage ? 'Uploading...' : 'Choose File'}</Text>
+                    </TouchableOpacity>
+                    <Text style={styles.fileStatus}>
+                      {activityForm.imageUrl ? 'Image selected' : 'No file chosen'}
+                    </Text>
+                    {activityForm.imageUrl && (
+                      <Text style={styles.imagePreviewText} numberOfLines={1}>
+                        {activityForm.imageUrl}
+                      </Text>
+                    )}
                     <TextInput
                       style={styles.input}
                       placeholder="Date (YYYY-MM-DD)"
@@ -703,6 +762,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   textArea: { minHeight: 80, textAlignVertical: 'top' },
+  fileInputBtn: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    padding: 12,
+    backgroundColor: '#ffffff',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  fileInputBtnText: { color: '#3b82f6', fontSize: 14, fontWeight: '500' },
+  fileStatus: { fontSize: 12, color: '#6b7280', marginBottom: 8 },
+  imagePreviewText: { fontSize: 11, color: '#16a34a', marginBottom: 8 },
   actionBtn: { backgroundColor: '#3b82f6', borderRadius: 8, paddingVertical: 12, alignItems: 'center', marginTop: 4 },
   actionBtnText: { color: '#ffffff', fontWeight: '600', fontSize: 14 },
   list: { backgroundColor: '#ffffff', borderRadius: 8, borderWidth: 1, borderColor: '#e5e7eb' },
