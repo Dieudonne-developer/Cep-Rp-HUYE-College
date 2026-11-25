@@ -8,8 +8,9 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  Alert
+  Image
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/AuthContext';
 import { DEFAULT_ADMIN_GROUP } from '@/config/api';
 
@@ -51,51 +52,141 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-        <Text style={styles.title}>CEP RP Huye</Text>
-        <Text style={styles.subtitle}>Admin Login — all family groups</Text>
+      <LinearGradient colors={['#2563eb', '#7c3aed']} style={styles.gradient}>
+        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
+          <View style={styles.card}>
+            <View style={styles.header}>
+              <View style={styles.logoCircle}>
+                <Image source={require('@/assets/log.jpg')} style={styles.logo} />
+              </View>
+              <Text style={styles.title}>Admin Login</Text>
+              <Text style={styles.subtitle}>Administration Portal</Text>
+            </View>
 
-        <Text style={styles.label}>Your Family / Group</Text>
-        <View style={styles.groupWrap}>
-          {GROUPS.map(g => (
-            <TouchableOpacity
-              key={g.key}
-              style={[styles.groupChip, adminGroup === g.key && styles.groupChipActive]}
-              onPress={() => setAdminGroup(g.key)}
-            >
-              <Text style={[styles.groupChipText, adminGroup === g.key && styles.groupChipTextActive]}>{g.label}</Text>
-            </TouchableOpacity>
-          ))}
-        </View>
+            {error ? (
+              <View style={styles.errorBox}>
+                <Text style={styles.errorText}>{error}</Text>
+              </View>
+            ) : null}
 
-        <Text style={styles.label}>Email</Text>
-        <TextInput style={styles.input} value={email} onChangeText={setEmail} autoCapitalize="none" keyboardType="email-address" placeholder="admin@cep.com" />
-        <Text style={styles.label}>Password</Text>
-        <TextInput style={styles.input} value={password} onChangeText={setPassword} secureTextEntry placeholder="••••••••" />
+            <View style={styles.form}>
+              <Text style={styles.label}>Your Family / Group</Text>
+              <View style={styles.groupWrap}>
+                {GROUPS.map(g => (
+                  <TouchableOpacity
+                    key={g.key}
+                    style={[styles.groupChip, adminGroup === g.key && styles.groupChipActive]}
+                    onPress={() => setAdminGroup(g.key)}
+                  >
+                    <Text style={[styles.groupChipText, adminGroup === g.key && styles.groupChipTextActive]}>{g.label}</Text>
+                  </TouchableOpacity>
+                ))}
+              </View>
 
-        {error ? <Text style={styles.error}>{error}</Text> : null}
+              <Text style={styles.label}>Email Address</Text>
+              <TextInput
+                style={styles.input}
+                value={email}
+                onChangeText={setEmail}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                placeholder="admin@ishyangaryera.com"
+                placeholderTextColor="#9ca3af"
+              />
 
-        <TouchableOpacity style={[styles.button, isSubmitting && { opacity: 0.6 }]} onPress={handleSubmit} disabled={isSubmitting}>
-          <Text style={styles.buttonText}>{isSubmitting ? 'Signing in...' : 'Sign In'}</Text>
-        </TouchableOpacity>
-      </ScrollView>
+              <Text style={styles.label}>Password</Text>
+              <TextInput
+                style={styles.input}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                placeholder="Enter your password"
+                placeholderTextColor="#9ca3af"
+              />
+
+              <TouchableOpacity
+                style={[styles.button, isSubmitting && styles.buttonDisabled]}
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+              >
+                <Text style={styles.buttonText}>{isSubmitting ? 'Signing in...' : 'Sign In'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </ScrollView>
+      </LinearGradient>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#f8fafc' },
-  container: { padding: 24, paddingTop: 80 },
-  title: { fontSize: 28, fontWeight: '800', color: '#1e293b', textAlign: 'center' },
-  subtitle: { fontSize: 14, color: '#64748b', textAlign: 'center', marginBottom: 20 },
-  label: { fontSize: 13, fontWeight: '600', color: '#334155', marginBottom: 6, marginTop: 12 },
-  input: { borderWidth: 1, borderColor: '#cbd5e1', borderRadius: 10, padding: 12, backgroundColor: '#fff', fontSize: 15 },
-  groupWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 6 },
-  groupChip: { paddingHorizontal: 10, paddingVertical: 7, borderRadius: 16, backgroundColor: '#e2e8f0' },
+  flex: { flex: 1 },
+  gradient: { flex: 1 },
+  container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
+  card: {
+    backgroundColor: '#ffffff',
+    borderRadius: 12,
+    padding: 32,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.25,
+    shadowRadius: 8,
+    elevation: 8,
+  },
+  header: { alignItems: 'center', marginBottom: 32 },
+  logoCircle: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#dbeafe',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  logo: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    resizeMode: 'contain',
+  },
+  title: { fontSize: 24, fontWeight: 'bold', color: '#1f2937', marginBottom: 4 },
+  subtitle: { fontSize: 14, color: '#6b7280' },
+  errorBox: {
+    backgroundColor: '#fee2e2',
+    borderWidth: 1,
+    borderColor: '#f87171',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 16,
+  },
+  errorText: { color: '#dc2626', fontSize: 14 },
+  form: { gap: 16 },
+  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 },
+  groupWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
+  groupChip: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 16,
+    backgroundColor: '#e5e7eb',
+  },
   groupChipActive: { backgroundColor: '#2563eb' },
-  groupChipText: { fontSize: 11, color: '#334155', fontWeight: '600' },
-  groupChipTextActive: { color: '#fff' },
-  error: { color: '#dc2626', marginTop: 12, fontSize: 13 },
-  button: { marginTop: 24, backgroundColor: '#2563eb', borderRadius: 10, paddingVertical: 14, alignItems: 'center' },
-  buttonText: { color: '#fff', fontWeight: '700', fontSize: 16 },
+  groupChipText: { fontSize: 12, color: '#374151', fontWeight: '600' },
+  groupChipTextActive: { color: '#ffffff' },
+  input: {
+    borderWidth: 1,
+    borderColor: '#d1d5db',
+    borderRadius: 8,
+    padding: 12,
+    fontSize: 15,
+    backgroundColor: '#ffffff',
+  },
+  button: {
+    backgroundColor: '#2563eb',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    marginTop: 8,
+  },
+  buttonDisabled: { backgroundColor: '#60a5fa' },
+  buttonText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16 },
 });
