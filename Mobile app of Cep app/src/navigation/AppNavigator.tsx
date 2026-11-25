@@ -1,10 +1,12 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavigationContainer, DefaultTheme } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Feather } from '@expo/vector-icons';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuth } from '@/context/AuthContext';
 import { LoginScreen } from '@/screens/LoginScreen';
+import { WelcomeScreen } from '@/screens/WelcomeScreen';
 import { DashboardScreen } from '@/screens/DashboardScreen';
 import { MembersScreen } from '@/screens/MembersScreen';
 import { IdeasScreen } from '@/screens/IdeasScreen';
@@ -18,7 +20,7 @@ import { SuperAdminsScreen } from '@/screens/admin/SuperAdminsScreen';
 import { MoreScreen } from '@/screens/admin/MoreScreen';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 
-export type RootStackParamList = { Auth: undefined; Main: undefined };
+export type RootStackParamList = { Welcome: undefined; Auth: undefined; Main: undefined };
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Stack2 = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -59,11 +61,33 @@ const AppTabs = () => (
 
 export const AppNavigator: React.FC = () => {
   const { admin, loading } = useAuth();
-  if (loading) return <LoadingOverlay />;
+  const [showWelcome, setShowWelcome] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    AsyncStorage.getItem('hasSeenWelcome').then(value => {
+      setShowWelcome(value !== 'true');
+    });
+  }, []);
+
+  const handleWelcomeComplete = async () => {
+    await AsyncStorage.setItem('hasSeenWelcome', 'true');
+    setShowWelcome(false);
+  };
+
+  if (loading || showWelcome === null) return <LoadingOverlay />;
+
   return (
     <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, background: '#f8fafc' } }}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
-        {admin ? <Stack.Screen name="Main" component={AppTabs} /> : <Stack.Screen name="Auth" component={LoginScreen} />}
+        {showWelcome ? (
+          <Stack.Screen name="Welcome">
+            {() => <WelcomeScreen onContinue={handleWelcomeComplete} />}
+          </Stack.Screen>
+        ) : admin ? (
+          <Stack.Screen name="Main" component={AppTabs} />
+        ) : (
+          <Stack.Screen name="Auth" component={LoginScreen} />
+        )}
       </Stack.Navigator>
     </NavigationContainer>
   );
