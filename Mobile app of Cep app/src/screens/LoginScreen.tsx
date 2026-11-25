@@ -7,8 +7,7 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
-  Image
+  View
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useAuth } from '@/context/AuthContext';
@@ -52,105 +51,102 @@ export const LoginScreen: React.FC = () => {
 
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-      <LinearGradient colors={['#2563eb', '#7c3aed']} style={styles.gradient}>
-        <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-          <View style={styles.card}>
-            <View style={styles.header}>
-              <View style={styles.logoCircle}>
-                <Image source={require('@/assets/log.jpg')} style={styles.logo} />
-              </View>
-              <Text style={styles.title}>Admin Login</Text>
-              <Text style={styles.subtitle}>Administration Portal</Text>
+      <View style={styles.container}>
+        <View style={styles.headerSection}>
+          <Text style={styles.headerTitle}>CEP RP HUYE COLLEGE</Text>
+        </View>
+
+        <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+          <Text style={styles.loginTitle}>LOGIN</Text>
+
+          {error ? (
+            <View style={styles.errorBox}>
+              <Text style={styles.errorText}>{error}</Text>
+            </View>
+          ) : null}
+
+          <View style={styles.form}>
+            <Text style={styles.label}>Your Family / Group</Text>
+            <View style={styles.groupWrap}>
+              {GROUPS.map(g => (
+                <TouchableOpacity
+                  key={g.key}
+                  style={[styles.groupChip, adminGroup === g.key && styles.groupChipActive]}
+                  onPress={() => setAdminGroup(g.key)}
+                >
+                  <Text style={[styles.groupChipText, adminGroup === g.key && styles.groupChipTextActive]}>{g.label}</Text>
+                </TouchableOpacity>
+              ))}
             </View>
 
-            {error ? (
-              <View style={styles.errorBox}>
-                <Text style={styles.errorText}>{error}</Text>
-              </View>
-            ) : null}
+            <Text style={styles.label}>Email Address</Text>
+            <TextInput
+              style={styles.input}
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              keyboardType="email-address"
+              placeholder="Enter your email"
+              placeholderTextColor="#9ca3af"
+            />
 
-            <View style={styles.form}>
-              <Text style={styles.label}>Your Family / Group</Text>
-              <View style={styles.groupWrap}>
-                {GROUPS.map(g => (
-                  <TouchableOpacity
-                    key={g.key}
-                    style={[styles.groupChip, adminGroup === g.key && styles.groupChipActive]}
-                    onPress={() => setAdminGroup(g.key)}
-                  >
-                    <Text style={[styles.groupChipText, adminGroup === g.key && styles.groupChipTextActive]}>{g.label}</Text>
-                  </TouchableOpacity>
-                ))}
-              </View>
+            <Text style={styles.label}>Password</Text>
+            <TextInput
+              style={styles.input}
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              placeholder="Enter your password"
+              placeholderTextColor="#9ca3af"
+            />
 
-              <Text style={styles.label}>Email Address</Text>
-              <TextInput
-                style={styles.input}
-                value={email}
-                onChangeText={setEmail}
-                autoCapitalize="none"
-                keyboardType="email-address"
-                placeholder="admin@ishyangaryera.com"
-                placeholderTextColor="#9ca3af"
-              />
+            <TouchableOpacity style={styles.forgotPassword}>
+              <Text style={styles.forgotPasswordText}>Forget your password?</Text>
+            </TouchableOpacity>
 
-              <Text style={styles.label}>Password</Text>
-              <TextInput
-                style={styles.input}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                placeholder="Enter your password"
-                placeholderTextColor="#9ca3af"
-              />
-
-              <TouchableOpacity
-                style={[styles.button, isSubmitting && styles.buttonDisabled]}
-                onPress={handleSubmit}
-                disabled={isSubmitting}
-              >
-                <Text style={styles.buttonText}>{isSubmitting ? 'Signing in...' : 'Sign In'}</Text>
-              </TouchableOpacity>
-            </View>
+            <TouchableOpacity
+              style={[styles.button, isSubmitting && styles.buttonDisabled]}
+              onPress={handleSubmit}
+              disabled={isSubmitting}
+            >
+              <LinearGradient colors={['#3b82f6', '#1d4ed8']} style={styles.buttonGradient}>
+                <Text style={styles.buttonText}>{isSubmitting ? 'Signing in...' : 'LOGIN'}</Text>
+              </LinearGradient>
+            </TouchableOpacity>
           </View>
         </ScrollView>
-      </LinearGradient>
+      </View>
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  flex: { flex: 1 },
-  gradient: { flex: 1 },
-  container: { flexGrow: 1, justifyContent: 'center', padding: 24 },
-  card: {
-    backgroundColor: '#ffffff',
-    borderRadius: 12,
-    padding: 32,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.25,
-    shadowRadius: 8,
-    elevation: 8,
-  },
-  header: { alignItems: 'center', marginBottom: 32 },
-  logoCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
-    backgroundColor: '#dbeafe',
-    justifyContent: 'center',
+  flex: { flex: 1, backgroundColor: '#f8fafc' },
+  container: { flex: 1 },
+  headerSection: {
+    backgroundColor: '#3b82f6',
+    paddingVertical: 40,
+    paddingHorizontal: 24,
     alignItems: 'center',
-    marginBottom: 16,
   },
-  logo: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    resizeMode: 'contain',
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    letterSpacing: 1,
   },
-  title: { fontSize: 24, fontWeight: 'bold', color: '#1f2937', marginBottom: 4 },
-  subtitle: { fontSize: 14, color: '#6b7280' },
+  content: {
+    flexGrow: 1,
+    padding: 24,
+    backgroundColor: '#ffffff',
+  },
+  loginTitle: {
+    fontSize: 28,
+    fontWeight: 'bold',
+    color: '#3b82f6',
+    marginBottom: 24,
+    textAlign: 'center',
+  },
   errorBox: {
     backgroundColor: '#fee2e2',
     borderWidth: 1,
@@ -169,24 +165,35 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     backgroundColor: '#e5e7eb',
   },
-  groupChipActive: { backgroundColor: '#2563eb' },
+  groupChipActive: { backgroundColor: '#3b82f6' },
   groupChipText: { fontSize: 12, color: '#374151', fontWeight: '600' },
   groupChipTextActive: { color: '#ffffff' },
   input: {
     borderWidth: 1,
     borderColor: '#d1d5db',
     borderRadius: 8,
-    padding: 12,
+    padding: 14,
     fontSize: 15,
-    backgroundColor: '#ffffff',
+    backgroundColor: '#f9fafb',
+  },
+  forgotPassword: {
+    alignSelf: 'flex-end',
+    marginTop: -8,
+    marginBottom: 8,
+  },
+  forgotPasswordText: {
+    fontSize: 13,
+    color: '#3b82f6',
   },
   button: {
-    backgroundColor: '#2563eb',
     borderRadius: 8,
-    paddingVertical: 12,
-    alignItems: 'center',
+    overflow: 'hidden',
     marginTop: 8,
   },
-  buttonDisabled: { backgroundColor: '#60a5fa' },
+  buttonGradient: {
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  buttonDisabled: { opacity: 0.6 },
   buttonText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16 },
 });
