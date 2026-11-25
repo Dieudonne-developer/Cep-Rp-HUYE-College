@@ -10,9 +10,13 @@ import {
   Alert,
   Modal,
   ScrollView,
-  ActivityIndicator
+  ActivityIndicator,
+  Dimensions
 } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
+import { LinearGradient } from 'expo-linear-gradient';
+
+const { width } = Dimensions.get('window');
 import {
   fetchSuperAdmins,
   createSuperAdmin,
@@ -64,6 +68,7 @@ export const SuperAdminsScreen: React.FC = () => {
   const [filterStatus, setFilterStatus] = useState('all');
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -237,7 +242,10 @@ export const SuperAdminsScreen: React.FC = () => {
     <View style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <View>
+        <TouchableOpacity onPress={() => setSidebarOpen(true)} style={styles.menuBtn}>
+          <Text style={styles.menuIcon}>☰</Text>
+        </TouchableOpacity>
+        <View style={{ flex: 1 }}>
           <Text style={styles.headerTitle}>CEP Admin Panel</Text>
           <Text style={styles.headerSubtitle}>Super Administrator - System Management</Text>
         </View>
@@ -547,6 +555,62 @@ export const SuperAdminsScreen: React.FC = () => {
           </View>
         </View>
       </Modal>
+
+      {/* Sidebar */}
+      <Modal visible={sidebarOpen} animationType="slide" transparent>
+        <TouchableOpacity
+          style={styles.sidebarOverlay}
+          activeOpacity={1}
+          onPress={() => setSidebarOpen(false)}
+        >
+          <TouchableOpacity activeOpacity={1} style={styles.sidebar} onPress={e => e.stopPropagation()}>
+            <LinearGradient colors={['#3b82f6', '#1d4ed8']} style={styles.sidebarHeader}>
+              <Text style={styles.sidebarTitle}>CEP Admin Panel</Text>
+              <TouchableOpacity onPress={() => setSidebarOpen(false)} style={styles.sidebarClose}>
+                <Text style={styles.sidebarCloseText}>✕</Text>
+              </TouchableOpacity>
+            </LinearGradient>
+
+            <ScrollView style={styles.sidebarContent}>
+              <TouchableOpacity style={styles.sidebarItem} onPress={() => { setSidebarOpen(false); }}>
+                <Text style={styles.sidebarItemText}>WhatsApp Groups</Text>
+              </TouchableOpacity>
+
+              <View style={styles.sidebarSection}>
+                <Text style={styles.sidebarSectionTitle}>HOMEPAGE</Text>
+                <TouchableOpacity
+                  style={[styles.sidebarItem, mainTab === 'homepage' && globalTab === 'Activities' && styles.sidebarItemActive]}
+                  onPress={() => { setMainTab('homepage'); setGlobalTab('Activities'); setSidebarOpen(false); }}
+                >
+                  <Text style={[styles.sidebarItemText, mainTab === 'homepage' && globalTab === 'Activities' && styles.sidebarItemTextActive]}>Activities</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.sidebarItem, mainTab === 'homepage' && globalTab === 'Ideas' && styles.sidebarItemActive]}
+                  onPress={() => { setMainTab('homepage'); setGlobalTab('Ideas'); setSidebarOpen(false); }}
+                >
+                  <Text style={[styles.sidebarItemText, mainTab === 'homepage' && globalTab === 'Ideas' && styles.sidebarItemTextActive]}>Ideas</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.sidebarItem, mainTab === 'homepage' && globalTab === 'Support' && styles.sidebarItemActive]}
+                  onPress={() => { setMainTab('homepage'); setGlobalTab('Support'); setSidebarOpen(false); }}
+                >
+                  <Text style={[styles.sidebarItemText, mainTab === 'homepage' && globalTab === 'Support' && styles.sidebarItemTextActive]}>Support</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={[styles.sidebarItem, mainTab === 'homepage' && globalTab === 'CEP Members' && styles.sidebarItemActive]}
+                  onPress={() => { setMainTab('homepage'); setGlobalTab('CEP Members'); setSidebarOpen(false); }}
+                >
+                  <Text style={[styles.sidebarItemText, mainTab === 'homepage' && globalTab === 'CEP Members' && styles.sidebarItemTextActive]}>CEP Members</Text>
+                </TouchableOpacity>
+              </View>
+
+              <TouchableOpacity style={styles.sidebarItem} onPress={() => { setSidebarOpen(false); }}>
+                <Text style={styles.sidebarItemText}>View Public Site</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      </Modal>
     </View>
   );
 };
@@ -561,6 +625,8 @@ const styles = StyleSheet.create({
     paddingVertical: 20,
     backgroundColor: '#3b82f6',
   },
+  menuBtn: { padding: 8, marginRight: 8 },
+  menuIcon: { fontSize: 24, color: '#ffffff', fontWeight: 'bold' },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff' },
   headerSubtitle: { fontSize: 12, color: '#bfdbfe', marginTop: 2 },
   logoutBtn: { backgroundColor: 'rgba(255,255,255,0.2)', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 6 },
@@ -654,4 +720,17 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 18, fontWeight: 'bold', color: '#1f2937' },
   modalClose: { fontSize: 24, color: '#6b7280' },
   modalBody: { padding: 16 },
+  sidebarOverlay: { flex: 1, backgroundColor: 'rgba(0,0,0,0.5)' },
+  sidebar: { width: width * 0.75, height: '100%', backgroundColor: '#ffffff' },
+  sidebarHeader: { padding: 20, borderBottomWidth: 1, borderBottomColor: '#e5e7eb' },
+  sidebarTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff' },
+  sidebarClose: { position: 'absolute', right: 16, top: 20 },
+  sidebarCloseText: { fontSize: 24, color: '#ffffff' },
+  sidebarContent: { flex: 1 },
+  sidebarSection: { marginTop: 16 },
+  sidebarSectionTitle: { fontSize: 12, fontWeight: 'bold', color: '#6b7280', paddingHorizontal: 20, marginBottom: 8, textTransform: 'uppercase' },
+  sidebarItem: { paddingVertical: 14, paddingHorizontal: 20, borderBottomWidth: 1, borderBottomColor: '#f3f4f6' },
+  sidebarItemActive: { backgroundColor: '#eff6ff', borderLeftWidth: 4, borderLeftColor: '#3b82f6' },
+  sidebarItemText: { fontSize: 15, color: '#1f2937' },
+  sidebarItemTextActive: { color: '#3b82f6', fontWeight: '600' },
 });
