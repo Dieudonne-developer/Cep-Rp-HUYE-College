@@ -180,9 +180,9 @@ export default function AdminLayout() {
                     Mobile Apps
                   </Link>
                   <Link
-                    to="/download-app"
+                    to={`${baseAdminPath}/download-app`}
                     onClick={handleNavLinkClick}
-                    className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+                    className={`group flex items-center px-2 py-2 text-sm font-medium rounded-md ${location.pathname.endsWith('/download-app') ? 'bg-blue-50 text-blue-700 border-l-4 border-blue-700' : 'text-gray-600 hover:bg-blue-50 hover:text-blue-700'}`}
                   >
                     <i data-lucide="download" className="mr-3 w-5 h-5"></i>
                     Download App

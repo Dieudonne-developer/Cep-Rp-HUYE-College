@@ -22,6 +22,7 @@ import ChatPage from './pages/WhatsAppGroupsPage'
 import AdminWhatsApp from './pages/Ishyangaryera Choir/admin/AdminWhatsApp'
 import AdminAttendance from './pages/Ishyangaryera Choir/admin/AdminAttendance'
 import AdminMobileApps from './pages/Ishyangaryera Choir/admin/AdminMobileApps'
+import AdminDownloadAppPage from './pages/Ishyangaryera Choir/admin/AdminDownloadAppPage'
 import MyAttendancePage from './pages/MyAttendancePage'
 import ChatHubPage from './pages/ChatHubPage'
 import RegisterPage from './pages/Ishyangaryera Choir/RegisterPage'
@@ -465,6 +466,7 @@ function App() {
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
           <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
