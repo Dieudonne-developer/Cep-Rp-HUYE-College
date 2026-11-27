@@ -1058,40 +1058,51 @@ router.post('/events/upload', upload.single('file'), async (req, res) => {
 });
 
 // Mobile App Upload
+const { query: dbQuery } = require('../src/db/pool');
+
+const ensureMobileAppTable = async () => {
+  await dbQuery(`
+    CREATE TABLE IF NOT EXISTS mobile_app_versions (
+      id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+      app_type VARCHAR(20) NOT NULL,
+      version VARCHAR(50) NOT NULL,
+      version_code INTEGER NOT NULL,
+      download_url TEXT NOT NULL,
+      file_name VARCHAR(255) NOT NULL,
+      file_size BIGINT NOT NULL,
+      uploaded_by VARCHAR(255) NOT NULL,
+      uploaded_at TIMESTAMP DEFAULT NOW(),
+      is_active BOOLEAN DEFAULT TRUE,
+      release_notes TEXT
+    )
+  `);
+};
+
 router.post('/mobile-app/upload', upload.single('file'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, message: 'No file uploaded' });
     }
-    
+
     const { appType, version, versionCode } = req.body;
-    
     if (!appType || !version || !versionCode) {
       return res.status(400).json({ success: false, message: 'appType, version, and versionCode are required' });
     }
-    
-    // Get the correct base URL
+
     const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:4000';
     const protocol = req.get('x-forwarded-proto') || req.protocol || 'http';
     const baseUrl = `${protocol}://${host}`;
-    
     const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
-    
-    // Save to MobileAppVersion model
-    const MobileAppVersion = require('../models/MobileAppVersion');
-    await MobileAppVersion.create({
-      appType,
-      version,
-      versionCode: parseInt(versionCode),
-      downloadUrl: fileUrl,
-      fileName: req.file.filename,
-      fileSize: req.file.size,
-      uploadedBy: req.admin?.username || req.admin?.email || 'admin',
-      isActive: true,
-    });
-    
-    res.json({ 
-      success: true, 
+
+    await ensureMobileAppTable();
+    await dbQuery(
+      `INSERT INTO mobile_app_versions (app_type, version, version_code, download_url, file_name, file_size, uploaded_by, is_active)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, TRUE)`,
+      [appType, version, parseInt(versionCode), fileUrl, req.file.filename, req.file.size, req.admin?.username || req.admin?.email || 'admin']
+    );
+
+    res.json({
+      success: true,
       message: 'Mobile app uploaded successfully',
       url: fileUrl,
       fileUrl: fileUrl,
@@ -1106,12 +1117,14 @@ router.post('/mobile-app/upload', upload.single('file'), async (req, res) => {
 // Get Mobile App Versions
 router.get('/mobile-app/versions', async (req, res) => {
   try {
-    const MobileAppVersion = require('../models/MobileAppVersion');
-    const versions = await MobileAppVersion.findAll({
-      where: { isActive: true },
-      order: [['uploadedAt', 'DESC']],
-    });
-    res.json({ success: true, versions });
+    await ensureMobileAppTable();
+    const { rows } = await dbQuery(
+      `SELECT id, app_type AS "appType", version, version_code AS "versionCode", download_url AS "downloadUrl",
+              file_name AS "fileName", file_size AS "fileSize", uploaded_by AS "uploadedBy",
+              uploaded_at AS "uploadedAt", is_active AS "isActive", release_notes AS "releaseNotes"
+       FROM mobile_app_versions WHERE is_active = TRUE ORDER BY uploaded_at DESC`
+    );
+    res.json({ success: true, versions: rows });
   } catch (error) {
     console.error('Error fetching mobile app versions:', error);
     res.status(500).json({ success: false, message: 'Failed to fetch mobile app versions' });
