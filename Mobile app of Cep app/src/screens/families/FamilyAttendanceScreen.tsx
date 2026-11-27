@@ -72,7 +72,7 @@ export const FamilyAttendanceScreen: React.FC<FamilyAttendanceScreenProps> = ({ 
             <Text style={styles.loginText}>Login required to view your attendance records.</Text>
             <TouchableOpacity
               style={styles.loginButton}
-              onPress={() => navigation.navigate('AttendanceLogin' as never)}
+              onPress={() => navigation.navigate('Attendance' as never)}
             >
               <Text style={styles.loginButtonText}>Login</Text>
             </TouchableOpacity>
