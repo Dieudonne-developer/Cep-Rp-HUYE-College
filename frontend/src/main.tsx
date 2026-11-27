@@ -349,6 +349,10 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
           <Route path="super-admin-dashboard" element={<SuperAdminDashboard />} />
           <Route path="super-admins" element={<AdminSuperAdmins />} />
         </Route>
@@ -370,6 +374,8 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
@@ -389,6 +395,8 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
@@ -408,6 +416,8 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
@@ -427,6 +437,8 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
@@ -446,6 +458,8 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
@@ -467,6 +481,8 @@ function App() {
           <Route path="attendance" element={<AdminAttendance />} />
           <Route path="mobile-apps" element={<AdminMobileApps />} />
           <Route path="download-app" element={<AdminDownloadAppPage />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
@@ -486,6 +502,8 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
+          <Route path="download-app" element={<AdminDownloadAppPage />} />
         </Route>
       </Routes>
     )
