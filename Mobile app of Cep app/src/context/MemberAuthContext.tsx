@@ -25,8 +25,8 @@ export const MemberAuthProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         const stored = await AsyncStorage.getItem(STORAGE_KEY);
         if (stored) {
           const parsed = JSON.parse(stored);
-          setUser(parsed.user);
-          setToken(parsed.token);
+          setUser(parsed.user || null);
+          setToken(parsed.token || parsed.accessToken || null);
         }
       } catch {}
       setLoading(false);

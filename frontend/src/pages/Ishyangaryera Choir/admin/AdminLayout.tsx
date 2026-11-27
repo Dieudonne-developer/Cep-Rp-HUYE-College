@@ -171,6 +171,14 @@ export default function AdminLayout() {
                     <i data-lucide="message-circle" className="mr-3 w-5 h-5"></i>
                     WhatsApp Groups
                   </Link>
+                  <Link
+                    to="/download-app"
+                    onClick={handleNavLinkClick}
+                    className="group flex items-center px-2 py-2 text-sm font-medium rounded-md text-gray-600 hover:bg-blue-50 hover:text-blue-700"
+                  >
+                    <i data-lucide="smartphone" className="mr-3 w-5 h-5"></i>
+                    Download App
+                  </Link>
                   <div className="mt-2">
                     <div className="px-2 text-xs uppercase tracking-wider text-gray-400 mb-1">Homepage</div>
                     <Link 

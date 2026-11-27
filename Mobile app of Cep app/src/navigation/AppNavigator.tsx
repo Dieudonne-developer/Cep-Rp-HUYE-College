@@ -19,6 +19,7 @@ import { AdminAttendanceScreen } from '@/screens/admin/AttendanceScreen';
 import { SuperAdminsScreen } from '@/screens/admin/SuperAdminsScreen';
 import { MoreScreen } from '@/screens/admin/MoreScreen';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { SuperAdminNavigator } from '@/navigation/SuperAdminNavigator';
 
 export type RootStackParamList = { Welcome: undefined; Auth: undefined; Main: undefined };
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -45,17 +46,29 @@ const AppTabs = () => (
       tabBarInactiveTintColor: '#94a3b8',
       tabBarIcon: ({ color, size }) => {
         const icons: Record<string, keyof typeof Feather.glyphMap> = {
-          Dashboard: 'home', Members: 'users', Ideas: 'message-circle', Features: 'grid', Settings: 'settings'
+          Dashboard: 'home',
+          Events: 'calendar',
+          Songs: 'music',
+          Members: 'users',
+          Ideas: 'star',
+          Support: 'heart',
+          WhatsApp: 'message-circle',
+          Attendance: 'check-circle',
+          Settings: 'settings'
         };
         return <Feather name={icons[route.name] || 'circle'} size={size} color={color} />;
       }
     })}
   >
-    <Tab.Screen name="Dashboard" component={DashboardScreen} />
-    <Tab.Screen name="Members" component={MembersScreen} />
-    <Tab.Screen name="Ideas" component={IdeasScreen} />
-    <Tab.Screen name="Features" component={FeatureStack} />
-    <Tab.Screen name="Settings" component={SettingsScreen} />
+    <Tab.Screen name="Dashboard" component={DashboardScreen} options={{ title: 'Dashboard' }} />
+    <Tab.Screen name="Events" component={EventsScreen} options={{ title: 'Events' }} />
+    <Tab.Screen name="Songs" component={SongsScreen} options={{ title: 'Songs' }} />
+    <Tab.Screen name="Members" component={MembersScreen} options={{ title: 'Members' }} />
+    <Tab.Screen name="Ideas" component={IdeasScreen} options={{ title: 'Ideas' }} />
+    <Tab.Screen name="Support" component={SupportScreen} options={{ title: 'Support' }} />
+    <Tab.Screen name="WhatsApp" component={WhatsAppScreen} options={{ title: 'WhatsApp' }} />
+    <Tab.Screen name="Attendance" component={AdminAttendanceScreen} options={{ title: 'Attendance' }} />
+    <Tab.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
   </Tab.Navigator>
 );
 
@@ -76,6 +89,8 @@ export const AppNavigator: React.FC = () => {
 
   if (loading || showWelcome === null) return <LoadingOverlay />;
 
+  const isSuperAdmin = admin?.role === 'super-admin';
+
   return (
     <NavigationContainer theme={{ ...DefaultTheme, colors: { ...DefaultTheme.colors, background: '#f8fafc' } }}>
       <Stack.Navigator screenOptions={{ headerShown: false }}>
@@ -84,7 +99,9 @@ export const AppNavigator: React.FC = () => {
             {() => <WelcomeScreen onContinue={handleWelcomeComplete} />}
           </Stack.Screen>
         ) : admin ? (
-          <Stack.Screen name="Main" component={AppTabs} />
+          <Stack.Screen name="Main">
+            {() => isSuperAdmin ? <SuperAdminNavigator /> : <AppTabs />}
+          </Stack.Screen>
         ) : (
           <Stack.Screen name="Auth" component={LoginScreen} />
         )}

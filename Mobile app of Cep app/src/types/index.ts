@@ -26,11 +26,18 @@ export interface DashboardStats {
   pendingVerification: number;
   totalSongs: number;
   totalEvents: number;
+  ideas?: number;
+  members?: number;
+  songs?: number;
+  events?: number;
+  donations?: number;
 }
 
 export interface DashboardResponse {
   success: boolean;
   stats: DashboardStats;
+  recentActivity?: any[];
+  recentActivities?: any[];
 }
 
 export interface Member {

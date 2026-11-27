@@ -1,25 +1,10 @@
 import React from 'react';
 import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAuth } from '@/context/AuthContext';
-import { API_BASE_URL } from '@/config/api';
-import { apiClient } from '@/services/apiClient';
+import { ScreenHeader } from '@/components/ScreenHeader';
 
 export const SettingsScreen: React.FC = () => {
   const { admin, logout } = useAuth();
-  const [healthStatus, setHealthStatus] = React.useState<string>('Unknown');
-
-  const checkHealth = async () => {
-    try {
-      const response = await apiClient.get('/health');
-      setHealthStatus(response.data?.status ?? 'ok');
-    } catch (error) {
-      setHealthStatus('unreachable');
-    }
-  };
-
-  React.useEffect(() => {
-    checkHealth();
-  }, []);
 
   const handleLogout = () => {
     Alert.alert('Sign out', 'Do you want to log out?', [
@@ -30,7 +15,7 @@ export const SettingsScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.heading}>Settings</Text>
+      <ScreenHeader title="Settings" />
       <Text style={styles.subheading}>Manage your account and environment.</Text>
 
       <View style={styles.card}>
@@ -39,15 +24,6 @@ export const SettingsScreen: React.FC = () => {
         <Text style={styles.meta}>{admin?.email}</Text>
         <Text style={styles.meta}>Role: {admin?.role}</Text>
         <Text style={styles.meta}>Group: {admin?.adminGroup}</Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.label}>Backend API</Text>
-        <Text style={styles.value}>{API_BASE_URL}</Text>
-        <Text style={[styles.meta, { marginTop: 8 }]}>Health: {healthStatus}</Text>
-        <Pressable style={styles.secondaryButton} onPress={checkHealth}>
-          <Text style={styles.secondaryButtonText}>Re-check status</Text>
-        </Pressable>
       </View>
 
       <Pressable style={styles.logoutButton} onPress={handleLogout}>

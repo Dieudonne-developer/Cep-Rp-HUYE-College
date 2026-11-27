@@ -243,7 +243,15 @@ router.get('/me', async (req, res) => {
        WHERE lower(r.user_email) = $1 ORDER BY s.session_date DESC NULLS LAST`,
       [member.email]
     );
-    res.json({ records: rows });
+    const attendance = rows.map((row) => ({
+      ...row,
+      eventTitle: row.session_title,
+      event: row.session_title,
+      date: row.session_date,
+      time: row.session_time,
+      present: row.status === 'present' || row.status === 'late',
+    }));
+    res.json({ records: attendance, attendance });
   } catch (err) { console.error('my attendance error:', err); res.status(500).json({ message: 'Failed to load attendance' }); }
 });
 

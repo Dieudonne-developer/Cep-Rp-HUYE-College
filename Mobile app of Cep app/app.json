@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "mobile",
+    "name": "Admin CEP",
     "slug": "mobile",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -13,10 +13,11 @@
       "backgroundColor": "#ffffff"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cephuye.admin"
     },
     "android": {
-      "package": "com.cephuye.app",
+      "package": "com.cephuye.admin",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
@@ -30,14 +31,13 @@
     "plugins": [
       "expo-secure-store"
     ],
-    "scheme": "cepapp",
+    "scheme": "admincep",
+    "updates": {
+      "enabled": false
+    },
     "extra": {
       "apiBaseUrl": "https://cep-rp-huye-college-yt6x-eight.vercel.app",
-      "defaultGroup": "choir",
-      "eas": {
-        "projectId": "cdd2329e-8ed3-4ed0-8077-51a7e5297420"
-      }
-    },
-    "owner": "dieudonne_developer"
+      "defaultGroup": "choir"
+    }
   }
 }

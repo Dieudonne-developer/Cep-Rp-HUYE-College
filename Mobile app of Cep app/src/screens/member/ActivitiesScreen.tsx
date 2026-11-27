@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, FlatList, StyleSheet, RefreshControl, Image, Linking, TouchableOpacity } from 'react-native';
-import { fetchActivities, fetchWhatsAppGroups } from '@/services/userService';
+import { API_BASE_URL } from '@/config/api';
+import { fetchWhatsAppGroups } from '@/services/userService';
 
 export const ActivitiesScreen: React.FC = () => {
   const [activities, setActivities] = useState<any[]>([]);
@@ -8,10 +9,22 @@ export const ActivitiesScreen: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
+  const getImageUrl = (activity: any) => {
+    const imageUrl = activity.imageUrl || activity.image || activity.image_url;
+    if (!imageUrl) return null;
+    if (imageUrl.startsWith('http://') || imageUrl.startsWith('https://')) {
+      return imageUrl;
+    }
+    return `${API_BASE_URL}${imageUrl.startsWith('/') ? '' : '/'}${imageUrl}`;
+  };
+
   const load = useCallback(async () => {
     try {
-      const [a, g] = await Promise.all([fetchActivities(), fetchWhatsAppGroups()]);
-      setActivities(a || []);
+      const [a, g] = await Promise.all([
+        fetch(`${API_BASE_URL}/api/home/activities`).then(r => r.json()),
+        fetchWhatsAppGroups()
+      ]);
+      setActivities(Array.isArray(a) ? a : []);
       setGroups(g || []);
     } catch {}
     setLoading(false);
@@ -35,19 +48,22 @@ export const ActivitiesScreen: React.FC = () => {
           </View>
         }
         ListEmptyComponent={null}
-        renderItem={({ item }) => (
-          <View style={styles.card}>
-            {(item.imageUrl || item.image_url) ? (
-              <Image source={{ uri: item.imageUrl || item.image_url }} style={styles.img} />
-            ) : null}
-            <View style={{ flex: 1 }}>
-              <Text style={styles.cardTitle}>{item.title}</Text>
-              {(item.eventDate || item.date) ? <Text style={styles.meta}>{new Date(item.eventDate || item.date).toLocaleDateString()}</Text> : null}
-              {item.location ? <Text style={styles.meta}>{item.location}</Text> : null}
-              {item.description ? <Text style={styles.desc} numberOfLines={3}>{item.description}</Text> : null}
+        renderItem={({ item }) => {
+          const imageUrl = getImageUrl(item);
+          return (
+            <View style={styles.card}>
+              {imageUrl ? (
+                <Image source={{ uri: imageUrl }} style={styles.img} />
+              ) : null}
+              <View style={{ flex: 1 }}>
+                <Text style={styles.cardTitle}>{item.title}</Text>
+                {(item.eventDate || item.date) ? <Text style={styles.meta}>{new Date(item.eventDate || item.date).toLocaleDateString()}</Text> : null}
+                {item.location ? <Text style={styles.meta}>{item.location}</Text> : null}
+                {item.description ? <Text style={styles.desc} numberOfLines={3}>{item.description}</Text> : null}
+              </View>
             </View>
-          </View>
-        )}
+          );
+        }}
         ListFooterComponent={
           <View style={{ marginTop: 16 }}>
             <Text style={styles.section}>WhatsApp Groups</Text>
@@ -57,8 +73,8 @@ export const ActivitiesScreen: React.FC = () => {
                   <Text style={styles.cardTitle}>{g.name}</Text>
                   {g.description ? <Text style={styles.desc} numberOfLines={2}>{g.description}</Text> : null}
                 </View>
-                {(g.inviteLink || g.invite_link) ? (
-                  <TouchableOpacity onPress={() => Linking.openURL(g.inviteLink || g.invite_link)} style={styles.joinBtn}>
+                {(g.inviteUrl || g.inviteUrl) ? (
+                  <TouchableOpacity onPress={() => Linking.openURL(g.inviteUrl || g.inviteUrl)} style={styles.joinBtn}>
                     <Text style={styles.joinBtnText}>Join</Text>
                   </TouchableOpacity>
                 ) : (

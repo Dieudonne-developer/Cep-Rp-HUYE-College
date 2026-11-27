@@ -30,7 +30,7 @@ export const MemberLoginScreen: React.FC = () => {
   return (
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.container}>
-        <Text style={styles.title}>CEP RP Huye</Text>
+        <Text style={styles.title}>CEP APP</Text>
         <Text style={styles.subtitle}>Member Login</Text>
 
         <Text style={styles.label}>Family</Text>

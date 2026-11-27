@@ -688,7 +688,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 20,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#3590F3',
   },
   menuBtn: { padding: 8, marginRight: 8 },
   menuIcon: { fontSize: 24, color: '#ffffff', fontWeight: 'bold' },

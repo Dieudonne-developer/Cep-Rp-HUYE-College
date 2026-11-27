@@ -79,14 +79,14 @@ export const LoginScreen: React.FC = () => {
               ))}
             </View>
 
-            <Text style={styles.label}>Email Address</Text>
+            <Text style={styles.label}>Username</Text>
             <TextInput
               style={styles.input}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
               keyboardType="email-address"
-              placeholder="Enter your email"
+              placeholder="example@email.com"
               placeholderTextColor="#9ca3af"
             />
 
@@ -121,30 +121,41 @@ export const LoginScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  flex: { flex: 1, backgroundColor: '#f8fafc' },
+  flex: { flex: 1, backgroundColor: '#f5f5f5' },
   container: { flex: 1 },
   headerSection: {
     backgroundColor: '#3b82f6',
-    paddingVertical: 40,
+    paddingVertical: 50,
     paddingHorizontal: 24,
     alignItems: 'center',
+    borderBottomLeftRadius: 30,
+    borderBottomRightRadius: 30,
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#ffffff',
     letterSpacing: 1,
+    textAlign: 'center',
   },
   content: {
     flexGrow: 1,
     padding: 24,
     backgroundColor: '#ffffff',
+    marginTop: -30,
+    marginHorizontal: 20,
+    borderRadius: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
   },
   loginTitle: {
-    fontSize: 28,
+    fontSize: 32,
     fontWeight: 'bold',
     color: '#3b82f6',
-    marginBottom: 24,
+    marginBottom: 30,
     textAlign: 'center',
   },
   errorBox: {
@@ -156,13 +167,13 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   errorText: { color: '#dc2626', fontSize: 14 },
-  form: { gap: 16 },
-  label: { fontSize: 14, fontWeight: '600', color: '#374151', marginBottom: 6 },
+  form: { gap: 20 },
+  label: { fontSize: 14, fontWeight: '600', color: '#6b7280', marginBottom: 8 },
   groupWrap: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginBottom: 8 },
   groupChip: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 16,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 20,
     backgroundColor: '#e5e7eb',
   },
   groupChipActive: { backgroundColor: '#3b82f6' },
@@ -171,29 +182,35 @@ const styles = StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: '#d1d5db',
-    borderRadius: 8,
-    padding: 14,
+    borderRadius: 12,
+    padding: 16,
     fontSize: 15,
     backgroundColor: '#f9fafb',
   },
   forgotPassword: {
     alignSelf: 'flex-end',
-    marginTop: -8,
-    marginBottom: 8,
+    marginTop: -10,
+    marginBottom: 10,
   },
   forgotPasswordText: {
-    fontSize: 13,
+    fontSize: 14,
     color: '#3b82f6',
+    fontWeight: '500',
   },
   button: {
-    borderRadius: 8,
+    borderRadius: 12,
     overflow: 'hidden',
-    marginTop: 8,
+    marginTop: 12,
+    shadowColor: '#3b82f6',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 5,
   },
   buttonGradient: {
-    paddingVertical: 14,
+    paddingVertical: 16,
     alignItems: 'center',
   },
   buttonDisabled: { opacity: 0.6 },
-  buttonText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16 },
+  buttonText: { color: '#ffffff', fontWeight: 'bold', fontSize: 16, letterSpacing: 1 },
 });

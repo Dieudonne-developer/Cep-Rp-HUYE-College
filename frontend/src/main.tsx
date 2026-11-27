@@ -38,6 +38,7 @@ import MemberPage from './pages/MemberPage'
 import CepRegisterPage from './pages/CepRegisterPage'
 import CepMembersPage from './pages/CepMembersPage'
 import AboutPage from './pages/AboutPage'
+import DownloadAppPage from './pages/DownloadAppPage'
 
 function MainLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = React.useState(false)
@@ -64,6 +65,7 @@ function MainLayout({ children }: { children: React.ReactNode }) {
             <Link to="/support" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">Support</Link>
             <Link to="/ideas" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">Ideas</Link>
             <Link to="/chat" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">WhatsApp</Link>
+            <Link to="/download-app" className="flex items-center px-3 py-2 rounded-lg transition duration-300 ease-in-out hover:bg-blue-600">Download App</Link>
           </nav>
         </div>
         {/* Mobile Menu */}
@@ -111,6 +113,13 @@ function MainLayout({ children }: { children: React.ReactNode }) {
                 onClick={() => setMobileMenuOpen(false)}
               >
                 WhatsApp
+              </Link>
+              <Link 
+                to="/download-app" 
+                className="block px-4 py-2 rounded-lg hover:bg-blue-700 transition"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                Download App
               </Link>
             </nav>
           </div>
@@ -483,6 +492,7 @@ function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
+        <Route path="/download-app" element={<DownloadAppPage />} />
         <Route path="/families" element={<FamiliesPage />} />
         <Route path="/activities" element={<ActivitiesPage />} />
         <Route path="/support" element={<SupportPage />} />

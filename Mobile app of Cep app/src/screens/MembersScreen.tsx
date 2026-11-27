@@ -1,18 +1,25 @@
 import React, { useMemo, useState } from 'react';
 import {
+  Modal,
   RefreshControl,
   ScrollView,
+  Share,
   StyleSheet,
   Text,
+  TextInput,
+  TouchableOpacity,
   View,
   Alert,
   Pressable
 } from 'react-native';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { approveMember, fetchMembers, fetchPendingMembers, rejectMember } from '@/services/adminService';
+import { approveMember, createCepMember, fetchMembers, fetchPendingMembers, rejectMember } from '@/services/adminService';
 import { useAuth } from '@/context/AuthContext';
 import { Member } from '@/types';
 import { MemberListItem } from '@/components/MemberListItem';
+import { ScreenHeader } from '@/components/ScreenHeader';
+import * as FileSystem from 'expo-file-system/legacy';
+import * as Sharing from 'expo-sharing';
 
 type TabKey = 'approved' | 'pending';
 
@@ -20,6 +27,9 @@ export const MembersScreen: React.FC = () => {
   const { admin } = useAuth();
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<TabKey>('approved');
+  const [showRegister, setShowRegister] = useState(false);
+  const [registering, setRegistering] = useState(false);
+  const [regForm, setRegForm] = useState({ username: '', email: '', contactNumber: '' });
 
   const membersQuery = useQuery({
     queryKey: ['members', admin?.adminGroup],
@@ -67,6 +77,54 @@ export const MembersScreen: React.FC = () => {
     ]);
   };
 
+  const handleRegister = async () => {
+    if (!admin) return;
+    if (!regForm.username.trim() || !regForm.email.trim() || !regForm.contactNumber.trim()) {
+      Alert.alert('Error', 'Username, email and contact number are required.');
+      return;
+    }
+    setRegistering(true);
+    try {
+      await createCepMember(admin, { ...regForm, group: admin.adminGroup });
+      setShowRegister(false);
+      setRegForm({ username: '', email: '', contactNumber: '' });
+      queryClient.invalidateQueries({ queryKey: ['members', admin.adminGroup] });
+      queryClient.invalidateQueries({ queryKey: ['pending-members', admin.adminGroup] });
+      Alert.alert('Success', 'Member registered. They will receive an email invitation to set up their account.');
+    } catch (e: any) {
+      Alert.alert('Error', e?.response?.data?.message || e?.message || 'Failed to register member');
+    } finally {
+      setRegistering(false);
+    }
+  };
+
+  const handleExportCsv = async () => {
+    const rows = membersQuery.data || [];
+    if (rows.length === 0) {
+      Alert.alert('Export', 'No members to export.');
+      return;
+    }
+    const escape = (v: any) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const csv = [
+      'Username,Email,Contact Number,Status,Created At',
+      ...rows.map((m: any) =>
+        [m.username, m.email, m.contactNumber, m.status, m.createdAt ? new Date(m.createdAt).toISOString() : ''].map(escape).join(',')
+      )
+    ].join('\n');
+    try {
+      const fileName = `members-${admin?.adminGroup || 'export'}.csv`;
+      const path = `${FileSystem.cacheDirectory}${fileName}`;
+      await FileSystem.writeAsStringAsync(path, csv);
+      if (await Sharing.isAvailableAsync()) {
+        await Sharing.shareAsync(path, { mimeType: 'text/csv', dialogTitle: `Save ${fileName}` });
+      } else {
+        await Share.share({ url: path, title: fileName });
+      }
+    } catch {
+      Alert.alert('Export', 'Could not save the CSV file on this device.');
+    }
+  };
+
   const onReject = (member: Member) => {
     Alert.alert('Reject member', `Reject ${member.username || member.email}?`, [
       { text: 'Cancel', style: 'cancel' },
@@ -94,10 +152,19 @@ export const MembersScreen: React.FC = () => {
         />
       }
     >
-      <Text style={styles.heading}>Members</Text>
+      <ScreenHeader title="Members" />
       <Text style={styles.subheading}>
         Manage member approvals for the {admin?.adminGroup} family.
       </Text>
+
+      <View style={styles.actionRow}>
+        <TouchableOpacity style={styles.registerBtn} onPress={() => setShowRegister(true)}>
+          <Text style={styles.registerBtnText}>+ Register Member</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.exportBtn} onPress={handleExportCsv}>
+          <Text style={styles.exportBtnText}>Export CSV</Text>
+        </TouchableOpacity>
+      </View>
 
       <View style={styles.tabs}>
         <Pressable
@@ -138,6 +205,44 @@ export const MembersScreen: React.FC = () => {
           </View>
         )}
       </View>
+
+      <Modal visible={showRegister} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalCard}>
+            <Text style={styles.modalTitle}>Register Member</Text>
+            <TextInput
+              style={styles.input}
+              placeholder="Username"
+              value={regForm.username}
+              onChangeText={v => setRegForm({ ...regForm, username: v })}
+              autoCapitalize="none"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Email address"
+              value={regForm.email}
+              onChangeText={v => setRegForm({ ...regForm, email: v })}
+              autoCapitalize="none"
+              keyboardType="email-address"
+            />
+            <TextInput
+              style={styles.input}
+              placeholder="Contact number"
+              value={regForm.contactNumber}
+              onChangeText={v => setRegForm({ ...regForm, contactNumber: v })}
+              keyboardType="phone-pad"
+            />
+            <View style={styles.modalButtons}>
+              <TouchableOpacity style={styles.cancelBtn} onPress={() => setShowRegister(false)}>
+                <Text style={styles.cancelBtnText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.saveBtn} onPress={handleRegister} disabled={registering}>
+                <Text style={styles.saveBtnText}>{registering ? 'Registering...' : 'Register'}</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
     </ScrollView>
   );
 };
@@ -146,6 +251,91 @@ const styles = StyleSheet.create({
   container: {
     padding: 20,
     gap: 16
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4
+  },
+  registerBtn: {
+    flex: 1,
+    backgroundColor: '#3590F3',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  registerBtnText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: 14
+  },
+  exportBtn: {
+    flex: 1,
+    backgroundColor: '#fff',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#3590F3'
+  },
+  exportBtnText: {
+    color: '#3590F3',
+    fontWeight: '700',
+    fontSize: 14
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    justifyContent: 'center',
+    padding: 20
+  },
+  modalCard: {
+    backgroundColor: '#fff',
+    borderRadius: 20,
+    padding: 20
+  },
+  modalTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: '#0f172a',
+    marginBottom: 14
+  },
+  input: {
+    borderWidth: 1,
+    borderColor: '#cbd5e1',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    marginBottom: 12,
+    fontSize: 15,
+    color: '#0f172a'
+  },
+  modalButtons: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 4
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: '#e2e8f0',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  cancelBtnText: {
+    color: '#334155',
+    fontWeight: '700'
+  },
+  saveBtn: {
+    flex: 1,
+    backgroundColor: '#3590F3',
+    borderRadius: 12,
+    paddingVertical: 12,
+    alignItems: 'center'
+  },
+  saveBtnText: {
+    color: '#fff',
+    fontWeight: '700'
   },
   heading: {
     fontSize: 24,

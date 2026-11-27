@@ -64,6 +64,15 @@ export const fetchIdeas = async (admin: AdminAccount): Promise<Idea[]> => {
   return response.data;
 };
 
+export const implementIdea = async (admin: AdminAccount, id: string) => {
+  const res = await apiClient.put(`${API_BASE_URL}/api/admin/ideas/${id}/implement`, {}, { headers: withAdminHeaders(admin) });
+  return res.data;
+};
+
+export const deleteIdea = async (admin: AdminAccount, id: string) => {
+  await apiClient.delete(`${API_BASE_URL}/api/admin/ideas/${id}`, { headers: withAdminHeaders(admin) });
+};
+
 
 
 // ===== Extended admin endpoints =====
@@ -71,6 +80,36 @@ export const fetchEvents = async (admin: AdminAccount) => {
   const res = await apiClient.get<any[]>(API_ENDPOINTS.events, { headers: withAdminHeaders(admin) });
   const d:any=res.data; return Array.isArray(d) ? d : (d?.events || []);
 };
+export const uploadEventImage = async (admin: AdminAccount, asset: { uri: string; mimeType?: string | null; fileName?: string | null }) => {
+  let uri = asset.uri;
+  let fileName = asset.fileName || 'event-image.jpg';
+  try {
+    const ImageManipulator = await import('expo-image-manipulator');
+    const result = await ImageManipulator.manipulateAsync(
+      asset.uri,
+      [{ resize: { width: 1600 } }],
+      { compress: 0.7, format: ImageManipulator.SaveFormat.JPEG }
+    );
+    uri = result.uri;
+    fileName = 'event-image.jpg';
+  } catch {
+    // If manipulation fails, upload the original file
+  }
+  const formData = new FormData();
+  formData.append('file', {
+    uri,
+    name: fileName,
+    type: 'image/jpeg'
+  } as any);
+  const res = await apiClient.post(`/api/admin/events/upload`, formData, {
+    headers: {
+      ...withAdminHeaders(admin),
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+  return res.data;
+};
+
 export const createEvent = async (admin: AdminAccount, data: any) => {
   const res = await apiClient.post(API_ENDPOINTS.events, data, { headers: withAdminHeaders(admin) });
   return res.data;
@@ -82,6 +121,10 @@ export const deleteEvent = async (admin: AdminAccount, id: string) => {
 export const fetchSongs = async (admin: AdminAccount) => {
   const res = await apiClient.get<any[]>(API_ENDPOINTS.songs, { headers: withAdminHeaders(admin) });
   const d:any=res.data; return Array.isArray(d) ? d : (d?.songs || []);
+};
+export const createSong = async (admin: AdminAccount, data: any) => {
+  const res = await apiClient.post(API_ENDPOINTS.songs, data, { headers: withAdminHeaders(admin) });
+  return res.data;
 };
 export const deleteSong = async (admin: AdminAccount, id: string) => {
   await apiClient.delete(`${API_ENDPOINTS.songs}/${id}`, { headers: withAdminHeaders(admin) });
@@ -185,10 +228,23 @@ export const deleteGlobalIdea = async (admin: AdminAccount, id: string) => {
   await apiClient.delete(`${API_BASE_URL}/api/admin/super-admin/home/ideas/${id}`, { headers: withAdminHeaders(admin) });
 };
 export const fetchGlobalSupport = async (admin: AdminAccount) => {
-  const res = await apiClient.get(`${API_BASE_URL}/api/admin/super-admin/home/support`, { headers: withAdminHeaders(admin) });
+  const res = await apiClient.get(API_ENDPOINTS.globalSupport, { headers: withAdminHeaders(admin) });
   return res.data?.support || {};
 };
 export const saveGlobalSupport = async (admin: AdminAccount, data: any) => {
-  const res = await apiClient.put(`${API_BASE_URL}/api/admin/super-admin/home/support`, data, { headers: withAdminHeaders(admin) });
+  const res = await apiClient.put(API_ENDPOINTS.updateGlobalSupport, data, { headers: withAdminHeaders(admin) });
   return res.data;
+};
+
+// CEP Members
+export const fetchCepMembers = async (admin: AdminAccount) => {
+  const res = await apiClient.get(API_ENDPOINTS.cepMembers, { headers: withAdminHeaders(admin) });
+  return res.data?.members || [];
+};
+export const createCepMember = async (admin: AdminAccount, data: any) => {
+  const res = await apiClient.post(API_ENDPOINTS.members, data, { headers: withAdminHeaders(admin) });
+  return res.data;
+};
+export const deleteCepMember = async (admin: AdminAccount, id: string) => {
+  await apiClient.delete(`${API_ENDPOINTS.members}/${id}`, { headers: withAdminHeaders(admin) });
 };

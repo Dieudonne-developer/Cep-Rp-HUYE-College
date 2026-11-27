@@ -504,6 +504,7 @@ app.use('/api/chat', chatRoutes);
 app.use('/api/whatsapp', whatsappRoutes);
 app.use('/api/attendance', attendanceRoutes);
 app.use('/api/home', homeRoutes);
+app.use('/api/prayer-requests', require('./routes/prayer-requests'));
 
 // Assets: logo image from DB with filesystem fallback
 app.get('/api/assets/logo', async (req, res) => {

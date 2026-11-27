@@ -22,6 +22,7 @@ import {
   fetchWhatsAppRequests,
   decideWhatsAppRequest
 } from '@/services/adminService';
+import { ScreenHeader } from '@/components/ScreenHeader';
 
 export const WhatsAppScreen: React.FC = () => {
   const { admin } = useAuth();
@@ -41,19 +42,27 @@ export const WhatsAppScreen: React.FC = () => {
     isActive: true
   });
 
+  const isSuperAdmin = (admin?.role || '').toLowerCase() === 'super-admin';
+
   const load = useCallback(async () => {
     if (!admin) return;
     setLoading(true);
     try {
       const [g, r] = await Promise.all([fetchWhatsAppGroups(admin), fetchWhatsAppRequests(admin)]);
-      setGroups(g);
-      setRequests(r);
+      const visibleGroups = isSuperAdmin ? g : g.filter((grp: any) => grp.canManage || grp.slug === admin.adminGroup);
+      const manageableIds = new Set(visibleGroups.map((grp: any) => String(grp.id || grp._id)));
+      const groupSlugById = new Map(g.map((grp: any) => [String(grp.id || grp._id), grp.slug]));
+      const visibleRequests = isSuperAdmin
+        ? r
+        : r.filter((req: any) => manageableIds.has(String(req.groupId)) || groupSlugById.get(String(req.groupId)) === admin.adminGroup);
+      setGroups(visibleGroups);
+      setRequests(visibleRequests);
     } catch (e) {
       console.error('Load error:', e);
     } finally {
       setLoading(false);
     }
-  }, [admin]);
+  }, [admin, isSuperAdmin]);
 
   useEffect(() => {
     load();
@@ -139,12 +148,11 @@ export const WhatsAppScreen: React.FC = () => {
   return (
     <View style={styles.container}>
       {/* Header */}
-      <View style={styles.header}>
-        <Text style={styles.headerTitle}>WhatsApp Group Management</Text>
-      </View>
+      <ScreenHeader title="WhatsApp Group Management" />
 
       <ScrollView style={styles.content} refreshControl={<RefreshControl refreshing={loading} onRefresh={load} />}>
-        {/* Add Group Form */}
+        {/* Add Group Form - Super Admin only (backend enforces this too) */}
+        {isSuperAdmin && (
         <View style={styles.formCard}>
           <Text style={styles.formTitle}>Add a group</Text>
           <TextInput
@@ -180,6 +188,7 @@ export const WhatsAppScreen: React.FC = () => {
             <Text style={styles.actionBtnText}>{creating ? 'Adding...' : 'Add Group'}</Text>
           </TouchableOpacity>
         </View>
+        )}
 
         {/* Groups List */}
         <View style={styles.section}>
@@ -204,9 +213,11 @@ export const WhatsAppScreen: React.FC = () => {
                 <TouchableOpacity onPress={() => openEditModal(group)}>
                   <Text style={styles.editBtn}>Edit</Text>
                 </TouchableOpacity>
+                {(isSuperAdmin || group.canManage) && (
                 <TouchableOpacity onPress={() => handleDeleteGroup(group.id || group._id)}>
                   <Text style={styles.deleteBtn}>Delete</Text>
                 </TouchableOpacity>
+                )}
               </View>
             </View>
           ))}
@@ -301,7 +312,7 @@ const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 16,
     paddingVertical: 20,
-    backgroundColor: '#3b82f6',
+    backgroundColor: '#3590F3',
   },
   headerTitle: { fontSize: 18, fontWeight: 'bold', color: '#ffffff' },
   content: { flex: 1 },
