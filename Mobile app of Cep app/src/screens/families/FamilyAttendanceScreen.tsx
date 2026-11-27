@@ -114,14 +114,14 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#1e293b',
     padding: 16,
-    paddingBottom: 72,
+    paddingBottom: 80,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 16,
-    paddingBottom: 72,
+    paddingBottom: 80,
   },
   logoutButton: {
     backgroundColor: '#dc2626',

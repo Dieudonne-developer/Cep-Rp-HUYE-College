@@ -164,7 +164,7 @@ export const AbanyamugishaActivitiesScreen: React.FC = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#f8fafc' },
-  title: { fontSize: 22, fontWeight: '800', color: '#1e293b', padding: 16, paddingBottom: 72 },
+  title: { fontSize: 22, fontWeight: '800', color: '#1e293b', padding: 16, paddingBottom: 80 },
   scroll: { flex: 1, paddingHorizontal: 16 },
   card: { backgroundColor: '#ffffff', borderRadius: 12, marginBottom: 12, overflow: 'hidden', borderWidth: 1, borderColor: '#e2e8f0' },
   cardImage: { width: '100%', height: 160 },

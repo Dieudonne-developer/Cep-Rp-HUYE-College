@@ -1057,6 +1057,67 @@ router.post('/events/upload', upload.single('file'), async (req, res) => {
   }
 });
 
+// Mobile App Upload
+router.post('/mobile-app/upload', upload.single('file'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    
+    const { appType, version, versionCode } = req.body;
+    
+    if (!appType || !version || !versionCode) {
+      return res.status(400).json({ success: false, message: 'appType, version, and versionCode are required' });
+    }
+    
+    // Get the correct base URL
+    const host = req.get('x-forwarded-host') || req.get('host') || 'localhost:4000';
+    const protocol = req.get('x-forwarded-proto') || req.protocol || 'http';
+    const baseUrl = `${protocol}://${host}`;
+    
+    const fileUrl = `${baseUrl}/uploads/${req.file.filename}`;
+    
+    // Save to MobileAppVersion model
+    const MobileAppVersion = require('../models/MobileAppVersion');
+    await MobileAppVersion.create({
+      appType,
+      version,
+      versionCode: parseInt(versionCode),
+      downloadUrl: fileUrl,
+      fileName: req.file.filename,
+      fileSize: req.file.size,
+      uploadedBy: req.admin?.username || req.admin?.email || 'admin',
+      isActive: true,
+    });
+    
+    res.json({ 
+      success: true, 
+      message: 'Mobile app uploaded successfully',
+      url: fileUrl,
+      fileUrl: fileUrl,
+      filename: req.file.filename
+    });
+  } catch (error) {
+    console.error('Error uploading mobile app:', error);
+    res.status(500).json({ success: false, message: 'Failed to upload mobile app' });
+  }
+});
+
+// Get Mobile App Versions
+router.get('/mobile-app/versions', async (req, res) => {
+  try {
+    const MobileAppVersion = require('../models/MobileAppVersion');
+    const versions = await MobileAppVersion.findAll({
+      where: { isActive: true },
+      order: [['uploadedAt', 'DESC']],
+    });
+    res.json({ success: true, versions });
+  } catch (error) {
+    console.error('Error fetching mobile app versions:', error);
+    res.status(500).json({ success: false, message: 'Failed to fetch mobile app versions' });
+  }
+});
+
 // Seed data endpoint (for testing)
 router.post('/seed', async (req, res) => {
   try {

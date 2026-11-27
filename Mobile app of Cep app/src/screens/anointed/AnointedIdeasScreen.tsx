@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#1e293b',
     padding: 16,
-    paddingBottom: 72,
+    paddingBottom: 80,
   },
   formSection: {
     backgroundColor: '#ffffff',

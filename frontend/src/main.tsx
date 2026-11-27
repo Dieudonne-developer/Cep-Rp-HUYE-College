@@ -21,7 +21,9 @@ import SuperAdminDashboard from './pages/Ishyangaryera Choir/admin/SuperAdminDas
 import ChatPage from './pages/WhatsAppGroupsPage'
 import AdminWhatsApp from './pages/Ishyangaryera Choir/admin/AdminWhatsApp'
 import AdminAttendance from './pages/Ishyangaryera Choir/admin/AdminAttendance'
+import AdminMobileApps from './pages/Ishyangaryera Choir/admin/AdminMobileApps'
 import MyAttendancePage from './pages/MyAttendancePage'
+import ChatHubPage from './pages/ChatHubPage'
 import RegisterPage from './pages/Ishyangaryera Choir/RegisterPage'
 import ForgotPasswordPage from './pages/Ishyangaryera Choir/ForgotPasswordPage'
 import AnointedPage from './pages/Anointed/Page'
@@ -462,6 +464,7 @@ function App() {
           <Route path="support" element={<AdminSupport />} />
           <Route path="whatsapp" element={<AdminWhatsApp />} />
           <Route path="attendance" element={<AdminAttendance />} />
+          <Route path="mobile-apps" element={<AdminMobileApps />} />
         </Route>
       </Routes>
     )
@@ -497,7 +500,7 @@ function App() {
         <Route path="/activities" element={<ActivitiesPage />} />
         <Route path="/support" element={<SupportPage />} />
         <Route path="/ideas" element={<IdeasPage />} />
-        <Route path="/chat" element={<MyAttendancePage />} />
+        <Route path="/chat" element={<ChatHubPage />} />
         <Route path="/my-attendance" element={<MyAttendancePage />} />
         <Route path="/member" element={<MemberPage />} />
       </Routes>
