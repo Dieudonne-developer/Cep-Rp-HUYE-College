@@ -27,8 +27,8 @@ export const FamilyTabs: React.FC<FamilyTabsProps> = ({ group, groupLabel }) => 
           backgroundColor: '#ffffff',
           borderTopWidth: 1,
           borderTopColor: '#e2e8f0',
-          height: 80,
-          paddingBottom: 80,
+          height: 88,
+          paddingBottom: 88,
           paddingTop: 8,
         },
         tabBarLabelStyle: {

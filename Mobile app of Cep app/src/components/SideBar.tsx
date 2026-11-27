@@ -94,7 +94,7 @@ const styles = StyleSheet.create({
   },
   section: {
     padding: 16,
-    paddingBottom: 80,
+    paddingBottom: 88,
   },
   sectionTitle: {
     fontSize: 12,

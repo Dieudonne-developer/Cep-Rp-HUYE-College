@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     fontWeight: '800',
     color: '#1e293b',
     padding: 16,
-    paddingBottom: 80,
+    paddingBottom: 88,
   },
   scroll: {
     flex: 1,
