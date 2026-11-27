@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, StyleSheet, Alert, ScrollView } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { AppHeader } from '@/components/AppHeader';
 import { API_BASE_URL } from '@/config/api';
 import { useMemberAuth } from '@/context/MemberAuthContext';
@@ -12,8 +12,10 @@ const GROUPS = [
 
 export const AttendanceLoginScreen: React.FC = () => {
   const navigation = useNavigation();
+  const route = useRoute<any>();
   const { login } = useMemberAuth();
-  const [form, setForm] = useState({ username: '', password: '', group: 'choir' });
+  const initialGroup = route.params?.group === 'anointed' ? 'anointed' : 'choir';
+  const [form, setForm] = useState({ username: '', password: '', group: initialGroup });
   const [loading, setLoading] = useState(false);
 
   const handleLogin = async () => {
@@ -25,10 +27,9 @@ export const AttendanceLoginScreen: React.FC = () => {
     setLoading(true);
     try {
       await login(form.username.trim(), form.password, form.group);
-      // Navigate directly to Attendance screen
-      try {
-        (navigation as any).navigate('Attendance');
-      } catch {
+      if ((navigation as any).canGoBack()) {
+        (navigation as any).goBack();
+      } else {
         (navigation as any).navigate('Main');
       }
     } catch (error: any) {

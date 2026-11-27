@@ -101,13 +101,19 @@ export const uploadEventImage = async (admin: AdminAccount, asset: { uri: string
     name: fileName,
     type: 'image/jpeg'
   } as any);
-  const res = await apiClient.post(`/api/admin/events/upload`, formData, {
+  const response = await fetch(`${API_BASE_URL}/api/admin/events/upload`, {
+    method: 'POST',
     headers: {
-      ...withAdminHeaders(admin),
-      'Content-Type': 'multipart/form-data',
+      ...(withAdminHeaders(admin) as Record<string, string>),
+      Accept: 'application/json',
     },
+    body: formData,
   });
-  return res.data;
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || data.success === false) {
+    throw new Error(data.message || 'Failed to upload image');
+  }
+  return data;
 };
 
 export const createEvent = async (admin: AdminAccount, data: any) => {
