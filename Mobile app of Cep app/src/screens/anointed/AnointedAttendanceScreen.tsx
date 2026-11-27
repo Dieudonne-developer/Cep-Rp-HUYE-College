@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ScrollView, RefreshControl, TouchableOpacity, Alert } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { AppHeader } from '@/components/AppHeader';
+import { MemberLoginForm } from '@/components/MemberLoginForm';
 import { useMemberAuth } from '@/context/MemberAuthContext';
 import { API_BASE_URL } from '@/config/api';
 
@@ -63,15 +64,7 @@ export const AnointedAttendanceScreen: React.FC = () => {
         {loading ? (
           <Text style={styles.empty}>Loading...</Text>
         ) : !token ? (
-          <View style={styles.loginContainer}>
-            <Text style={styles.loginText}>Login required to view your attendance records.</Text>
-            <TouchableOpacity
-              style={styles.loginButton}
-              onPress={() => navigation.navigate('Attendance' as never)}
-            >
-              <Text style={styles.loginButtonText}>Login</Text>
-            </TouchableOpacity>
-          </View>
+          <MemberLoginForm />
         ) : !Array.isArray(attendance) || attendance.length === 0 ? (
           <Text style={styles.empty}>No attendance records found.</Text>
         ) : (
