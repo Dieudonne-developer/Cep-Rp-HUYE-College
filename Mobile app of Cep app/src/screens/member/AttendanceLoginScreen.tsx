@@ -26,9 +26,13 @@ export const AttendanceLoginScreen: React.FC = () => {
     try {
       await login(form.username.trim(), form.password, form.group);
       // Navigate directly to Attendance screen
-      (navigation as any).navigate('Attendance');
+      try {
+        (navigation as any).navigate('Attendance');
+      } catch {
+        (navigation as any).navigate('Main');
+      }
     } catch (error: any) {
-      Alert.alert('Login Failed', error.message || 'Invalid credentials');
+      Alert.alert('Login Failed', error?.message || error?.toString() || 'Invalid credentials');
     } finally {
       setLoading(false);
     }
@@ -36,7 +40,7 @@ export const AttendanceLoginScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <AppHeader onMenuPress={() => (navigation as any).openDrawer()} />
+      <AppHeader onMenuPress={() => (navigation as any).navigate('Main')} />
       <ScrollView style={styles.scroll}>
         <View style={styles.card}>
           <Text style={styles.title}>Attendance Login</Text>
