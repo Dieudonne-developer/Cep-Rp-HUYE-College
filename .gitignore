@@ -1,3 +1,6 @@
 .neon
 node_modules/
 .env.local
+dist-test/
+CEP-APP.apk
+*.apk
