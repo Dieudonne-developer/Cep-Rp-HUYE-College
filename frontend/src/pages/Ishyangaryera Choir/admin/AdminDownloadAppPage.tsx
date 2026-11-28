@@ -12,7 +12,7 @@ export default function AdminDownloadAppPage() {
           <h3 className="text-xl font-semibold text-gray-800 mb-4">Admin CEP</h3>
           <p className="text-gray-600 mb-4">For family administrators and content managers</p>
           <a
-            href="https://expo.dev/artifacts/eas/Bg4bG6t-cP5aKnRaD2zspp-1sBhK25Xn6LAuI7CQEGM.apk"
+            href="https://cep-rp-huye-college-yt6x-eight.vercel.app/api/download/admin-app"
             download="Admin CEP.apk"
             className="inline-block bg-gray-600 hover:bg-gray-700 text-white font-bold py-3 px-6 rounded-lg transition"
           >
