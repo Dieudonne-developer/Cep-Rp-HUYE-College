@@ -168,7 +168,7 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: 20 },
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '700' },
   empty: { textAlign: 'center', color: '#64748b', marginTop: 40 },
-  loginScroll: { flexGrow: 1, justifyContent: 'center' },
+  loginScroll: { flexGrow: 1, justifyContent: 'flex-start', paddingTop: 8 },
   loginContainer: { flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20 },
   loginText: { fontSize: 16, color: '#64748b', textAlign: 'center', marginBottom: 20 },
   loginButton: { backgroundColor: '#2735F5', paddingHorizontal: 32, paddingVertical: 14, borderRadius: 10 },

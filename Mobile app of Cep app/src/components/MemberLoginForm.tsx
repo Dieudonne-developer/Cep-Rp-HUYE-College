@@ -85,7 +85,7 @@ export const MemberLoginForm: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  loginContainer: { flex: 1, justifyContent: 'center', padding: 16 },
+  loginContainer: { padding: 16, paddingTop: 8 },
   card: { backgroundColor: '#fff', borderRadius: 16, padding: 20, borderWidth: 1, borderColor: '#e2e8f0' },
   title: { fontSize: 22, fontWeight: '800', color: '#1e293b', marginBottom: 8 },
   subtitle: { fontSize: 14, color: '#64748b', marginBottom: 24 },
