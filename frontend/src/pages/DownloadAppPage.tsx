@@ -13,7 +13,7 @@ export default function DownloadAppPage() {
           <p className="text-gray-600 mb-4">For choir members, family members, and visitors</p>
           <a
             href="https://expo.dev/artifacts/eas/5DU_87aC5wao1FZ1DYUYkvLy3tCJk4EikUXIqL6m2KI.apk"
-            download="CEP-APP.apk"
+            download="CEP App.apk"
             className="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition"
           >
             Download CEP App

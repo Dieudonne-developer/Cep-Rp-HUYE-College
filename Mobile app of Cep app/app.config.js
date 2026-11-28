@@ -5,7 +5,7 @@ module.exports = {
   expo: {
     ...appJson.expo,
     name: IS_USER ? 'CEP APP' : 'Admin CEP',
-    slug: 'mobile',
+    slug: 'dieudonne-ntarindwa',
     icon: IS_USER ? './assets/cep_logo.png' : './assets/icon_admin.png',
     ios: {
       ...appJson.expo.ios,
@@ -23,7 +23,7 @@ module.exports = {
     extra: {
       ...appJson.expo.extra,
       eas: {
-        projectId: 'e5a2dc22-8597-41cf-9426-be00a66fcd4f',
+        projectId: '1d93c543-8a2b-4148-b5e3-e39709ca2ef8',
       },
     },
   },
