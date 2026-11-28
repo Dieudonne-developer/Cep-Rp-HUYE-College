@@ -89,6 +89,9 @@ export const FamilyAttendanceScreen: React.FC<FamilyAttendanceScreenProps> = ({ 
               {(record.session_time || record.time) && (
                 <Text style={styles.cardMeta}>{record.session_time || record.time}</Text>
               )}
+              {(record.reason || record.absent_reason) ? (
+                <Text style={[styles.cardMeta, { color: '#92400e' }]}>Reason: {record.reason || record.absent_reason}</Text>
+              ) : null}
             </View>
           ))
         )}
